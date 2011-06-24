@@ -45,13 +45,14 @@ record Application₂₂₂
   open Simple simple₁
     using ()
     renaming ( id to id₁; sub to sub₁; var to var₁; wk to wk₁
-             ; _↑ to _↑₁; _↑⁺_ to _↑⁺₁_; _↑⋆ to _↑⋆₁; _↑⁺⋆_ to _↑⁺⋆₁_
+             ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_
+             ; _↑⋆ to _↑⋆₁; _↑⁺⋆_ to _↑⁺⋆₁_
              )
   open Simple simple₂
     using ()
     renaming ( var to var₂
              ; weaken to weaken₂; wk-subst to wk-subst₂
-             ; _↑ to _↑₂; _↑⁺_ to _↑⁺₂_
+             ; _↑ to _↑₂; _↑_ to _↑₂_; _↑⁺_ to _↑⁺₂_
              )
 
   field
@@ -128,9 +129,9 @@ record Application₂₂₂
 
     ∘-↑ : ∀ {Γ Δ Ε} σ {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε}
           (ρ₁ : Sub T₂ ρ̂₁) (ρ₂ : Sub T₁ ρ̂₂) →
-          _↑₂ {σ = σ} (ρ₁ ∘ ρ₂) ≅-⇨ _↑₂ {σ = σ} ρ₁ ∘ ρ₂ ↑₁
+          (ρ₁ ∘ ρ₂) ↑₂ σ ≅-⇨ ρ₁ ↑₂ σ ∘ ρ₂ ↑₁
     ∘-↑ σ ρ₁ ρ₂ =
-      let ρ₂↑ = _↑₁ {σ = σ / ρ₁} ρ₂
+      let ρ₂↑ = ρ₂ ↑₁ (σ / ρ₁)
 
           lemma₁ = begin
             [ wk-subst₂ (ρ₁ ∘ ρ₂)              ]  ≡⟨ P.refl ⟩

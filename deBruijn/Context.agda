@@ -122,28 +122,16 @@ t̂ail ρ̂ = ŵk ∘̂ ρ̂
 ĥead : ∀ {Γ Δ σ} (ρ̂ : Γ ▻ σ ⇨̂ Δ) → Value Δ (σ /̂ t̂ail ρ̂)
 ĥead ρ̂ = proj₂ ∘ ρ̂
 
--- Maps between types.
-
-infixr 4 _⇨̂₁_
-
-_⇨̂₁_ : ∀ {Γ} → Type Γ → Type Γ → Set _
-σ ⇨̂₁ τ = ∀ {γ} → El (τ γ) → El (σ γ)
-
--- One can construct a context morphism between two non-empty contexts
--- by supplying two functions, one which turns the old tail into the
--- new one, and one which turns the old head into the new one.
-
-infixl 10 _↑̂_
-
-_↑̂_ : ∀ {Γ Δ σ τ} (ρ̂ : Γ ⇨̂ Δ) → σ /̂ ρ̂ ⇨̂₁ τ → Γ ▻ σ ⇨̂ Δ ▻ τ
-_↑̂_ = Prod.map
-
 -- Lifting.
 
-infix 10 _↑̂
+infixl 10 _↑̂_
+infix  10 _↑̂
+
+_↑̂_ : ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) σ → Γ ▻ σ ⇨̂ Δ ▻ σ /̂ ρ̂
+ρ̂ ↑̂ _ = Prod.map ρ̂ id
 
 _↑̂ : ∀ {Γ Δ σ} (ρ̂ : Γ ⇨̂ Δ) → Γ ▻ σ ⇨̂ Δ ▻ σ /̂ ρ̂
-ρ̂ ↑̂ = ρ̂ ↑̂ id
+ρ̂ ↑̂ = ρ̂ ↑̂ _
 
 ------------------------------------------------------------------------
 -- Variables
@@ -474,7 +462,7 @@ ĥead-cong P.refl = P.refl
 
 ↑̂-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {σ₁}
            {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {σ₂} →
-         ρ̂₁ ≅-⇨̂ ρ̂₂ → σ₁ ≅-Type σ₂ → _↑̂ {σ = σ₁} ρ̂₁ ≅-⇨̂ _↑̂ {σ = σ₂} ρ̂₂
+         ρ̂₁ ≅-⇨̂ ρ̂₂ → σ₁ ≅-Type σ₂ → ρ̂₁ ↑̂ σ₁ ≅-⇨̂ ρ̂₂ ↑̂ σ₂
 ↑̂-cong P.refl P.refl = P.refl
 
 ▻⁺-cong : ∀ {Γ₁} {Γ⁺₁ : Ctxt⁺ Γ₁} {σ₁}
@@ -563,13 +551,13 @@ îd-∘̂ ρ̂ = P.refl
 -- The lifting of the identity substitution is the identity
 -- substitution.
 
-îd-↑̂ : ∀ {Γ} (σ : Type Γ) → _↑̂ {σ = σ} îd ≅-⇨̂ îd {Γ = Γ ▻ σ}
+îd-↑̂ : ∀ {Γ} (σ : Type Γ) → îd ↑̂ σ ≅-⇨̂ îd {Γ = Γ ▻ σ}
 îd-↑̂ σ = P.refl
 
 -- _↑̂ distributes over _∘̂_.
 
 ↑̂-distrib : ∀ {Γ Δ Ε} (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) σ →
-            _↑̂ {σ = σ} (ρ̂₁ ∘̂ ρ̂₂) ≅-⇨̂ _↑̂ {σ = σ} ρ̂₁ ∘̂ ρ̂₂ ↑̂
+            (ρ̂₁ ∘̂ ρ̂₂) ↑̂ σ ≅-⇨̂ ρ̂₁ ↑̂ σ ∘̂ ρ̂₂ ↑̂
 ↑̂-distrib ρ̂₁ ρ̂₂ σ = P.refl
 
 -- ŵk is a left inverse of ŝub.
@@ -680,9 +668,9 @@ abstract
            (ρ̂₁ ∘̂ ρ̂₂) ↑̂⁺ Γ⁺ ≅-⇨̂ ρ̂₁ ↑̂⁺ Γ⁺ ∘̂ ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)
     ∘̂-↑̂⁺ ρ̂₁ ρ̂₂ ε        = P.refl
     ∘̂-↑̂⁺ ρ̂₁ ρ̂₂ (Γ⁺ ▻ σ) = begin
-      [ ((ρ̂₁ ∘̂ ρ̂₂) ↑̂⁺ Γ⁺) ↑̂                          ]  ≡⟨ ↑̂-cong (∘̂-↑̂⁺ ρ̂₁ ρ̂₂ Γ⁺) P.refl ⟩
-      [ (ρ̂₁ ↑̂⁺ Γ⁺ ∘̂ ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)) ↑̂              ]  ≡⟨ P.refl ⟩
-      [ _↑̂ {σ = σ} (ρ̂₁ ↑̂⁺ Γ⁺) ∘̂ (ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)) ↑̂ ]  ∎
+      [ ((ρ̂₁ ∘̂ ρ̂₂) ↑̂⁺ Γ⁺) ↑̂                   ]  ≡⟨ ↑̂-cong (∘̂-↑̂⁺ ρ̂₁ ρ̂₂ Γ⁺) P.refl ⟩
+      [ (ρ̂₁ ↑̂⁺ Γ⁺ ∘̂ ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)) ↑̂       ]  ≡⟨ P.refl ⟩
+      [ (ρ̂₁ ↑̂⁺ Γ⁺) ↑̂ σ ∘̂ (ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)) ↑̂ ]  ∎
 
   -- A corollary.
 

@@ -141,7 +141,7 @@ record Application₁ {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     -- etc.).
 
     ↑-∘-sub : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ σ) (ρ : Sub T ρ̂) →
-              sub t ∘ ρ ≅-⇨ _↑ {σ = σ} ρ ∘ sub (t /⊢ ρ)
+              sub t ∘ ρ ≅-⇨ ρ ↑ σ ∘ sub (t /⊢ ρ)
     ↑-∘-sub t ρ =
       let lemma = begin
             [ id ∘ ρ                    ]  ≡⟨ id-∘ ρ ⟩

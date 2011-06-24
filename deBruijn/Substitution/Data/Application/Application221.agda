@@ -44,7 +44,7 @@ record Application₂₂₁
   open Simple simple₁
     using ()
     renaming ( wk to wk₁; wk-subst to wk-subst₁
-             ; _↑ to _↑₁; _↑⁺_ to _↑⁺₁_; _↑⁺⋆_ to _↑⁺⋆₁_
+             ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_; _↑⁺⋆_ to _↑⁺⋆₁_
              )
   open Simple simple₂
     using ()
@@ -175,8 +175,8 @@ record Application₂₂₁
         [ var₂ · zero                                              ]  ≡⟨ Simple.var-cong simple₂
                                                                            (zero-cong (/̂-↑̂⁺-/̂-ŵk-↑̂⁺ σ ⟦ ρ ⟧⇨ Γ⁺ τ)) ⟩
         [ var₂ · zero                                              ]  ≡⟨ P.sym $ zero-/⊢-↑ (τ / wk₁ ↑⁺₁ Γ⁺)
-                                                                                           (_↑₁ {σ = σ} ρ ↑⁺₁ (Γ⁺ /⁺ wk₁)) ⟩
-        [ var₂ · zero /⊢ _↑₁ {σ = σ} ρ ↑⁺₁ ((Γ⁺ ▻ τ) /⁺ wk₁)       ]  ∎
+                                                                                           (ρ ↑₁ σ ↑⁺₁ (Γ⁺ /⁺ wk₁)) ⟩
+        [ var₂ · zero /⊢ ρ ↑₁ σ ↑⁺₁ ((Γ⁺ ▻ τ) /⁺ wk₁)              ]  ∎
       var-/⊢-↑⁺-wk-↑⁺ σ ρ (Γ⁺ ▻ τ) (suc x) = begin
         [ var₂ · suc x /⊢ ρ ↑⁺₁ (Γ⁺ ▻ τ) /⊢ wk₁ ↑⁺₁ ((Γ⁺ ▻ τ) /⁺ ρ) ]  ≡⟨ /⊢-cong (var-suc-/⊢-↑ τ x (ρ ↑⁺₁ Γ⁺))
                                                                                   (P.refl {x = [ wk₁ ↑⁺₁ ((Γ⁺ ▻ τ) /⁺ ρ) ]}) ⟩

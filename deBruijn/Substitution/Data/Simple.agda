@@ -50,18 +50,25 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
 
   -- Lifting.
 
-  infix 10 _↑ _↑⋆
+  infixl 10 _↑_ _↑⋆_
+  infix  10 _↑  _↑⋆
 
-  _↑ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (_↑̂ {σ = σ} ρ̂)
-  ρ ↑ =
+  _↑_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → ∀ σ → Sub T (ρ̂ ↑̂ σ)
+  ρ ↑ _ =
     P.subst (Sub T)
             (≅-⇨̂-⇒-≡ $ ▻̂-cong P.refl P.refl
                          (P.sym $ corresponds var zero))
             (wk-subst ρ ▻ var · zero)
 
-  _↑⋆ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Subs T ρ̂ → Subs T (_↑̂ {σ = σ} ρ̂)
+  _↑ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ↑̂ σ)
+  ρ ↑ = ρ ↑ _
+
+  _↑⋆ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Subs T ρ̂ → Subs T (ρ̂ ↑̂ σ)
   ε        ↑⋆ = ε
   (ρs ▻ ρ) ↑⋆ = ρs ↑⋆ ▻ ρ ↑
+
+  _↑⋆_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Subs T ρ̂ → ∀ σ → Subs T (ρ̂ ↑̂ σ)
+  ρs ↑⋆ _ = ρs ↑⋆
 
   -- N-ary lifting.
 
@@ -118,13 +125,12 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
 
   ↑-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁} {σ₁}
              {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} {σ₂} →
-           ρ₁ ≅-⇨ ρ₂ → σ₁ ≅-Type σ₂ → _↑ {σ = σ₁} ρ₁ ≅-⇨ _↑ {σ = σ₂} ρ₂
+           ρ₁ ≅-⇨ ρ₂ → σ₁ ≅-Type σ₂ → ρ₁ ↑ σ₁ ≅-⇨ ρ₂ ↑ σ₂
   ↑-cong P.refl P.refl = P.refl
 
   ↑⋆-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρs₁ : Subs T ρ̂₁} {σ₁}
               {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρs₂ : Subs T ρ̂₂} {σ₂} →
-            ρs₁ ≅-⇨⋆ ρs₂ → σ₁ ≅-Type σ₂ →
-            _↑⋆ {σ = σ₁} ρs₁ ≅-⇨⋆ _↑⋆ {σ = σ₂} ρs₂
+            ρs₁ ≅-⇨⋆ ρs₂ → σ₁ ≅-Type σ₂ → ρs₁ ↑⋆ σ₁ ≅-⇨⋆ ρs₂ ↑⋆ σ₂
   ↑⋆-cong P.refl P.refl = P.refl
 
   ↑⁺-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁} {Γ⁺₁}
@@ -158,7 +164,7 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     -- Unfolding lemma for _↑.
 
     unfold-↑ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T ρ̂) →
-               _↑ {σ = σ} ρ ≅-⇨
+               ρ ↑ σ ≅-⇨
                Sub._▻_ {σ = σ} (wk-subst {σ = σ / ρ} ρ) (var · zero)
     unfold-↑ _ =
       drop-subst-Sub F.id

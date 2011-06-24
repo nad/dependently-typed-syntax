@@ -50,13 +50,14 @@ record Application₂₁
     using ()
     renaming ( id to id₁; sub to sub₁; var to var₁
              ; weaken to weaken₁; wk to wk₁; wk-subst to wk-subst₁
-             ; _↑ to _↑₁; _↑⁺_ to _↑⁺₁_; _↑⋆ to _↑⋆₁; _↑⁺⋆_ to _↑⁺⋆₁_
+             ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_
+             ; _↑⋆_ to _↑⋆₁_; _↑⁺⋆_ to _↑⁺⋆₁_
              )
   open Simple simple₂
     using ()
     renaming ( id to id₂; var to var₂
              ; weaken to weaken₂; wk to wk₂; wk-subst to wk-subst₂
-             ; _↑ to _↑₂
+             ; _↑ to _↑₂; _↑_ to _↑₂_
              )
 
   field
@@ -190,19 +191,18 @@ record Application₂₁
     -- Variants of zero-/∋-↑.
 
     zero-/⊢-↑ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} σ (ρ : Sub T₁ ρ̂) →
-                var₂ · zero /⊢ _↑₁ {σ = σ} ρ ≅-⊢₂
-                var₂ · zero {σ = σ / ρ}
+                var₂ · zero /⊢ ρ ↑₁ σ ≅-⊢₂ var₂ · zero {σ = σ / ρ}
     zero-/⊢-↑ σ ρ =
-      /∋-≅-⊢-var zero (_↑₁ {σ = σ} ρ) (Simple.zero-/∋-↑ simple₁ σ ρ)
+      /∋-≅-⊢-var zero (ρ ↑₁ σ) (Simple.zero-/∋-↑ simple₁ σ ρ)
 
     zero-/⊢⋆-↑⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} σ (ρs : Subs T₁ ρ̂) →
-                  var₂ · zero /⊢⋆ _↑⋆₁ {σ = σ} ρs ≅-⊢₂
+                  var₂ · zero /⊢⋆ ρs ↑⋆₁ σ ≅-⊢₂
                   var₂ · zero {σ = σ /⋆ ρs}
     zero-/⊢⋆-↑⋆ σ ε        = P.refl
     zero-/⊢⋆-↑⋆ σ (ρs ▻ ρ) = begin
-      [ var₂ · zero /⊢⋆ _↑⋆₁ {σ = σ} ρs /⊢ ρ ↑₁ ]  ≡⟨ /⊢-cong (zero-/⊢⋆-↑⋆ σ ρs) (P.refl {x = [ _↑₁ {σ = σ /⋆ ρs} ρ ]}) ⟩
-      [ var₂ · zero /⊢ _↑₁ {σ = σ /⋆ ρs} ρ      ]  ≡⟨ zero-/⊢-↑ (σ /⋆ ρs) ρ ⟩
-      [ var₂ · zero                             ]  ∎
+      [ var₂ · zero /⊢⋆ ρs ↑⋆₁ σ /⊢ ρ ↑₁ ]  ≡⟨ /⊢-cong (zero-/⊢⋆-↑⋆ σ ρs) (P.refl {x = [ ρ ↑₁ (σ /⋆ ρs) ]}) ⟩
+      [ var₂ · zero /⊢ ρ ↑₁ (σ /⋆ ρs)    ]  ≡⟨ zero-/⊢-↑ (σ /⋆ ρs) ρ ⟩
+      [ var₂ · zero                      ]  ∎
 
     -- A corollary of ε-↑⁺⋆.
 
@@ -292,10 +292,9 @@ record Application₂₁
     -- it.
 
     map-trans-↑ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T₁ ρ̂) →
-                  map trans (_↑₁ {σ = σ} ρ) ≅-⇨
-                  _↑₂ {σ = σ} (map trans ρ)
+                  map trans (ρ ↑₁ σ) ≅-⇨ map trans ρ ↑₂ σ
     map-trans-↑ {σ = σ} ρ = begin
-      [ map trans (_↑₁ {σ = σ} ρ)                                   ]  ≡⟨ map-cong (P.refl {x = [ trans ]})
+      [ map trans (ρ ↑₁ σ)                                          ]  ≡⟨ map-cong (P.refl {x = [ trans ]})
                                                                                    (Simple.unfold-↑ simple₁ ρ) ⟩
       [ map trans (wk-subst₁ {σ = σ / ρ} ρ ▻ var₁ · zero)           ]  ≡⟨ map-▻ trans (wk-subst₁ ρ) _ ⟩
       [ map trans (wk-subst₁ {σ = σ / ρ} ρ) ▻ trans · (var₁ · zero) ]  ≡⟨ ▻⇨-cong P.refl (map-trans-wk-subst ρ) (trans-var zero) ⟩
