@@ -92,7 +92,7 @@ open Dummy₁ public
 --                                                                    (λ ρ̂ → σ /̂ ρ̂)
 --                                                                    (≅-⇨̂-⇒-≡ $ P.sym (map-lemma f ρ))) ⟩
 --           [ ⟦ f · t ⟧₂                                  ]  ≡⟨ P.sym $ corresponds f t ⟩
---           [ ⟦ t ⟧₁ /Val ρ₂                              ]  ∎)
+--           [ ⟦ t ⟧₁ /̂Val ρ₂                              ]  ∎)
 
 private
  module Dummy₂ {t} {T : TermLike.Term-like Uni t} where
@@ -162,6 +162,14 @@ private
 
   _/⋆_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Type Γ → Subs T ρ̂ → Type Δ
   σ /⋆ ρs = σ /̂ ⟦ ρs ⟧⇨⋆
+
+  -- Application of substitutions to values.
+
+  infixl 8 _/Val_
+
+  _/Val_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} →
+           Value Γ σ → Sub T ρ̂ → Value Δ (σ /̂ ρ̂)
+  v /Val ρ = v /̂Val ⟦ ρ ⟧⇨
 
   -- Application of substitutions to context extensions.
 

@@ -65,24 +65,24 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
       -- The application operation is well-behaved.
 
       _/⊢-lemma_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ σ) (ρ : Sub T ρ̂) →
-                   ⟦ t ⟧ /Val ρ̂ ≅-Value ⟦ t /⊢ ρ ⟧
+                   ⟦ t ⟧ /Val ρ ≅-Value ⟦ t /⊢ ρ ⟧
       var x /⊢-lemma ρ = begin
         [ x /̂∋ ⟦ ρ ⟧⇨              ]  ≡⟨ corresponds (app∋ ρ) x ⟩
         [ Term-like.⟦_⟧ T (x /∋ ρ) ]  ≡⟨ corresponds trans (x /∋ ρ) ⟩
         [ ⟦ trans ⊙ (x /∋ ρ) ⟧     ]  ∎
       ƛ σ′ t /⊢-lemma ρ = ≅-Curried-Value-⇒-≅-Value (begin
-        [ c ⟦ t ⟧ /Val ⟦ ρ ⟧⇨     ]  ≡⟨ P.refl ⟩
-        [ c (⟦ t ⟧ /Val ⟦ ρ ↑ ⟧⇨) ]  ≡⟨ curry-cong-Value (t /⊢-lemma (ρ ↑)) ⟩
-        [ c ⟦ t /⊢ ρ ↑ ⟧          ]  ∎)
+        [ c ⟦ t ⟧ /Val ρ     ]  ≡⟨ P.refl ⟩
+        [ c (⟦ t ⟧ /Val ρ ↑) ]  ≡⟨ curry-cong (t /⊢-lemma (ρ ↑)) ⟩
+        [ c ⟦ t /⊢ ρ ↑ ⟧     ]  ∎)
       _·_ {τ = τ} t₁ t₂ /⊢-lemma ρ = begin
-        [ ⟦ t₁ · t₂ ⟧ /Val ⟦ ρ ⟧⇨                       ]  ≡⟨ P.refl ⟩
-        [ (⟦ t₁ ⟧ /Val ⟦ ρ ⟧⇨) ˢ (⟦ t₂ ⟧ /Val ⟦ ρ ⟧⇨)   ]  ≡⟨ ˢ-cong {f₁ = ⟦ t₁ ⟧ /Val ⟦ ρ ⟧⇨} {f₂ = ⟦ t₁ /⊢ ρ ⟧}
-                                                                     (≅-Value-⇒-≅-Curried-Value (P.refl {x = [ uc τ / ρ ↑ ]})
-                                                                                                (t₁ /⊢-lemma ρ))
-                                                                     (t₂ /⊢-lemma ρ) ⟩
-        [ ⟦ t₁ /⊢ ρ ⟧ ˢ ⟦ t₂ /⊢ ρ ⟧                     ]  ≡⟨ P.refl ⟩
-        [ ⟦ (t₁ /⊢ ρ) · (t₂ /⊢ ρ) ⟧                     ]  ≡⟨ ⟦⟧-cong (P.sym $ ·-/⊢ t₁ t₂ ρ) ⟩
-        [ ⟦ t₁ · t₂ /⊢ ρ ⟧                              ]  ∎
+        [ ⟦ t₁ · t₂ ⟧ /Val ρ                ]  ≡⟨ P.refl ⟩
+        [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ) ]  ≡⟨ ˢ-cong {f₁ = ⟦ t₁ ⟧ /Val ρ} {f₂ = ⟦ t₁ /⊢ ρ ⟧}
+                                                         (≅-Value-⇒-≅-Curried-Value (P.refl {x = [ uc τ / ρ ↑ ]})
+                                                                                    (t₁ /⊢-lemma ρ))
+                                                         (t₂ /⊢-lemma ρ) ⟩
+        [ ⟦ t₁ /⊢ ρ ⟧ ˢ ⟦ t₂ /⊢ ρ ⟧         ]  ≡⟨ P.refl ⟩
+        [ ⟦ (t₁ /⊢ ρ) · (t₂ /⊢ ρ) ⟧         ]  ≡⟨ ⟦⟧-cong (P.sym $ ·-/⊢ t₁ t₂ ρ) ⟩
+        [ ⟦ t₁ · t₂ /⊢ ρ ⟧                  ]  ∎
 
   app : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → [ Tm ⟶ Tm ] ρ̂
   app ρ = record

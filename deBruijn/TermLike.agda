@@ -81,7 +81,7 @@ record [_⟶_] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
   field
     function    : ∀ σ → Γ ⊢₁ σ → Δ ⊢₂ σ /̂ ρ̂
     corresponds :
-      ∀ σ (t : Γ ⊢₁ σ) → ⟦ t ⟧₁ /Val ρ̂ ≅-Value ⟦ function σ t ⟧₂
+      ∀ σ (t : Γ ⊢₁ σ) → ⟦ t ⟧₁ /̂Val ρ̂ ≅-Value ⟦ function σ t ⟧₂
 
 -- Functions which do not change the context or type.
 
@@ -106,7 +106,7 @@ corresponds :
       open Term-like T₂ renaming (⟦_⟧ to ⟦_⟧₂) in
   ∀ {Γ Δ : Ctxt} {ρ̂ : Γ ⇨̂ Δ} {σ}
   (f : [ T₁ ⟶ T₂ ] ρ̂) (t : Γ ⊢₁ σ) →
-  ⟦ t ⟧₁ /Val ρ̂ ≅-Value ⟦ f · t ⟧₂
+  ⟦ t ⟧₁ /̂Val ρ̂ ≅-Value ⟦ f · t ⟧₂
 corresponds f = [_⟶_].corresponds f _
 
 -- Equality.
@@ -155,11 +155,11 @@ lift {Γ} {Δ} {ρ̂} f (Γ⁺ ▻ σ) = record
 
   abstract
     corr : ∀ τ (x : Γ ++ Γ⁺ ▻ σ ∋ τ) →
-           lookup x /Val ρ̂ ↑̂⁺ (Γ⁺ ▻ σ) ≅-Value lookup (function _ x)
+           lookup x /̂Val ρ̂ ↑̂⁺ (Γ⁺ ▻ σ) ≅-Value lookup (function _ x)
     corr ._ zero    = P.refl
     corr ._ (suc x) = begin
-      [ lookup x /Val ρ̂ ↑̂⁺ Γ⁺ /Val ŵk  ]  ≡⟨ /Val-cong (corresponds (lift f Γ⁺) x) P.refl ⟩
-      [ lookup (lift f Γ⁺ · x) /Val ŵk ]  ≡⟨ P.refl ⟩
+      [ lookup x /̂Val ρ̂ ↑̂⁺ Γ⁺ /̂Val ŵk  ]  ≡⟨ /̂Val-cong (corresponds (lift f Γ⁺) x) P.refl ⟩
+      [ lookup (lift f Γ⁺ · x) /̂Val ŵk ]  ≡⟨ P.refl ⟩
       [ lookup (suc (lift f Γ⁺ · x))   ]  ∎
 
 -- Some congruence lemmas.
@@ -183,7 +183,7 @@ record [corresponds] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
     {Γ Δ} : Ctxt
     {ρ̂}   : Γ ⇨̂ Δ
     {f}   : ∀ σ → Γ ⊢₁ σ → Δ ⊢₂ σ /̂ ρ̂
-    corr  : ∀ σ (t : Γ ⊢₁ σ) → ⟦ t ⟧₁ /Val ρ̂ ≅-Value ⟦ f σ t ⟧₂
+    corr  : ∀ σ (t : Γ ⊢₁ σ) → ⟦ t ⟧₁ /̂Val ρ̂ ≅-Value ⟦ f σ t ⟧₂
 
 function-corresponds-cong :
   ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} →
@@ -192,11 +192,11 @@ function-corresponds-cong :
   ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
     {function₁ : ∀ σ → Γ₁ ⊢₁ σ → Δ₁ ⊢₂ σ /̂ ρ̂₁}
     {corresponds₁ : ∀ σ (t : Γ₁ ⊢₁ σ) →
-                    ⟦ t ⟧₁ /Val ρ̂₁ ≅-Value ⟦ function₁ σ t ⟧₂}
+                    ⟦ t ⟧₁ /̂Val ρ̂₁ ≅-Value ⟦ function₁ σ t ⟧₂}
     {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂}
     {function₂ : ∀ σ → Γ₂ ⊢₁ σ → Δ₂ ⊢₂ σ /̂ ρ̂₂}
     {corresponds₂ : ∀ σ (t : Γ₂ ⊢₁ σ) →
-                    ⟦ t ⟧₁ /Val ρ̂₂ ≅-Value ⟦ function₂ σ t ⟧₂} →
+                    ⟦ t ⟧₁ /̂Val ρ̂₂ ≅-Value ⟦ function₂ σ t ⟧₂} →
   ρ̂₁ ≅-⇨̂ ρ̂₂ →
   [function].[_] {T₁ = T₁} {T₂ = T₂} function₁ ≡
              [_]                     function₂ →
@@ -263,10 +263,10 @@ _[∘]_ {T₁ = T₁} {T₂} {T₃} {ρ̂₁ = ρ̂₁} {ρ̂₂} f g = record
 
   abstract
     corr : ∀ σ (t : _ ⊢₁ σ) →
-           ⟦ t ⟧₁ /Val ρ̂₁ ∘̂ ρ̂₂ ≅-Value ⟦ f · (g · t) ⟧₃
+           ⟦ t ⟧₁ /̂Val ρ̂₁ ∘̂ ρ̂₂ ≅-Value ⟦ f · (g · t) ⟧₃
     corr = λ σ t → begin
-      [ ⟦ t ⟧₁ /Val ρ̂₁ ∘̂ ρ̂₂ ]  ≡⟨ /Val-cong (corresponds g t) P.refl ⟩
-      [ ⟦ g · t ⟧₂ /Val ρ̂₂  ]  ≡⟨ corresponds f (g · t) ⟩
+      [ ⟦ t ⟧₁ /̂Val ρ̂₁ ∘̂ ρ̂₂ ]  ≡⟨ /̂Val-cong (corresponds g t) P.refl ⟩
+      [ ⟦ g · t ⟧₂ /̂Val ρ̂₂  ]  ≡⟨ corresponds f (g · t) ⟩
       [ ⟦ f · (g · t) ⟧₃    ]  ∎
 
 abstract

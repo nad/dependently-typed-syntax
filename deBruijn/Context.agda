@@ -85,10 +85,10 @@ _/̂_ : ∀ {Γ Δ} → Type Γ → Γ ⇨̂ Δ → Type Δ
 
 -- Application of context morphisms to values.
 
-infixl 8 _/Val_
+infixl 8 _/̂Val_
 
-_/Val_ : ∀ {Γ Δ σ} → Value Γ σ → (ρ̂ : Γ ⇨̂ Δ) → Value Δ (σ /̂ ρ̂)
-v /Val ρ̂ = v ∘ ρ̂
+_/̂Val_ : ∀ {Γ Δ σ} → Value Γ σ → (ρ̂ : Γ ⇨̂ Δ) → Value Δ (σ /̂ ρ̂)
+v /̂Val ρ̂ = v ∘ ρ̂
 
 -- Weakening.
 
@@ -167,7 +167,7 @@ lookup (suc x) (γ , v) = lookup x γ
 infixl 8 _/̂∋_
 
 _/̂∋_ : ∀ {Γ Δ σ} → Γ ∋ σ → (ρ̂ : Γ ⇨̂ Δ) → Value Δ (σ /̂ ρ̂)
-x /̂∋ ρ̂ = lookup x /Val ρ̂
+x /̂∋ ρ̂ = lookup x /̂Val ρ̂
 
 ------------------------------------------------------------------------
 -- Context extensions
@@ -440,10 +440,10 @@ îd-cong P.refl = P.refl
          σ₁ ≅-Type σ₂ → ρ̂₁ ≅-⇨̂ ρ̂₂ → σ₁ /̂ ρ̂₁ ≅-Type σ₂ /̂ ρ̂₂
 /̂-cong P.refl P.refl = P.refl
 
-/Val-cong : ∀ {Γ₁ Δ₁ σ₁} {v₁ : Value Γ₁ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
+/̂Val-cong : ∀ {Γ₁ Δ₁ σ₁} {v₁ : Value Γ₁ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
               {Γ₂ Δ₂ σ₂} {v₂ : Value Γ₂ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} →
-            v₁ ≅-Value v₂ → ρ̂₁ ≅-⇨̂ ρ̂₂ → v₁ /Val ρ̂₁ ≅-Value v₂ /Val ρ̂₂
-/Val-cong P.refl P.refl = P.refl
+            v₁ ≅-Value v₂ → ρ̂₁ ≅-⇨̂ ρ̂₂ → v₁ /̂Val ρ̂₁ ≅-Value v₂ /̂Val ρ̂₂
+/̂Val-cong P.refl P.refl = P.refl
 
 ŵk-cong : ∀ {Γ₁} {σ₁ : Type Γ₁} {Γ₂} {σ₂ : Type Γ₂} →
           σ₁ ≅-Type σ₂ → ŵk {σ = σ₁} ≅-⇨̂ ŵk {σ = σ₂}
@@ -591,7 +591,7 @@ ŵk-↑̂-∘̂-ŝub σ = P.refl
 -- ŝub commutes with arbitrary context morphisms (modulo lifting).
 
 ŝub-∘̂ : ∀ {Γ Δ σ} (ρ̂ : Γ ⇨̂ Δ) (v : Value Γ σ) →
-        ŝub v ∘̂ ρ̂ ≅-⇨̂ ρ̂ ↑̂ ∘̂ ŝub (v /Val ρ̂)
+        ŝub v ∘̂ ρ̂ ≅-⇨̂ ρ̂ ↑̂ ∘̂ ŝub (v /̂Val ρ̂)
 ŝub-∘̂ ρ̂ v = P.refl
 
 -- Laws relating _▻̂_, ĥead and t̂ail.
@@ -610,7 +610,7 @@ t̂ail-▻̂-ĥead ρ̂ = P.refl
 -- Law relating _▻̂_ and _∘̂_.
 
 ▻̂-∘̂ : ∀ {Γ Δ Ε σ} (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) (v : Value Δ (σ /̂ ρ̂₁)) →
-      (_▻̂_ {σ = σ} ρ̂₁ v) ∘̂ ρ̂₂ ≅-⇨̂ (ρ̂₁ ∘̂ ρ̂₂) ▻̂ v /Val ρ̂₂
+      (_▻̂_ {σ = σ} ρ̂₁ v) ∘̂ ρ̂₂ ≅-⇨̂ (ρ̂₁ ∘̂ ρ̂₂) ▻̂ v /̂Val ρ̂₂
 ▻̂-∘̂ ρ̂₁ ρ̂₂ v = P.refl
 
 -- The identity substitution has no effect.
@@ -618,8 +618,8 @@ t̂ail-▻̂-ĥead ρ̂ = P.refl
 /̂-îd : ∀ {Γ} (σ : Type Γ) → σ /̂ îd ≅-Type σ
 /̂-îd σ = P.refl
 
-/Val-îd : ∀ {Γ σ} (v : Value Γ σ) → v /Val îd ≅-Value v
-/Val-îd v = P.refl
+/̂Val-îd : ∀ {Γ σ} (v : Value Γ σ) → v /̂Val îd ≅-Value v
+/̂Val-îd v = P.refl
 
 -- Applying two substitutions is equivalent to applying their
 -- composition.
@@ -628,9 +628,9 @@ t̂ail-▻̂-ĥead ρ̂ = P.refl
       σ /̂ ρ̂₁ ∘̂ ρ̂₂ ≅-Type σ /̂ ρ̂₁ /̂ ρ̂₂
 /̂-∘̂ ρ̂₁ ρ̂₂ σ = P.refl
 
-/Val-∘̂ : ∀ {Γ Δ Ε σ} (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) (v : Value Γ σ) →
-         v /Val ρ̂₁ ∘̂ ρ̂₂ ≅-Value v /Val ρ̂₁ /Val ρ̂₂
-/Val-∘̂ ρ̂₁ ρ̂₂ v = P.refl
+/̂Val-∘̂ : ∀ {Γ Δ Ε σ} (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) (v : Value Γ σ) →
+         v /̂Val ρ̂₁ ∘̂ ρ̂₂ ≅-Value v /̂Val ρ̂₁ /̂Val ρ̂₂
+/̂Val-∘̂ ρ̂₁ ρ̂₂ v = P.refl
 
 ------------------------------------------------------------------------
 -- Some properties which do not hold definitionally
