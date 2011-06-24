@@ -19,7 +19,7 @@ open import Data.Empty
 open import Data.Product as Prod
 open import Data.Unit
 open import Function
-open import Level
+open import Level using (_⊔_; Lift)
 open import Relation.Binary.HeterogeneousEquality as H using (_≅_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 

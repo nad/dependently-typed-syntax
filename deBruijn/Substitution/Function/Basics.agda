@@ -12,7 +12,7 @@ module deBruijn.Substitution.Function.Basics
 
 import deBruijn.Context as Context
 open import Function using (id; _∘_; _$_)
-open import Level using (suc; _⊔_)
+open import Level using (_⊔_)
 open import Relation.Binary.HeterogeneousEquality as H using (_≅_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
@@ -132,42 +132,43 @@ abstract
   -- Some eta-laws, based on the assumption of extensionality.
 
   private
-   module Dummy (ext : P.Extensionality (e ⊔ u) (suc (e ⊔ u ⊔ t))) where
+   module Dummy (ext : P.Extensionality
+                         (e ⊔ u) (Level.suc (e ⊔ u ⊔ t))) where
 
     -- Various derived instances of extensionality.
 
     private
       ext₁ : P.Extensionality (e ⊔ u) (e ⊔ u ⊔ t)
       ext₁ = P.extensionality-for-lower-levels
-               (e ⊔ u) (suc (e ⊔ u ⊔ t)) ext
+               (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) ext
 
       ext₁′ : P.Extensionality (e ⊔ u) t
       ext₁′ = P.extensionality-for-lower-levels
-                (e ⊔ u) (suc (e ⊔ u ⊔ t)) ext
+                (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) ext
 
       ext₂ : H.Extensionality (e ⊔ u) (e ⊔ u)
       ext₂ = H.≡-ext-to-≅-ext $
                P.extensionality-for-lower-levels
-                 (e ⊔ u) (suc (e ⊔ u ⊔ t)) ext
+                 (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) ext
 
-      ext₂′ : P.Extensionality (e ⊔ u) (suc e)
+      ext₂′ : P.Extensionality (e ⊔ u) (Level.suc e)
       ext₂′ = P.extensionality-for-lower-levels
-                (e ⊔ u) (suc (e ⊔ u ⊔ t)) ext
+                (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) ext
 
       ext₂″ : H.Extensionality (e ⊔ u) e
       ext₂″ = H.≡-ext-to-≅-ext $
                 P.extensionality-for-lower-levels
-                  (e ⊔ u) (suc (e ⊔ u ⊔ t)) ext
+                  (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) ext
 
       ext₃ : H.Extensionality (e ⊔ u) (e ⊔ u ⊔ t)
       ext₃ = H.≡-ext-to-≅-ext $
                P.extensionality-for-lower-levels
-                 (e ⊔ u) (suc (e ⊔ u ⊔ t)) ext
+                 (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) ext
 
       ext₃′ : H.Extensionality (e ⊔ u) t
       ext₃′ = H.≡-ext-to-≅-ext $
                 P.extensionality-for-lower-levels
-                  (e ⊔ u) (suc (e ⊔ u ⊔ t)) ext
+                  (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) ext
 
       -- Some congruence lemmas.
 
@@ -279,7 +280,7 @@ abstract
   -- projections are pairwise equal (assuming extensionality).
 
   extensionality :
-    P.Extensionality (e ⊔ u) (suc (e ⊔ u ⊔ t)) →
+    P.Extensionality (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) →
     ∀ {Γ Δ₁ Δ₂} {ρ̂₁ : Γ ⇨̂ Δ₁} {ρ̂₂ : Γ ⇨̂ Δ₂}
     (ρ₁ : Sub ρ̂₁) (ρ₂ : Sub ρ̂₂) →
     Δ₁ ≡ Δ₂ → ρ̂₁ ≅ ρ̂₂ → (∀ {σ} (x : Γ ∋ σ) → x /∋ ρ₁ ≅ x /∋ ρ₂) →

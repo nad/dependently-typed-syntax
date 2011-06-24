@@ -11,7 +11,7 @@ module deBruijn.TermLike {u e} (Uni : Universe u e) where
 open import Data.Product
 import deBruijn.Context as Context
 open import Function
-open import Level using (zero; suc; _⊔_)
+open import Level using (_⊔_)
 open import Relation.Binary.HeterogeneousEquality as H using (_≅_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
@@ -20,7 +20,7 @@ open Context Uni
 ------------------------------------------------------------------------
 -- Term-like things
 
-record Term-like ℓ : Set (u ⊔ e ⊔ suc ℓ) where
+record Term-like ℓ : Set (u ⊔ e ⊔ Level.suc ℓ) where
   infix 4 _⊢_
   field
     _⊢_ : (Γ : Ctxt) → Type Γ → Set ℓ
@@ -213,17 +213,17 @@ abstract
   private
    module Dummy
      {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂}
-     (ext : P.Extensionality (e ⊔ u ⊔ t₁) (e ⊔ t₁))
+     (ext : P.Extensionality (u ⊔ e ⊔ t₁) (u ⊔ e ⊔ t₁))
      where
 
     -- Some derived instances of extensionality.
 
     private
-      ext₁ : P.Extensionality (e ⊔ u) (e ⊔ t₁)
-      ext₁ = P.extensionality-for-lower-levels t₁ zero ext
+      ext₁ : P.Extensionality (u ⊔ e) (u ⊔ e ⊔ t₁)
+      ext₁ = P.extensionality-for-lower-levels t₁ Level.zero ext
 
-      ext₂ : P.Extensionality t₁ e
-      ext₂ = P.extensionality-for-lower-levels (e ⊔ u) t₁ ext
+      ext₂ : P.Extensionality t₁ (u ⊔ e)
+      ext₂ = P.extensionality-for-lower-levels (u ⊔ e) t₁ ext
 
     -- The uses of P.proof-irrelevance below can probably be replaced
     -- by direct proofs if the definition of _[∘]_ is made fully

@@ -2,11 +2,11 @@
 -- Substitutions
 ------------------------------------------------------------------------
 
-open import Level using (zero)
+import Level
 open import Universe
 
 module README.DependentlyTyped.Substitution
-  (Uni₀ : Universe zero zero) where
+  (Uni₀ : Universe Level.zero Level.zero) where
 
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 
@@ -24,7 +24,7 @@ open TermLike Uni renaming (_·_ to _⊙_; ·-cong to ⊙-cong)
 -- Note that the _↦_ record ensures that we already have access to
 -- operations such as lifting.
 
-module Apply {T : Term-like zero} (T↦Tm : T ↦ Tm) where
+module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
 
   open _↦_ T↦Tm hiding (var)
 
@@ -140,7 +140,7 @@ open Substitution₁ substitution₁ hiding (var)
 -- Some unfolding lemmas.
 
 module Unfolding-lemmas
-  {T : Term-like zero}
+  {T : Term-like Level.zero}
   (T↦Tm : Translation-from T)
   where
 
@@ -215,7 +215,7 @@ module Unfolding-lemmas
 -- Another lemma.
 
 module Apply-lemmas
-  {T₁ T₂ : Term-like zero}
+  {T₁ T₂ : Term-like Level.zero}
   (T₁↦T : Translation-from T₁) (T₂↦T : Translation-from T₂)
   {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρs₁ : Subs T₁ ρ̂) (ρs₂ : Subs T₂ ρ̂) where
 

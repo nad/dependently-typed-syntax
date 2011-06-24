@@ -16,7 +16,7 @@ import deBruijn.Substitution.Data.Basics
 import deBruijn.Substitution.Function.Basics
 open import Function using (_$_)
 open import Function.Inverse using (_↔_)
-open import Level using (suc; _⊔_)
+open import Level using (_⊔_)
 open import Relation.Binary.HeterogeneousEquality as H using (_≅_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
@@ -27,7 +27,7 @@ private
     using (ε⇨; _▻⇨_)
 
 isomorphic :
-  P.Extensionality (e ⊔ u) (suc (e ⊔ u ⊔ t)) →
+  P.Extensionality (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) →
   ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → FB.Sub ρ̂ ↔ DB.Sub ρ̂
 isomorphic ext = record
   { to         = P.→-to-⟶ (to _)

@@ -17,7 +17,7 @@ module deBruijn.Substitution.Data {u e} {Uni : Universe u e} where
 import deBruijn.Context as Context
 import deBruijn.TermLike as TermLike
 open import Function as F using (_$_)
-open import Level using (suc; _⊔_)
+open import Level using (_⊔_)
 open import Relation.Binary.HeterogeneousEquality as H using (_≅_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
@@ -86,7 +86,8 @@ record _↦_ {t₁} (T₁ : Term-like t₁)
 -- here; this is the level of Var. The code could perhaps be made more
 -- general.
 
-record Substitution₁ (T : Term-like (u ⊔ e)) : Set (suc (u ⊔ e)) where
+record Substitution₁ (T : Term-like (u ⊔ e))
+                     : Set (Level.suc (u ⊔ e)) where
 
   open Term-like T
 
@@ -187,7 +188,8 @@ record Substitution₁ (T : Term-like (u ⊔ e)) : Set (suc (u ⊔ e)) where
         var · suc x ≡ Simple.weaken simple {σ = σ} · (var · x)
       trans-weaken x = P.sym $ Simple.weaken-var simple x
 
-record Substitution₂ (T : Term-like (u ⊔ e)) : Set (suc (u ⊔ e)) where
+record Substitution₂ (T : Term-like (u ⊔ e))
+                     : Set (Level.suc (u ⊔ e)) where
 
   open Term-like T
 
