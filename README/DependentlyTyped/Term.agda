@@ -2,6 +2,8 @@
 -- A well-typed representation of a dependently typed language
 ------------------------------------------------------------------------
 
+{-# OPTIONS --universe-polymorphism #-}
+
 -- The code is parametrised by an arbitrary (small) universe.
 
 open import Level using (zero)
@@ -13,7 +15,6 @@ open import Data.Product renaming (curry to c; uncurry to uc)
 import deBruijn.Context
 import deBruijn.TermLike
 open import Function renaming (const to k)
-open import Relation.Binary.HeterogeneousEquality as H using (_≅_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
 ------------------------------------------------------------------------
@@ -102,41 +103,82 @@ Tm = record { _⊢_ = _⊢_; ⟦_⟧ = ⟦_⟧ }
 open Term-like Tm public hiding (_⊢_; ⟦_⟧)
 
 ------------------------------------------------------------------------
--- Some congruence lemmas
+-- Equality
 
-k-el-ˢ-cong : ∀ {Γ₁} {σ₁ : Env Γ₁ → U₀}
-                {Γ₂} {σ₂ : Env Γ₂ → U₀} →
-              Γ₁ ≡ Γ₂ → σ₁ ≅ σ₂ → k U.el ˢ σ₁ ≅ k U.el ˢ σ₂
-k-el-ˢ-cong P.refl H.refl = H.refl
+-- Syntactic type telescopes.
+
+record [type] : Set where
+  constructor [_]
+  field
+    {Γ} : Ctxt
+    {σ} : Type Γ
+    σ′  : Γ ⊢ σ type
+
+-- Equality of syntactic types.
+
+infix 4 _≅-type_
+
+_≅-type_ : ∀ {Γ₁ σ₁} (σ′₁ : Γ₁ ⊢ σ₁ type)
+             {Γ₂ σ₂} (σ′₂ : Γ₂ ⊢ σ₂ type) → Set
+σ′₁ ≅-type σ′₂ = [type].[_] σ′₁ ≡ [ σ′₂ ]
+
+-- If the indices are equal, then _≅-type_ coincides with _≡_.
+
+≅-type-⇒-≡ : ∀ {Γ σ} {σ′₁ σ′₂ : Γ ⊢ σ type} →
+             σ′₁ ≅-type σ′₂ → σ′₁ ≡ σ′₂
+≅-type-⇒-≡ P.refl = P.refl
+
+-- Certain uses of substitutivity can be removed.
+
+drop-subst-⊢-type :
+  ∀ {a} {A : Set a} {x₁ x₂ : A} {Γ}
+  (f : A → Type Γ) {σ′} (eq : x₁ ≡ x₂) →
+  P.subst (λ x → Γ ⊢ f x type) eq σ′ ≅-type σ′
+drop-subst-⊢-type f P.refl = P.refl
+
+-- Function values are automatically "curried values" and vice versa.
+
+≅-Value-⇒-≅-Curried-Value :
+  ∀ {Γ₁ σ₁ τ₁} {v₁ : Value Γ₁ (k U.π ˢ σ₁ ˢ c τ₁)}
+    {Γ₂ σ₂ τ₂} {v₂ : Value Γ₂ (k U.π ˢ σ₂ ˢ c τ₂)} →
+  τ₁ ≅-Type τ₂ → v₁ ≅-Value v₂ → ≅-Curried-Value τ₁ v₁ τ₂ v₂
+≅-Value-⇒-≅-Curried-Value P.refl P.refl = P.refl
+
+≅-Curried-Value-⇒-≅-Value :
+  ∀ {Γ₁ σ₁ τ₁} {v₁ : Value Γ₁ (k U.π ˢ σ₁ ˢ c τ₁)}
+    {Γ₂ σ₂ τ₂} {v₂ : Value Γ₂ (k U.π ˢ σ₂ ˢ c τ₂)} →
+  ≅-Curried-Value τ₁ v₁ τ₂ v₂ → v₁ ≅-Value v₂
+≅-Curried-Value-⇒-≅-Value P.refl = P.refl
+
+-- Some congruence lemmas.
 
 ⋆-cong : {Γ₁ Γ₂ : Ctxt} →
-         Γ₁ ≡ Γ₂ → _⊢_type.⋆ {Γ = Γ₁} ≅ _⊢_type.⋆ {Γ = Γ₂}
-⋆-cong P.refl = H.refl
+         Γ₁ ≅-Ctxt Γ₂ → ⋆ {Γ = Γ₁} ≅-type ⋆ {Γ = Γ₂}
+⋆-cong P.refl = P.refl
 
 el-cong : ∀ {Γ₁} {t₁ : Γ₁ ⊢ k ⋆}
             {Γ₂} {t₂ : Γ₂ ⊢ k ⋆} →
-          Γ₁ ≡ Γ₂ → t₁ ≅ t₂ → _⊢_type.el t₁ ≅ _⊢_type.el t₂
-el-cong P.refl H.refl = H.refl
+          t₁ ≅-⊢ t₂ → el t₁ ≅-type el t₂
+el-cong P.refl = P.refl
 
 π-cong : ∀ {Γ₁ σ₁ τ₁} {σ′₁ : Γ₁ ⊢ σ₁ type} {τ′₁ : Γ₁ ▻ σ₁ ⊢ τ₁ type}
            {Γ₂ σ₂ τ₂} {σ′₂ : Γ₂ ⊢ σ₂ type} {τ′₂ : Γ₂ ▻ σ₂ ⊢ τ₂ type} →
-         Γ₁ ≡ Γ₂ → σ₁ ≅ σ₂ → τ₁ ≅ τ₂ → σ′₁ ≅ σ′₂ → τ′₁ ≅ τ′₂ →
-         _⊢_type.π σ′₁ τ′₁ ≅ _⊢_type.π σ′₂ τ′₂
-π-cong P.refl H.refl H.refl H.refl H.refl = H.refl
+         σ′₁ ≅-type σ′₂ → τ′₁ ≅-type τ′₂ → π σ′₁ τ′₁ ≅-type π σ′₂ τ′₂
+π-cong P.refl P.refl = P.refl
 
 var-cong : ∀ {Γ₁ σ₁} {x₁ : Γ₁ ∋ σ₁}
              {Γ₂ σ₂} {x₂ : Γ₂ ∋ σ₂} →
-           Γ₁ ≡ Γ₂ → σ₁ ≅ σ₂ → x₁ ≅ x₂ → var x₁ ≅ var x₂
-var-cong P.refl H.refl H.refl = H.refl
+           x₁ ≅-∋ x₂ → var x₁ ≅-⊢ var x₂
+var-cong P.refl = P.refl
 
 ƛ-cong : ∀ {Γ₁ σ₁ τ₁} {σ′₁ : Γ₁ ⊢ σ₁ type} {t₁ : Γ₁ ▻ σ₁ ⊢ uc τ₁}
            {Γ₂ σ₂ τ₂} {σ′₂ : Γ₂ ⊢ σ₂ type} {t₂ : Γ₂ ▻ σ₂ ⊢ uc τ₂} →
-         Γ₁ ≡ Γ₂ → σ₁ ≅ σ₂ → τ₁ ≅ τ₂ → σ′₁ ≅ σ′₂ → t₁ ≅ t₂ →
-         ƛ {τ = τ₁} σ′₁ t₁ ≅ ƛ {τ = τ₂} σ′₂ t₂
-ƛ-cong P.refl H.refl H.refl H.refl H.refl = H.refl
+         τ₁ ≅-Curried-Type τ₂ → σ′₁ ≅-type σ′₂ → t₁ ≅-⊢ t₂ →
+         ƛ {τ = τ₁} σ′₁ t₁ ≅-⊢ ƛ {τ = τ₂} σ′₂ t₂
+ƛ-cong P.refl P.refl P.refl = P.refl
 
 ·-cong : ∀ {Γ₁ σ₁ τ₁} {t₁₁ : Γ₁ ⊢ k U.π ˢ σ₁ ˢ τ₁} {t₂₁ : Γ₁ ⊢ σ₁}
            {Γ₂ σ₂ τ₂} {t₁₂ : Γ₂ ⊢ k U.π ˢ σ₂ ˢ τ₂} {t₂₂ : Γ₂ ⊢ σ₂} →
-         Γ₁ ≡ Γ₂ → σ₁ ≅ σ₂ → τ₁ ≅ τ₂ → t₁₁ ≅ t₁₂ → t₂₁ ≅ t₂₂ →
-         t₁₁ · t₂₁ ≅ t₁₂ · t₂₂
-·-cong P.refl H.refl H.refl H.refl H.refl = H.refl
+         τ₁ ≅-Curried-Type τ₂ → t₁₁ ≅-⊢ t₁₂ → t₂₁ ≅-⊢ t₂₂ →
+         t₁₁ · t₂₁ ≅-⊢ t₁₂ · t₂₂
+·-cong P.refl P.refl P.refl = P.refl

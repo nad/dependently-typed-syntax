@@ -17,7 +17,6 @@ open import deBruijn.Substitution.Data.Basics
 open import deBruijn.Substitution.Data.Simple
 import deBruijn.TermLike as TermLike
 open import Level using (_⊔_)
-open import Relation.Binary.PropositionalEquality using (_≡_)
 
 open Context Uni
 open TermLike Uni
@@ -42,7 +41,7 @@ record Application₂₂
   (trans : [ T₁ ⟶⁼ T₂ ])
   : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
 
-  open Term-like T₂ renaming (_⊢_ to _⊢₂_)
+  open Term-like T₂ renaming (_⊢_ to _⊢₂_; _≅-⊢_ to _≅-⊢₂_)
   open Simple simple₁
     using () renaming (wk to wk₁; _↑⁺⋆_ to _↑⁺⋆₁_)
   open Simple simple₂
@@ -59,12 +58,13 @@ record Application₂₂
     var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ :
       ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρs₁ : Subs T₁ ρ̂) (ρs₂ : Subs T₁ ρ̂) →
       (∀ Γ⁺ {σ} (x : Γ ++ Γ⁺ ∋ σ) →
-         var₂ · x /⊢⋆ ρs₁ ↑⁺⋆₁ Γ⁺ ≡ var₂ · x /⊢⋆ ρs₂ ↑⁺⋆₁ Γ⁺) →
+         var₂ · x /⊢⋆ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢₂ var₂ · x /⊢⋆ ρs₂ ↑⁺⋆₁ Γ⁺) →
       ∀ Γ⁺ {σ} (t : Γ ++ Γ⁺ ⊢₂ σ) →
-      t /⊢⋆ ρs₁ ↑⁺⋆₁ Γ⁺ ≡ t /⊢⋆ ρs₂ ↑⁺⋆₁ Γ⁺
+      t /⊢⋆ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢₂ t /⊢⋆ ρs₂ ↑⁺⋆₁ Γ⁺
 
     -- The wk substitution and the weaken function are equivalent.
-    /⊢-wk : ∀ {Γ σ τ} (t : Γ ⊢₂ τ) → t /⊢ wk₁ ≡ weaken₂ {σ = σ} · t
+    /⊢-wk : ∀ {Γ σ τ} (t : Γ ⊢₂ τ) →
+            t /⊢ wk₁ {σ = σ} ≅-⊢₂ weaken₂ {σ = σ} · t
 
   open Application₂₂₂
     (record { application₂₂₁ = record

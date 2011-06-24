@@ -18,10 +18,10 @@ import deBruijn.Context as Context
 import deBruijn.TermLike as TermLike
 open import Function as F using (_$_)
 open import Level using (_⊔_)
-open import Relation.Binary.HeterogeneousEquality as H using (_≅_)
-open import Relation.Binary.PropositionalEquality as P using (_≡_)
+import Relation.Binary.PropositionalEquality as P
 
 open Context Uni
+open P.≡-Reasoning
 open TermLike Uni
 
 -- This module reexports some other modules.
@@ -104,7 +104,7 @@ record Substitution₁ (T : Term-like (u ⊔ e))
     app-var :
       ∀ {T′ : Term-like (u ⊔ e)} {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
       (T′↦T : T′ ↦ T) (x : Γ ∋ σ) (ρ : Sub T′ ρ̂) →
-      app T′↦T ρ · (var · x) ≡ _↦_.trans T′↦T · (x /∋ ρ)
+      app T′↦T ρ · (var · x) ≅-⊢ _↦_.trans T′↦T · (x /∋ ρ)
 
   -- Variables can be translated into terms.
 
@@ -131,15 +131,13 @@ record Substitution₁ (T : Term-like (u ⊔ e))
     }
     where
     abstract
-      weaken-var : ∀ {Γ σ τ} (x : Γ ∋ σ) →
-                   app-renaming (Renaming.wk {σ = τ}) · (var · x) ≡
-                   var · suc x
+      weaken-var : ∀ {Γ σ τ} (x : Γ ∋ τ) →
+                   app-renaming (Renaming.wk {σ = σ}) · (var · x) ≅-⊢
+                   var · suc {σ = σ} x
       weaken-var x = begin
-        app-renaming Renaming.wk · (var · x)  ≡⟨ app-var Var-↦′ x Renaming.wk ⟩
-        var · (x /∋ Renaming.wk)              ≅⟨ ·-cong P.refl P.refl H.refl H.refl (H.refl {x = var})
-                                                        (H.≡-to-≅ $ Renaming./∋-wk x) ⟩
-        var · suc x                           ∎
-        where open P.≡-Reasoning
+        [ app-renaming Renaming.wk · (var · x) ]  ≡⟨ app-var Var-↦′ x Renaming.wk ⟩
+        [ var · (x /∋ Renaming.wk)             ]  ≡⟨ ·-cong (P.refl {x = [ var ]}) (Renaming./∋-wk x) ⟩
+        [ var · suc x                          ]  ∎
 
   -- A translation of T′'s to T's, plus a bit more.
 
@@ -154,10 +152,10 @@ record Substitution₁ (T : Term-like (u ⊔ e))
 
     field
       trans-weaken : ∀ {Γ σ τ} (t : Term-like._⊢_ T′ Γ τ) →
-                     trans · (weaken′ · t) ≡
+                     trans · (weaken′ {σ = σ} · t) ≅-⊢
                      Simple.weaken simple {σ = σ} · (trans · t)
       trans-var    : ∀ {Γ σ} (x : Γ ∋ σ) →
-                     trans · (var′ · x) ≡ var · x
+                     trans · (var′ · x) ≅-⊢ var · x
 
     -- An Application₂₁ record.
 
@@ -185,7 +183,8 @@ record Substitution₁ (T : Term-like (u ⊔ e))
     abstract
       trans-weaken :
         ∀ {Γ σ τ} (x : Γ ∋ τ) →
-        var · suc x ≡ Simple.weaken simple {σ = σ} · (var · x)
+        var · suc {σ = σ} x ≅-⊢
+        Simple.weaken simple {σ = σ} · (var · x)
       trans-weaken x = P.sym $ Simple.weaken-var simple x
 
 record Substitution₂ (T : Term-like (u ⊔ e))
@@ -212,9 +211,9 @@ record Substitution₂ (T : Term-like (u ⊔ e))
 
       ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρs₁ : Subs T₁ ρ̂) (ρs₂ : Subs T₂ ρ̂) →
       (∀ Γ⁺ {σ} (x : Γ ++ Γ⁺ ∋ σ) →
-         var · x /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺ ≡ var · x /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺) →
+         var · x /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢ var · x /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺) →
       ∀ Γ⁺ {σ} (t : Γ ++ Γ⁺ ⊢ σ) →
-      t /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺ ≡ t /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺
+      t /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢ t /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺
 
   -- Given a well-behaved translation from something with simple
   -- substitutions one can define an Application₂₂ record.
@@ -243,18 +242,17 @@ record Substitution₂ (T : Term-like (u ⊔ e))
 
     abstract
       /⊢-wk : ∀ {Γ σ τ} (t : Γ ⊢ τ) →
-              t /⊢′ wk′ ≡ t /⊢-renaming Renaming.wk {σ = σ}
+              t /⊢′ wk′ {σ = σ} ≅-⊢ t /⊢-renaming Renaming.wk {σ = σ}
       /⊢-wk =
         var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ T′↦T Var-↦ (ε ▻ wk′) (ε ▻ Renaming.wk)
           (λ Γ⁺ x → begin
-             var · x /⊢⋆′ (ε ▻ wk′) ↑⁺⋆′ Γ⁺                          ≡⟨ Translation-from./⊢⋆-ε-▻-↑⁺⋆ T′↦T Γ⁺ (var · x) wk′ ⟩
-             var · x /⊢′ wk′ ↑⁺′ Γ⁺                                  ≡⟨ Translation-from.var-/⊢-wk-↑⁺ T′↦T Γ⁺ x ⟩
-             var · (lift weaken∋ Γ⁺ · x)                             ≡⟨ P.sym $ Translation-from.var-/⊢-wk-↑⁺ Var-↦ Γ⁺ x ⟩
-             var · x /⊢-renaming Renaming.wk ↑⁺-renaming Γ⁺          ≡⟨ P.sym $ Translation-from./⊢⋆-ε-▻-↑⁺⋆
-                                                                                  Var-↦ Γ⁺ (var · x) Renaming.wk ⟩
-             var · x /⊢⋆-renaming (ε ▻ Renaming.wk) ↑⁺⋆-renaming Γ⁺  ∎)
+             [ var · x /⊢⋆′ (ε ▻ wk′) ↑⁺⋆′ Γ⁺                         ]  ≡⟨ Translation-from./⊢⋆-ε-▻-↑⁺⋆ T′↦T Γ⁺ (var · x) wk′ ⟩
+             [ var · x /⊢′ wk′ ↑⁺′ Γ⁺                                 ]  ≡⟨ Translation-from.var-/⊢-wk-↑⁺ T′↦T Γ⁺ x ⟩
+             [ var · (lift weaken∋ Γ⁺ · x)                            ]  ≡⟨ P.sym $ Translation-from.var-/⊢-wk-↑⁺ Var-↦ Γ⁺ x ⟩
+             [ var · x /⊢-renaming Renaming.wk ↑⁺-renaming Γ⁺         ]  ≡⟨ P.sym $ Translation-from./⊢⋆-ε-▻-↑⁺⋆
+                                                                                      Var-↦ Γ⁺ (var · x) Renaming.wk ⟩
+             [ var · x /⊢⋆-renaming (ε ▻ Renaming.wk) ↑⁺⋆-renaming Γ⁺ ]  ∎)
           ε
-        where open P.≡-Reasoning
 
   -- An Application₂₂ record for renamings.
 
