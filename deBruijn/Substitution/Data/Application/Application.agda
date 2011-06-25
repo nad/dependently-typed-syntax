@@ -96,7 +96,7 @@ record Application
 
     ▻-∘ : ∀ {Γ Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} {σ}
           (ρ₁ : Sub T₂ ρ̂₁) (t : Δ ⊢₂ σ / ρ₁) (ρ₂ : Sub T₁ ρ̂₂) →
-          _▻_ {σ = σ} ρ₁ t ∘ ρ₂ ≅-⇨ Sub._▻_ {σ = σ} (ρ₁ ∘ ρ₂) (t /⊢ ρ₂)
+          (ρ₁ ▻⇨[ σ ] t) ∘ ρ₂ ≅-⇨ ρ₁ ∘ ρ₂ ▻⇨[ σ ] t /⊢ ρ₂
     ▻-∘ ρ₁ t ρ₂ = map-▻ (app ρ₂) ρ₁ t
 
     -- Applying a composed substitution to a variable is equivalent to

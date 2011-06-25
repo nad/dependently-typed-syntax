@@ -43,9 +43,9 @@ record Application₂₂
 
   open Term-like T₂ renaming (_⊢_ to _⊢₂_; _≅-⊢_ to _≅-⊢₂_)
   open Simple simple₁
-    using () renaming (wk to wk₁; _↑⁺⋆_ to _↑⁺⋆₁_)
+    using () renaming (wk[_] to wk₁[_]; _↑⁺⋆_ to _↑⁺⋆₁_)
   open Simple simple₂
-    using () renaming (var to var₂; weaken to weaken₂)
+    using () renaming (var to var₂; weaken[_] to weaken₂[_])
 
   field
     application₂₁ : Application₂₁ simple₁ simple₂ trans
@@ -64,7 +64,7 @@ record Application₂₂
 
     -- The wk substitution and the weaken function are equivalent.
     /⊢-wk : ∀ {Γ σ τ} (t : Γ ⊢₂ τ) →
-            t /⊢ wk₁ {σ = σ} ≅-⊢₂ weaken₂ {σ = σ} · t
+            t /⊢ wk₁[ σ ] ≅-⊢₂ weaken₂[ σ ] · t
 
   open Application₂₂₂
     (record { application₂₂₁ = record

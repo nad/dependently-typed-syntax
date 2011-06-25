@@ -69,6 +69,12 @@ _⇨̂_ : Ctxt → Ctxt → Set _
 îd : ∀ {Γ} → Γ ⇨̂ Γ
 îd = id
 
+-- If the context cannot be inferred the following variant can be used
+-- instead.
+
+îd[_] : ∀ Γ → Γ ⇨̂ Γ
+îd[ _ ] = îd
+
 -- Reverse composition of context morphisms.
 
 infixl 9 _∘̂_
@@ -95,17 +101,26 @@ v /̂Val ρ̂ = v ∘ ρ̂
 ŵk : ∀ {Γ σ} → Γ ⇨̂ Γ ▻ σ
 ŵk = proj₁
 
+ŵk[_] : ∀ {Γ} σ → Γ ⇨̂ Γ ▻ σ
+ŵk[ _ ] = ŵk
+
 -- Empty context morphism.
 
 ε̂ : ∀ {Δ} → ε ⇨̂ Δ
 ε̂ = λ _ → _
 
+ε̂[_] : ∀ Δ → ε ⇨̂ Δ
+ε̂[ _ ] = ε̂
+
 -- Extends a context morphism with another value.
 
-infixl 5 _▻̂_
+infixl 5 _▻̂_ _▻̂[_]_
 
 _▻̂_ : ∀ {Γ Δ σ} (ρ̂ : Γ ⇨̂ Δ) → Value Δ (σ /̂ ρ̂) → Γ ▻ σ ⇨̂ Δ
 _▻̂_ = <_,_>
+
+_▻̂[_]_ : ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) σ → Value Δ (σ /̂ ρ̂) → Γ ▻ σ ⇨̂ Δ
+ρ̂ ▻̂[ _ ] v = ρ̂ ▻̂ v
 
 -- A context morphism which only modifies the last "variable".
 
@@ -143,6 +158,12 @@ infix 4 _∋_
 data _∋_ : (Γ : Ctxt) → Type Γ → Set (u ⊔ e) where
   zero : ∀ {Γ σ}               → Γ ▻ σ ∋ σ /̂ ŵk
   suc  : ∀ {Γ σ τ} (x : Γ ∋ τ) → Γ ▻ σ ∋ τ /̂ ŵk
+
+zero[_] : ∀ {Γ} σ → Γ ▻ σ ∋ σ /̂ ŵk
+zero[ _ ] = zero
+
+suc[_] : ∀ {Γ} σ {τ} → Γ ∋ τ → Γ ▻ σ ∋ τ /̂ ŵk
+suc[ _ ] = suc
 
 -- Interpretation of variables: a lookup function.
 
@@ -410,12 +431,12 @@ mutual
 
 ŵk⁺ : ∀ {Γ} Γ⁺ → Γ ⇨̂ Γ ++ Γ⁺
 ŵk⁺ ε        = îd
-ŵk⁺ (Γ⁺ ▻ σ) = ŵk⁺ Γ⁺ ∘̂ ŵk
+ŵk⁺ (Γ⁺ ▻ σ) = ŵk⁺ Γ⁺ ∘̂ ŵk[ σ ]
 
 ------------------------------------------------------------------------
 -- More congruence lemmas
 
-îd-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≅-Ctxt Γ₂ → îd {Γ = Γ₁} ≅-⇨̂ îd {Γ = Γ₂}
+îd-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≅-Ctxt Γ₂ → îd[ Γ₁ ] ≅-⇨̂ îd[ Γ₂ ]
 îd-cong P.refl = P.refl
 
 ∘̂-cong : ∀ {Γ₁ Δ₁ Ε₁} {ρ̂₁₁ : Γ₁ ⇨̂ Δ₁} {ρ̂₂₁ : Δ₁ ⇨̂ Ε₁}
@@ -434,16 +455,16 @@ îd-cong P.refl = P.refl
 /̂Val-cong P.refl P.refl = P.refl
 
 ŵk-cong : ∀ {Γ₁} {σ₁ : Type Γ₁} {Γ₂} {σ₂ : Type Γ₂} →
-          σ₁ ≅-Type σ₂ → ŵk {σ = σ₁} ≅-⇨̂ ŵk {σ = σ₂}
+          σ₁ ≅-Type σ₂ → ŵk[ σ₁ ] ≅-⇨̂ ŵk[ σ₂ ]
 ŵk-cong P.refl = P.refl
 
-ε̂-cong : ∀ {Δ₁ Δ₂} → Δ₁ ≅-Ctxt Δ₂ → ε̂ {Δ = Δ₁} ≅-⇨̂ ε̂ {Δ = Δ₂}
+ε̂-cong : ∀ {Δ₁ Δ₂} → Δ₁ ≅-Ctxt Δ₂ → ε̂[ Δ₁ ] ≅-⇨̂ ε̂[ Δ₂ ]
 ε̂-cong P.refl = P.refl
 
 ▻̂-cong : ∀ {Γ₁ Δ₁ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {v₁ : Value Δ₁ (σ₁ /̂ ρ̂₁)}
            {Γ₂ Δ₂ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {v₂ : Value Δ₂ (σ₂ /̂ ρ̂₂)} →
          σ₁ ≅-Type σ₂ → ρ̂₁ ≅-⇨̂ ρ̂₂ → v₁ ≅-Value v₂ →
-         _▻̂_ {σ = σ₁} ρ̂₁ v₁ ≅-⇨̂ _▻̂_ {σ = σ₂} ρ̂₂ v₂
+         ρ̂₁ ▻̂[ σ₁ ] v₁ ≅-⇨̂ ρ̂₂ ▻̂[ σ₂ ] v₂
 ▻̂-cong P.refl P.refl P.refl = P.refl
 
 ŝub-cong : ∀ {Γ₁ σ₁} {v₁ : Value Γ₁ σ₁} {Γ₂ σ₂} {v₂ : Value Γ₂ σ₂} →
@@ -497,13 +518,13 @@ ŵk⁺-cong P.refl = P.refl
 
 zero-cong : ∀ {Γ₁} {σ₁ : Type Γ₁}
               {Γ₂} {σ₂ : Type Γ₂} →
-            σ₁ ≅-Type σ₂ → zero {σ = σ₁} ≅-∋ zero {σ = σ₂}
+            σ₁ ≅-Type σ₂ → zero[ σ₁ ] ≅-∋ zero[ σ₂ ]
 zero-cong P.refl = P.refl
 
 suc-cong :
   ∀ {Γ₁ σ₁ τ₁} {x₁ : Γ₁ ∋ τ₁}
     {Γ₂ σ₂ τ₂} {x₂ : Γ₂ ∋ τ₂} →
-  σ₁ ≅-Type σ₂ → x₁ ≅-∋ x₂ → suc {σ = σ₁} x₁ ≅-∋ suc {σ = σ₂} x₂
+  σ₁ ≅-Type σ₂ → x₁ ≅-∋ x₂ → suc[ σ₁ ] x₁ ≅-∋ suc[ σ₂ ] x₂
 suc-cong P.refl P.refl = P.refl
 
 /̂∋-cong : ∀ {Γ₁ Δ₁ σ₁} {x₁ : Γ₁ ∋ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
@@ -551,7 +572,7 @@ îd-∘̂ ρ̂ = P.refl
 -- The lifting of the identity substitution is the identity
 -- substitution.
 
-îd-↑̂ : ∀ {Γ} (σ : Type Γ) → îd ↑̂ σ ≅-⇨̂ îd {Γ = Γ ▻ σ}
+îd-↑̂ : ∀ {Γ} (σ : Type Γ) → îd ↑̂ σ ≅-⇨̂ îd[ Γ ▻ σ ]
 îd-↑̂ σ = P.refl
 
 -- _↑̂ distributes over _∘̂_.
@@ -568,12 +589,12 @@ ŵk-∘̂-ŝub v = P.refl
 -- First weakening under the head, and then replacing the head with
 -- the new head, is the same as doing nothing.
 
-ŵk-↑̂-∘̂-ŝub : ∀ {Γ} σ → ŵk ↑̂ ∘̂ ŝub proj₂ ≅-⇨̂ îd {Γ = Γ ▻ σ}
+ŵk-↑̂-∘̂-ŝub : ∀ {Γ} σ → ŵk ↑̂ ∘̂ ŝub proj₂ ≅-⇨̂ îd[ Γ ▻ σ ]
 ŵk-↑̂-∘̂-ŝub σ = P.refl
 
 -- ŵk commutes with arbitrary context morphisms (modulo lifting).
 
-∘̂-ŵk : ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) σ → ρ̂ ∘̂ ŵk {σ = σ /̂ ρ̂} ≅-⇨̂ ŵk {σ = σ} ∘̂ ρ̂ ↑̂
+∘̂-ŵk : ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) σ → ρ̂ ∘̂ ŵk[ σ /̂ ρ̂ ] ≅-⇨̂ ŵk[ σ ] ∘̂ ρ̂ ↑̂
 ∘̂-ŵk ρ̂ σ = P.refl
 
 -- ŝub commutes with arbitrary context morphisms (modulo lifting).
@@ -585,11 +606,11 @@ ŝub-∘̂ ρ̂ v = P.refl
 -- Laws relating _▻̂_, ĥead and t̂ail.
 
 ĥead-▻̂ : ∀ {Γ Δ σ} (ρ̂ : Γ ⇨̂ Δ) (v : Value Δ (σ /̂ ρ̂)) →
-         ĥead {σ = σ} (ρ̂ ▻̂ v) ≅-Value v
+         ĥead (ρ̂ ▻̂[ σ ] v) ≅-Value v
 ĥead-▻̂ ρ̂ v = P.refl
 
 t̂ail-▻̂ : ∀ {Γ Δ σ} (ρ̂ : Γ ⇨̂ Δ) (v : Value Δ (σ /̂ ρ̂)) →
-         t̂ail {σ = σ} (ρ̂ ▻̂ v) ≅-⇨̂ ρ̂
+         t̂ail (ρ̂ ▻̂[ σ ] v) ≅-⇨̂ ρ̂
 t̂ail-▻̂ ρ̂ v = P.refl
 
 t̂ail-▻̂-ĥead : ∀ {Γ Δ σ} (ρ̂ : Γ ▻ σ ⇨̂ Δ) → t̂ail ρ̂ ▻̂ ĥead ρ̂ ≅-⇨̂ ρ̂
@@ -598,7 +619,7 @@ t̂ail-▻̂-ĥead ρ̂ = P.refl
 -- Law relating _▻̂_ and _∘̂_.
 
 ▻̂-∘̂ : ∀ {Γ Δ Ε σ} (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) (v : Value Δ (σ /̂ ρ̂₁)) →
-      (_▻̂_ {σ = σ} ρ̂₁ v) ∘̂ ρ̂₂ ≅-⇨̂ (ρ̂₁ ∘̂ ρ̂₂) ▻̂ v /̂Val ρ̂₂
+      (ρ̂₁ ▻̂[ σ ] v) ∘̂ ρ̂₂ ≅-⇨̂ (ρ̂₁ ∘̂ ρ̂₂) ▻̂ v /̂Val ρ̂₂
 ▻̂-∘̂ ρ̂₁ ρ̂₂ v = P.refl
 
 -- The identity substitution has no effect.
@@ -675,13 +696,13 @@ abstract
   -- A corollary.
 
   /̂-↑̂⁺-/̂-ŵk-↑̂⁺ : ∀ {Γ Δ} σ (ρ̂ : Γ ⇨̂ Δ) (Γ⁺ : Ctxt⁺ Γ) τ →
-                 τ /̂ ρ̂ ↑̂⁺ Γ⁺ /̂ ŵk {σ = σ /̂ ρ̂} ↑̂⁺ (Γ⁺ /̂⁺ ρ̂) ≅-Type
-                 τ /̂ ŵk {σ = σ} ↑̂⁺ Γ⁺ /̂ ρ̂ ↑̂ ↑̂⁺ (Γ⁺ /̂⁺ ŵk)
+                 τ /̂ ρ̂ ↑̂⁺ Γ⁺ /̂ ŵk[ σ /̂ ρ̂ ] ↑̂⁺ (Γ⁺ /̂⁺ ρ̂) ≅-Type
+                 τ /̂ ŵk[ σ ] ↑̂⁺ Γ⁺ /̂ ρ̂ ↑̂ ↑̂⁺ (Γ⁺ /̂⁺ ŵk)
   /̂-↑̂⁺-/̂-ŵk-↑̂⁺ σ ρ̂ Γ⁺ τ = /̂-cong (P.refl {x = [ τ ]}) (begin
-    [ ρ̂ ↑̂⁺ Γ⁺ ∘̂ ŵk ↑̂⁺ (Γ⁺ /̂⁺ ρ̂)            ]  ≡⟨ P.sym $ ∘̂-↑̂⁺ ρ̂ ŵk Γ⁺ ⟩
-    [ (ρ̂ ∘̂ ŵk) ↑̂⁺ Γ⁺                       ]  ≡⟨ P.refl ⟩
-    [ (ŵk {σ = σ} ∘̂ ρ̂ ↑̂) ↑̂⁺ Γ⁺             ]  ≡⟨ ∘̂-↑̂⁺ (ŵk {σ = σ}) (ρ̂ ↑̂) Γ⁺ ⟩
-    [ ŵk {σ = σ} ↑̂⁺ Γ⁺ ∘̂ ρ̂ ↑̂ ↑̂⁺ (Γ⁺ /̂⁺ ŵk) ]  ∎)
+    [ ρ̂ ↑̂⁺ Γ⁺ ∘̂ ŵk ↑̂⁺ (Γ⁺ /̂⁺ ρ̂)         ]  ≡⟨ P.sym $ ∘̂-↑̂⁺ ρ̂ ŵk Γ⁺ ⟩
+    [ (ρ̂ ∘̂ ŵk) ↑̂⁺ Γ⁺                    ]  ≡⟨ P.refl ⟩
+    [ (ŵk[ σ ] ∘̂ ρ̂ ↑̂) ↑̂⁺ Γ⁺             ]  ≡⟨ ∘̂-↑̂⁺ ŵk[ σ ] (ρ̂ ↑̂) Γ⁺ ⟩
+    [ ŵk[ σ ] ↑̂⁺ Γ⁺ ∘̂ ρ̂ ↑̂ ↑̂⁺ (Γ⁺ /̂⁺ ŵk) ]  ∎)
 
   -- ŵk⁺ commutes (modulo lifting) with arbitrary context morphisms.
 
@@ -689,9 +710,9 @@ abstract
           ρ̂ ∘̂ ŵk⁺ (Γ⁺ /̂⁺ ρ̂) ≅-⇨̂ ŵk⁺ Γ⁺ ∘̂ ρ̂ ↑̂⁺ Γ⁺
   ∘̂-ŵk⁺ ρ̂ ε        = P.refl
   ∘̂-ŵk⁺ ρ̂ (Γ⁺ ▻ σ) = begin
-    [ ρ̂ ∘̂ ŵk⁺ (Γ⁺ /̂⁺ ρ̂) ∘̂ ŵk            ]  ≡⟨ ∘̂-cong (∘̂-ŵk⁺ ρ̂ Γ⁺) P.refl ⟩
-    [ ŵk⁺ Γ⁺ ∘̂ ρ̂ ↑̂⁺ Γ⁺ ∘̂ ŵk             ]  ≡⟨ P.refl ⟩
-    [ ŵk⁺ Γ⁺ ∘̂ ŵk {σ = σ} ∘̂ (ρ̂ ↑̂⁺ Γ⁺) ↑̂ ]  ∎
+    [ ρ̂ ∘̂ ŵk⁺ (Γ⁺ /̂⁺ ρ̂) ∘̂ ŵk         ]  ≡⟨ ∘̂-cong (∘̂-ŵk⁺ ρ̂ Γ⁺) P.refl ⟩
+    [ ŵk⁺ Γ⁺ ∘̂ ρ̂ ↑̂⁺ Γ⁺ ∘̂ ŵk          ]  ≡⟨ P.refl ⟩
+    [ ŵk⁺ Γ⁺ ∘̂ ŵk[ σ ] ∘̂ (ρ̂ ↑̂⁺ Γ⁺) ↑̂ ]  ∎
 
   -- ŵk⁺ is homomorphic with respect to _++⁺_/_∘̂_.
 

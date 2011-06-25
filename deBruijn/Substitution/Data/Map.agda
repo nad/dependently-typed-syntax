@@ -46,7 +46,7 @@ private
     map-▻ :
       ∀ {Γ Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} {σ}
       (f : [ T₁ ⟶ T₂ ] ρ̂₂) (ρ : Sub T₁ ρ̂₁) t →
-      map f (_▻_ {σ = σ} ρ t) ≅-⇨ _▻_ {σ = σ} (map f ρ) (f · t)
+      map f (ρ ▻⇨[ σ ] t) ≅-⇨ map f ρ ▻⇨[ σ ] f · t
     map-▻ {ρ̂₂ = ρ̂₂} f ρ t =
       drop-subst-Sub (λ v → ⟦ ρ ⟧⇨ ∘̂ ρ̂₂ ▻̂ v)
                      (≅-Value-⇒-≡ $ P.sym $ corresponds f t)
@@ -113,14 +113,14 @@ private
              (x : Γ ∋ σ) (f : [ T₁ ⟶ T₂ ] ρ̂₂) (ρ : Sub T₁ ρ̂₁) →
              x /∋ map f ρ ≅-⊢₂ f · (x /∋ ρ)
     /∋-map (zero {σ = σ}) f (ρ ▻ t) = begin
-      [ zero {σ = σ} /∋ map f (ρ ▻ t)     ]  ≡⟨ /∋-map-▻ (zero {σ = σ}) f ρ ⟩
-      [ zero {σ = σ} /∋ (map f ρ ▻ f · t) ]  ≡⟨ P.refl ⟩
-      [ f · t                             ]  ∎
+      [ zero[ σ ] /∋ map f (ρ ▻ t)     ]  ≡⟨ /∋-map-▻ zero[ σ ] f ρ ⟩
+      [ zero[ σ ] /∋ (map f ρ ▻ f · t) ]  ≡⟨ P.refl ⟩
+      [ f · t                          ]  ∎
     /∋-map (suc {σ = σ} x) f (ρ ▻ t) = begin
-      [ suc         x /∋ map f (ρ ▻ t)     ]  ≡⟨ /∋-map-▻ (suc x) f ρ ⟩
-      [ suc {σ = σ} x /∋ (map f ρ ▻ f · t) ]  ≡⟨ P.refl ⟩
-      [ x /∋ map f ρ                       ]  ≡⟨ /∋-map x f ρ ⟩
-      [ f · (x /∋ ρ)                       ]  ∎
+      [ suc      x /∋ map f (ρ ▻ t)     ]  ≡⟨ /∋-map-▻ (suc x) f ρ ⟩
+      [ suc[ σ ] x /∋ (map f ρ ▻ f · t) ]  ≡⟨ P.refl ⟩
+      [ x /∋ map f ρ                    ]  ≡⟨ /∋-map x f ρ ⟩
+      [ f · (x /∋ ρ)                    ]  ∎
 
 open Dummy public
 

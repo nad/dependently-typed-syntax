@@ -44,14 +44,16 @@ record Application₂₂₂
   open Term-like T₂ using ([_]) renaming (_⊢_ to _⊢₂_; _≅-⊢_ to _≅-⊢₂_)
   open Simple simple₁
     using ()
-    renaming ( id to id₁; sub to sub₁; var to var₁; wk to wk₁
+    renaming ( id to id₁; sub to sub₁; var to var₁
+             ; wk to wk₁; wk[_] to wk₁[_]
              ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_
              ; _↑⋆ to _↑⋆₁; _↑⁺⋆_ to _↑⁺⋆₁_
              )
   open Simple simple₂
     using ()
     renaming ( var to var₂
-             ; weaken to weaken₂; wk-subst to wk-subst₂
+             ; weaken to weaken₂; weaken[_] to weaken₂[_]
+             ; wk-subst to wk-subst₂; wk-subst[_] to wk-subst₂[_]
              ; _↑ to _↑₂; _↑_ to _↑₂_; _↑⁺_ to _↑⁺₂_
              )
 
@@ -67,15 +69,15 @@ record Application₂₂₂
     suc-/⊢⋆-↑⋆ :
       ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ}
       σ {τ} (x : Γ ∋ τ) (ρs : Subs T₁ ρ̂) →
-      var₂ · suc {σ = σ} x /⊢⋆ ρs ↑⋆₁ ≅-⊢₂
-      var₂ · x /⊢⋆ (ρs ▻ wk₁ {σ = σ /⋆ ρs})
+      var₂ · suc[ σ ] x /⊢⋆ ρs ↑⋆₁ ≅-⊢₂
+      var₂ · x /⊢⋆ (ρs ▻ wk₁[ σ /⋆ ρs ])
     suc-/⊢⋆-↑⋆ σ x ε = begin
       [ var₂ · suc x    ]  ≡⟨ P.sym $ var-/⊢-wk-↑⁺ ε x ⟩
       [ var₂ · x /⊢ wk₁ ]  ∎
     suc-/⊢⋆-↑⋆ σ x (ρs ▻ ρ) = begin
-      [ var₂ · suc {σ = σ} x /⊢⋆ ρs ↑⋆₁ /⊢ ρ ↑₁      ]  ≡⟨ /⊢-cong (suc-/⊢⋆-↑⋆ σ x ρs) (P.refl {x = [ ρ ↑₁ ]}) ⟩
-      [ var₂ · x /⊢⋆ ρs /⊢ wk₁ {σ = σ /⋆ ρs} /⊢ ρ ↑₁ ]  ≡⟨ P.sym $ /⊢-/⊢-wk (σ /⋆ ρs) (var₂ · x /⊢⋆ ρs) ρ ⟩
-      [ var₂ · x /⊢⋆ ρs /⊢ ρ /⊢ wk₁                  ]  ∎
+      [ var₂ · suc[ σ ] x /⊢⋆ ρs ↑⋆₁ /⊢ ρ ↑₁      ]  ≡⟨ /⊢-cong (suc-/⊢⋆-↑⋆ σ x ρs) (P.refl {x = [ ρ ↑₁ ]}) ⟩
+      [ var₂ · x /⊢⋆ ρs /⊢ wk₁[ σ /⋆ ρs ] /⊢ ρ ↑₁ ]  ≡⟨ P.sym $ /⊢-/⊢-wk (σ /⋆ ρs) (var₂ · x /⊢⋆ ρs) ρ ⟩
+      [ var₂ · x /⊢⋆ ρs /⊢ ρ /⊢ wk₁               ]  ∎
 
     -- The antecedent of var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ follows from a less
     -- complicated statement.
@@ -153,14 +155,14 @@ record Application₂₂₂
             [ var₂ · zero /⊢ ρ₂↑    ]  ∎
 
       in begin
-      [ (ρ₁ ∘ ρ₂) ↑₂                                            ]  ≡⟨ Simple.unfold-↑ simple₂ (ρ₁ ∘ ρ₂) ⟩
-      [ wk-subst₂ (ρ₁ ∘ ρ₂) ▻ var₂ · zero                       ]  ≡⟨ ▻⇨-cong P.refl lemma₁ lemma₂ ⟩
-      [ map (app ρ₂↑) (map (weaken₂ {σ = σ / ρ₁}) ρ₁) ▻
-          var₂ · zero /⊢ ρ₂↑                                    ]  ≡⟨ P.sym $ map-▻ (app ρ₂↑) (wk-subst₂ {σ = σ / ρ₁} ρ₁) (var₂ · zero) ⟩
-      [ map (app ρ₂↑) (wk-subst₂ {σ = σ / ρ₁} ρ₁ ▻ var₂ · zero) ]  ≡⟨ map-cong (P.refl {x = [ app ρ₂↑ ]})
-                                                                               (P.sym $ Simple.unfold-↑ simple₂ ρ₁) ⟩
-      [ map (app ρ₂↑) (ρ₁ ↑₂)                                   ]  ≡⟨ P.refl ⟩
-      [ ρ₁ ↑₂ ∘ ρ₂ ↑₁                                           ]  ∎
+      [ (ρ₁ ∘ ρ₂) ↑₂                                                  ]  ≡⟨ Simple.unfold-↑ simple₂ (ρ₁ ∘ ρ₂) ⟩
+      [ wk-subst₂ (ρ₁ ∘ ρ₂) ▻ var₂ · zero                             ]  ≡⟨ ▻⇨-cong P.refl lemma₁ lemma₂ ⟩
+      [ map (app ρ₂↑) (map weaken₂[ σ / ρ₁ ] ρ₁) ▻ var₂ · zero /⊢ ρ₂↑ ]  ≡⟨ P.sym $
+                                                                              map-▻ (app ρ₂↑) (wk-subst₂[ σ / ρ₁ ] ρ₁) (var₂ · zero) ⟩
+      [ map (app ρ₂↑) (wk-subst₂[ σ / ρ₁ ] ρ₁ ▻ var₂ · zero)          ]  ≡⟨ map-cong (P.refl {x = [ app ρ₂↑ ]})
+                                                                                     (P.sym $ Simple.unfold-↑ simple₂ ρ₁) ⟩
+      [ map (app ρ₂↑) (ρ₁ ↑₂)                                         ]  ≡⟨ P.refl ⟩
+      [ ρ₁ ↑₂ ∘ ρ₂ ↑₁                                                 ]  ∎
 
     -- N-ary lifting distributes over composition.
 

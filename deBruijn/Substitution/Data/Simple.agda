@@ -34,7 +34,7 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
   field
 
     -- Weakens terms.
-    weaken : ∀ {Γ σ} → [ T ⟶ T ] (ŵk {Γ = Γ} {σ = σ})
+    weaken : ∀ {Γ} {σ : Type Γ} → [ T ⟶ T ] ŵk[ σ ]
 
     -- Takes variables to terms.
     var : [ Var ⟶⁼ T ]
@@ -43,10 +43,18 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     weaken-var : ∀ {Γ σ τ} (x : Γ ∋ τ) →
                  weaken {σ = σ} · (var · x) ≅-⊢ var · suc {σ = σ} x
 
+  -- A synonym.
+
+  weaken[_] : ∀ {Γ} (σ : Type Γ) → [ T ⟶ T ] ŵk[ σ ]
+  weaken[ _ ] = weaken
+
   -- Weakens substitutions.
 
-  wk-subst : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk {σ = σ})
+  wk-subst : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk[ σ ])
   wk-subst ρ = map weaken ρ
+
+  wk-subst[_] : ∀ {Γ Δ} σ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk[ σ ])
+  wk-subst[ _ ] = wk-subst
 
   -- Lifting.
 
@@ -84,9 +92,12 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
 
   -- The identity substitution.
 
-  id : ∀ {Γ} → Sub T (îd {Γ = Γ})
-  id {ε}     = ε
-  id {Γ ▻ σ} = id ↑
+  id[_] : ∀ Γ → Sub T îd[ Γ ]
+  id[ ε     ] = ε
+  id[ Γ ▻ σ ] = id[ Γ ] ↑
+
+  id : ∀ {Γ} → Sub T îd[ Γ ]
+  id = id[ _ ]
 
   -- N-ary weakening.
 
@@ -96,8 +107,11 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
 
   -- Weakening.
 
-  wk : ∀ {Γ} {σ : Type Γ} → Sub T (ŵk {σ = σ})
-  wk {σ = σ} = wk⁺ (ε ▻ σ)
+  wk[_] : ∀ {Γ} (σ : Type Γ) → Sub T ŵk[ σ ]
+  wk[ σ ] = wk⁺ (ε ▻ σ)
+
+  wk : ∀ {Γ} {σ : Type Γ} → Sub T ŵk[ σ ]
+  wk = wk[ _ ]
 
   -- A substitution which only replaces the first variable.
 
@@ -109,7 +123,7 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
   weaken-cong : ∀ {Γ₁ σ₁ τ₁} {t₁ : Γ₁ ⊢ τ₁}
                   {Γ₂ σ₂ τ₂} {t₂ : Γ₂ ⊢ τ₂} →
                 σ₁ ≅-Type σ₂ → t₁ ≅-⊢ t₂ →
-                weaken {σ = σ₁} · t₁ ≅-⊢ weaken {σ = σ₂} · t₂
+                weaken[ σ₁ ] · t₁ ≅-⊢ weaken[ σ₂ ] · t₂
   weaken-cong P.refl P.refl = P.refl
 
   var-cong : ∀ {Γ₁ σ₁} {x₁ : Γ₁ ∋ σ₁}
@@ -120,7 +134,7 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
   wk-subst-cong : ∀ {Γ₁ Δ₁ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
                     {Γ₂ Δ₂ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
                   σ₁ ≅-Type σ₂ → ρ₁ ≅-⇨ ρ₂ →
-                  wk-subst {σ = σ₁} ρ₁ ≅-⇨ wk-subst {σ = σ₂} ρ₂
+                  wk-subst[ σ₁ ] ρ₁ ≅-⇨ wk-subst[ σ₂ ] ρ₂
   wk-subst-cong P.refl P.refl = P.refl
 
   ↑-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁} {σ₁}
@@ -144,7 +158,7 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
              ρs₁ ↑⁺⋆ Γ⁺₁ ≅-⇨⋆ ρs₂ ↑⁺⋆ Γ⁺₂
   ↑⁺⋆-cong P.refl P.refl = P.refl
 
-  id-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≅-Ctxt Γ₂ → id {Γ = Γ₁} ≅-⇨ id {Γ = Γ₂}
+  id-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≅-Ctxt Γ₂ → id[ Γ₁ ] ≅-⇨ id[ Γ₂ ]
   id-cong P.refl = P.refl
 
   wk⁺-cong : ∀ {Γ₁} {Γ⁺₁ : Ctxt⁺ Γ₁} {Γ₂} {Γ⁺₂ : Ctxt⁺ Γ₂} →
@@ -152,7 +166,7 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
   wk⁺-cong P.refl = P.refl
 
   wk-cong : ∀ {Γ₁} {σ₁ : Type Γ₁} {Γ₂} {σ₂ : Type Γ₂} →
-            σ₁ ≅-Type σ₂ → wk {σ = σ₁} ≅-⇨ wk {σ = σ₂}
+            σ₁ ≅-Type σ₂ → wk[ σ₁ ] ≅-⇨ wk[ σ₂ ]
   wk-cong P.refl = P.refl
 
   sub-cong : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ σ₁} {Γ₂ σ₂} {t₂ : Γ₂ ⊢ σ₂} →
@@ -164,8 +178,7 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     -- Unfolding lemma for _↑.
 
     unfold-↑ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T ρ̂) →
-               ρ ↑ σ ≅-⇨
-               Sub._▻_ {σ = σ} (wk-subst {σ = σ / ρ} ρ) (var · zero)
+               ρ ↑ σ ≅-⇨ wk-subst[ σ / ρ ] ρ ▻⇨[ σ ] var · zero
     unfold-↑ _ =
       drop-subst-Sub F.id
         (≅-⇨̂-⇒-≡ $ ▻̂-cong P.refl P.refl (P.sym $ corresponds var zero))
@@ -173,27 +186,27 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     -- Some lemmas relating variables to lifting.
 
     /∋-↑ : ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (x : Γ ▻ σ ∋ τ) (ρ : Sub T ρ̂) →
-           x /∋ ρ ↑ ≅-⊢ x /∋ (wk-subst {σ = σ / ρ} ρ ▻ var · zero)
+           x /∋ ρ ↑ ≅-⊢ x /∋ (wk-subst[ σ / ρ ] ρ ▻ var · zero)
     /∋-↑ x ρ = /∋-cong (P.refl {x = [ x ]}) (unfold-↑ ρ)
 
     zero-/∋-↑ : ∀ {Γ Δ} σ {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T ρ̂) →
-                zero {σ = σ} /∋ ρ ↑ ≅-⊢ var · zero {σ = σ / ρ}
+                zero[ σ ] /∋ ρ ↑ ≅-⊢ var · zero[ σ / ρ ]
     zero-/∋-↑ σ ρ = begin
-      [ zero {σ = σ} /∋ ρ ↑                       ]  ≡⟨ /∋-↑ (zero {σ = σ}) ρ ⟩
-      [ zero {σ = σ} /∋ (wk-subst ρ ▻ var · zero) ]  ≡⟨ P.refl ⟩
-      [ var · zero                                ]  ∎
+      [ zero[ σ ] /∋ ρ ↑                       ]  ≡⟨ /∋-↑ zero[ σ ] ρ ⟩
+      [ zero[ σ ] /∋ (wk-subst ρ ▻ var · zero) ]  ≡⟨ P.refl ⟩
+      [ var · zero                             ]  ∎
 
     suc-/∋-↑ : ∀ {Γ Δ τ} σ {ρ̂ : Γ ⇨̂ Δ} (x : Γ ∋ τ) (ρ : Sub T ρ̂) →
-               suc {σ = σ} x /∋ ρ ↑ ≅-⊢ x /∋ wk-subst {σ = σ / ρ} ρ
+               suc[ σ ] x /∋ ρ ↑ ≅-⊢ x /∋ wk-subst[ σ / ρ ] ρ
     suc-/∋-↑ σ x ρ = begin
-      [ suc {σ = σ} x /∋ ρ ↑                       ]  ≡⟨ /∋-↑ (suc {σ = σ} x) ρ ⟩
-      [ suc {σ = σ} x /∋ (wk-subst ρ ▻ var · zero) ]  ≡⟨ P.refl ⟩
-      [ x /∋ wk-subst ρ                            ]  ∎
+      [ suc[ σ ] x /∋ ρ ↑                       ]  ≡⟨ /∋-↑ (suc[ σ ] x) ρ ⟩
+      [ suc[ σ ] x /∋ (wk-subst ρ ▻ var · zero) ]  ≡⟨ P.refl ⟩
+      [ x /∋ wk-subst ρ                         ]  ∎
 
     -- One can weaken either before or after looking up a variable.
 
-    /∋-wk-subst : ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (x : Γ ∋ σ) (ρ : Sub T ρ̂) →
-                  x /∋ wk-subst {σ = τ} ρ ≅-⊢ weaken {σ = τ} · (x /∋ ρ)
+    /∋-wk-subst : ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (x : Γ ∋ τ) (ρ : Sub T ρ̂) →
+                  x /∋ wk-subst[ σ ] ρ ≅-⊢ weaken[ σ ] · (x /∋ ρ)
     /∋-wk-subst x ρ = /∋-map x weaken ρ
 
     -- A corollary.
@@ -201,8 +214,8 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     /∋-wk-subst-var :
       ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ}
       (ρ : Sub T ρ̂) (x : Γ ∋ τ) (y : Δ ∋ τ / ρ) →
-      x /∋                  ρ ≅-⊢ var ·             y →
-      x /∋ wk-subst {σ = σ} ρ ≅-⊢ var · suc {σ = σ} y
+      x /∋               ρ ≅-⊢ var ·          y →
+      x /∋ wk-subst[ σ ] ρ ≅-⊢ var · suc[ σ ] y
     /∋-wk-subst-var ρ x y hyp = begin
       [ x /∋ wk-subst ρ    ]  ≡⟨ /∋-wk-subst x ρ ⟩
       [ weaken · (x /∋ ρ)  ]  ≡⟨ weaken-cong P.refl hyp ⟩
@@ -224,33 +237,32 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
 
       /∋-id : ∀ {Γ σ} (x : Γ ∋ σ) → x /∋ id ≅-⊢ var · x
       /∋-id {Γ = ε}     ()
-      /∋-id {Γ = Γ ▻ τ} x = begin
+      /∋-id {Γ = Γ ▻ σ} x = begin
         [ x /∋ id ↑              ]  ≡⟨ /∋-↑ x id ⟩
         [ x /∋ (wk ▻ var · zero) ]  ≡⟨ lemma x ⟩
         [ var · x                ]  ∎
         where
-        lemma : ∀ {σ} (x : Γ ▻ τ ∋ σ) →
-                x /∋ (wk {σ = τ} ▻ var · zero) ≅-⊢ var · x
+        lemma : ∀ {τ} (x : Γ ▻ σ ∋ τ) →
+                x /∋ (wk[ σ ] ▻ var · zero) ≅-⊢ var · x
         lemma zero    = P.refl
         lemma (suc x) = /∋-wk x
 
       -- Weakening a variable is equivalent to incrementing it.
 
       /∋-wk : ∀ {Γ σ τ} (x : Γ ∋ τ) →
-              x /∋ wk {σ = σ} ≅-⊢ var · suc {σ = σ} x
+              x /∋ wk[ σ ] ≅-⊢ var · suc[ σ ] x
       /∋-wk x = /∋-wk-subst-var id x x (/∋-id x)
 
     -- The n-ary lifting of the identity substitution is the identity
     -- substitution.
 
-    id-↑⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → id ↑⁺ Γ⁺ ≅-⇨ id {Γ = Γ ++ Γ⁺}
+    id-↑⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → id ↑⁺ Γ⁺ ≅-⇨ id[ Γ ++ Γ⁺ ]
     id-↑⁺ ε        = P.refl
     id-↑⁺ (Γ⁺ ▻ σ) = begin
       [ (id ↑⁺ Γ⁺) ↑ ]  ≡⟨ ↑-cong (id-↑⁺ Γ⁺) P.refl ⟩
       [ id ↑         ]  ∎
 
-    ε-↑⁺⋆ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) →
-          ε ↑⁺⋆ Γ⁺ ≅-⇨⋆ Subs.ε {T = T} {Γ = Γ ++ Γ⁺}
+    ε-↑⁺⋆ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → ε ↑⁺⋆ Γ⁺ ≅-⇨⋆ ε⇨⋆[ Γ ++ Γ⁺ ]
     ε-↑⁺⋆ ε        = P.refl
     ε-↑⁺⋆ (Γ⁺ ▻ σ) = begin
       [ (ε ↑⁺⋆ Γ⁺) ↑⋆ ]  ≡⟨ ↑⋆-cong (ε-↑⁺⋆ Γ⁺) P.refl ⟩
@@ -287,10 +299,10 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
             x /∋ ρ ↑⁺ Γ⁺ ≅-⊢ var · (lift f Γ⁺ · x)
     /∋-↑⁺ ρ f hyp ε        x    = hyp x
     /∋-↑⁺ ρ f hyp (Γ⁺ ▻ σ) zero = begin
-      [ zero {σ = σ} /∋ (ρ ↑⁺ Γ⁺) ↑ ]  ≡⟨ zero-/∋-↑ σ (ρ ↑⁺ Γ⁺) ⟩
-      [ var · zero                  ]  ∎
+      [ zero[ σ ] /∋ (ρ ↑⁺ Γ⁺) ↑ ]  ≡⟨ zero-/∋-↑ σ (ρ ↑⁺ Γ⁺) ⟩
+      [ var · zero               ]  ∎
     /∋-↑⁺ ρ f hyp (Γ⁺ ▻ σ) (suc x) = begin
-      [ suc {σ = σ} x /∋ (ρ ↑⁺ Γ⁺) ↑     ]  ≡⟨ suc-/∋-↑ σ x (ρ ↑⁺ Γ⁺) ⟩
+      [ suc[ σ ] x /∋ (ρ ↑⁺ Γ⁺) ↑        ]  ≡⟨ suc-/∋-↑ σ x (ρ ↑⁺ Γ⁺) ⟩
       [ x /∋ wk-subst (ρ ↑⁺ Γ⁺)          ]  ≡⟨ /∋-wk-subst x (ρ ↑⁺ Γ⁺) ⟩
       [ weaken · (x /∋ ρ ↑⁺ Γ⁺)          ]  ≡⟨ weaken-cong P.refl (/∋-↑⁺ ρ f hyp Γ⁺ x) ⟩
       [ weaken · (var · (lift f Γ⁺ · x)) ]  ≡⟨ weaken-var (lift f Γ⁺ · x) ⟩
@@ -300,13 +312,13 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     -- reference to the weaken function.
 
     /∋-wk-↑⁺ : ∀ {Γ σ} Γ⁺ {τ} (x : Γ ++ Γ⁺ ∋ τ) →
-               x /∋ wk {σ = σ} ↑⁺ Γ⁺ ≅-⊢
-               var · (lift (weaken∋ {σ = σ}) Γ⁺ · x)
+               x /∋ wk[ σ ] ↑⁺ Γ⁺ ≅-⊢
+               var · (lift weaken∋[ σ ] Γ⁺ · x)
     /∋-wk-↑⁺ = /∋-↑⁺ wk weaken∋ /∋-wk
 
     /∋-wk-↑⁺-↑⁺ : ∀ {Γ σ} Γ⁺ Γ⁺⁺ {τ} (x : Γ ++ Γ⁺ ++ Γ⁺⁺ ∋ τ) →
-                  x /∋ wk {σ = σ} ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺ ≅-⊢
-                  var · (lift (lift (weaken∋ {σ = σ}) Γ⁺) Γ⁺⁺ · x)
+                  x /∋ wk[ σ ] ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺ ≅-⊢
+                  var · (lift (lift weaken∋[ σ ] Γ⁺) Γ⁺⁺ · x)
     /∋-wk-↑⁺-↑⁺ Γ⁺ = /∋-↑⁺ (wk ↑⁺ Γ⁺) (lift weaken∋ Γ⁺) (/∋-wk-↑⁺ Γ⁺)
 
     -- Two n-ary liftings can be merged into one.

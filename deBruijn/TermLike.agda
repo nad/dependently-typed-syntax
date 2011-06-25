@@ -86,7 +86,7 @@ record [_⟶_] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
 -- Functions which do not change the context or type.
 
 [_⟶⁼_] : ∀ {t₁ t₂} → Term-like t₁ → Term-like t₂ → Set _
-[ T₁ ⟶⁼ T₂ ] = ∀ {Γ} → [ T₁ ⟶ T₂ ] (îd {Γ = Γ})
+[ T₁ ⟶⁼ T₂ ] = ∀ {Γ} → [ T₁ ⟶ T₂ ] îd[ Γ ]
 
 -- Projections. (The fields above have explicit σ's to avoid some
 -- problems; the projections below have implicit σ's.)
@@ -131,11 +131,14 @@ f₁ ≅-⟶ f₂ = [⟶].[_] f₁ ≡ [ f₂ ]
 
 -- Weakening of variables (the successor function).
 
-weaken∋ : ∀ {Γ} {σ : Type Γ} → [ Var ⟶ Var ] (ŵk {σ = σ})
+weaken∋ : ∀ {Γ} {σ : Type Γ} → [ Var ⟶ Var ] ŵk[ σ ]
 weaken∋ = record
   { function    = λ _ → suc
   ; corresponds = λ _ _ → P.refl
   }
+
+weaken∋[_] : ∀ {Γ} (σ : Type Γ) → [ Var ⟶ Var ] ŵk[ σ ]
+weaken∋[ _ ] = weaken∋
 
 -- Lifts a function on variables, f, to a function which leaves a
 -- prefix of the context unchanged and otherwise behaves as f.
@@ -222,12 +225,12 @@ abstract
 
   lift-weaken∋-lift-lift-weaken∋ :
     ∀ {Γ} σ Γ⁺ τ Γ⁺⁺ {υ} (x : Γ ++ Γ⁺ ++ Γ⁺⁺ ∋ υ) →
-    lift (weaken∋ {σ = τ /̂ ŵk ↑̂⁺ Γ⁺}) (Γ⁺⁺ /̂⁺ ŵk ↑̂⁺ Γ⁺) ·
-         (lift (lift (weaken∋ {σ = σ}) Γ⁺) Γ⁺⁺ · x) ≅-∋
-    lift (lift (weaken∋ {σ = σ}) (Γ⁺ ▻ τ)) (Γ⁺⁺ /̂⁺ ŵk) ·
-         (lift (weaken∋ {σ = τ}) Γ⁺⁺ · x)
-  lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ ε         x    = P.refl
-  lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ (Γ⁺⁺ ▻ υ) zero =
+    lift weaken∋[ τ /̂ ŵk ↑̂⁺ Γ⁺ ] (Γ⁺⁺ /̂⁺ ŵk ↑̂⁺ Γ⁺) ·
+         (lift (lift weaken∋[ σ ] Γ⁺) Γ⁺⁺ · x) ≅-∋
+    lift (lift weaken∋[ σ ] (Γ⁺ ▻ τ)) (Γ⁺⁺ /̂⁺ ŵk) ·
+         (lift weaken∋[ τ ] Γ⁺⁺ · x)
+  lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ ε         x       = P.refl
+  lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ (Γ⁺⁺ ▻ υ) zero    =
     zero-cong (/̂-↑̂⁺-/̂-ŵk-↑̂⁺ τ (ŵk ↑̂⁺ Γ⁺) Γ⁺⁺ υ)
   lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ (Γ⁺⁺ ▻ υ) (suc x) =
     suc-cong (/̂-↑̂⁺-/̂-ŵk-↑̂⁺ τ (ŵk ↑̂⁺ Γ⁺) Γ⁺⁺ υ)
@@ -240,7 +243,7 @@ abstract
 
 -- Identity.
 
-[id] : ∀ {t} {T : Term-like t} {Γ} → [ T ⟶ T ] (îd {Γ = Γ})
+[id] : ∀ {t} {T : Term-like t} {Γ} → [ T ⟶ T ] îd[ Γ ]
 [id] = record { function = λ _ → id; corresponds = λ _ _ → P.refl }
 
 -- Composition.

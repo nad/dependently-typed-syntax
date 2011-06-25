@@ -132,8 +132,8 @@ record Substitution₁ (T : Term-like (u ⊔ e))
     where
     abstract
       weaken-var : ∀ {Γ σ τ} (x : Γ ∋ τ) →
-                   app-renaming (Renaming.wk {σ = σ}) · (var · x) ≅-⊢
-                   var · suc {σ = σ} x
+                   app-renaming (Renaming.wk[_] σ) · (var · x) ≅-⊢
+                   var · suc[ σ ] x
       weaken-var x = begin
         [ app-renaming Renaming.wk · (var · x) ]  ≡⟨ app-var Var-↦′ x Renaming.wk ⟩
         [ var · (x /∋ Renaming.wk)             ]  ≡⟨ ·-cong (P.refl {x = [ var ]}) (Renaming./∋-wk x) ⟩
@@ -148,12 +148,12 @@ record Substitution₁ (T : Term-like (u ⊔ e))
 
     open _↦_ translation
       using (trans)
-      renaming (simple to simple′; var to var′; weaken to weaken′)
+      renaming (simple to simple′; var to var′; weaken[_] to weaken′[_])
 
     field
       trans-weaken : ∀ {Γ σ τ} (t : Term-like._⊢_ T′ Γ τ) →
-                     trans · (weaken′ {σ = σ} · t) ≅-⊢
-                     Simple.weaken simple {σ = σ} · (trans · t)
+                     trans · (weaken′[ σ ] · t) ≅-⊢
+                     Simple.weaken[_] simple σ · (trans · t)
       trans-var    : ∀ {Γ σ} (x : Γ ∋ σ) →
                      trans · (var′ · x) ≅-⊢ var · x
 
@@ -183,8 +183,8 @@ record Substitution₁ (T : Term-like (u ⊔ e))
     abstract
       trans-weaken :
         ∀ {Γ σ τ} (x : Γ ∋ τ) →
-        var · suc {σ = σ} x ≅-⊢
-        Simple.weaken simple {σ = σ} · (var · x)
+        var · suc[ σ ] x ≅-⊢
+        Simple.weaken[_] simple σ · (var · x)
       trans-weaken x = P.sym $ Simple.weaken-var simple x
 
 record Substitution₂ (T : Term-like (u ⊔ e))
@@ -231,7 +231,8 @@ record Substitution₂ (T : Term-like (u ⊔ e))
     where
     open Translation-from T′↦T
       using ()
-      renaming ( _↑⁺_ to _↑⁺′_; _↑⁺⋆_ to _↑⁺⋆′_; wk to wk′
+      renaming ( _↑⁺_ to _↑⁺′_; _↑⁺⋆_ to _↑⁺⋆′_
+               ; wk to wk′; wk[_] to wk′[_]
                ; _/⊢_ to _/⊢′_; _/⊢⋆_ to _/⊢⋆′_
                )
     open Translation-from Var-↦
@@ -242,7 +243,7 @@ record Substitution₂ (T : Term-like (u ⊔ e))
 
     abstract
       /⊢-wk : ∀ {Γ σ τ} (t : Γ ⊢ τ) →
-              t /⊢′ wk′ {σ = σ} ≅-⊢ t /⊢-renaming Renaming.wk {σ = σ}
+              t /⊢′ wk′[ σ ] ≅-⊢ t /⊢-renaming Renaming.wk[_] σ
       /⊢-wk =
         var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ T′↦T Var-↦ (ε ▻ wk′) (ε ▻ Renaming.wk)
           (λ Γ⁺ x → begin

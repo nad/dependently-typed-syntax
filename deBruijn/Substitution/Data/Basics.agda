@@ -28,15 +28,15 @@ private
   -- Substitutions, represented as sequences of terms.
 
   data Sub : ∀ {Γ Δ} → Γ ⇨̂ Δ → Set (u ⊔ e ⊔ t) where
-    ε   : ∀ {Δ} → Sub (ε̂ {Δ = Δ})
+    ε   : ∀ {Δ} → Sub ε̂[ Δ ]
     _▻_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
-          (ρ : Sub ρ̂) (t : Δ ⊢ σ /̂ ρ̂) → Sub (_▻̂_ {σ = σ} ρ̂ ⟦ t ⟧)
+          (ρ : Sub ρ̂) (t : Δ ⊢ σ /̂ ρ̂) → Sub (ρ̂ ▻̂[ σ ] ⟦ t ⟧)
 
   -- A sequence of matching substitutions. (The reflexive transitive
   -- closure of Sub.)
 
   data Subs {Γ} : ∀ {Δ} → Γ ⇨̂ Δ → Set (u ⊔ e ⊔ t) where
-    ε   : Subs (îd {Γ = Γ})
+    ε   : Subs îd[ Γ ]
     _▻_ : ∀ {Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε}
           (ρs : Subs ρ̂₁) (ρ : Sub ρ̂₂) → Subs (ρ̂₁ ∘̂ ρ̂₂)
 
@@ -98,6 +98,20 @@ private
  module Dummy₂ {t} {T : TermLike.Term-like Uni t} where
 
   open Term-like T
+
+  -- Some variants.
+
+  ε⇨[_] : ∀ Δ → Sub T ε̂[ Δ ]
+  ε⇨[ _ ] = ε
+
+  infixl 5 _▻⇨[_]_
+
+  _▻⇨[_]_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} →
+            Sub T ρ̂ → ∀ σ (t : Δ ⊢ σ /̂ ρ̂) → Sub T (ρ̂ ▻̂[ σ ] ⟦ t ⟧)
+  ρ ▻⇨[ _ ] t = ρ ▻ t
+
+  ε⇨⋆[_] : ∀ Γ → Subs T îd[ Γ ]
+  ε⇨⋆[ _ ] = ε
 
   -- Equality of substitutions.
 
@@ -228,19 +242,17 @@ private
 
   -- Some congruence lemmas.
 
-  ε⇨-cong : ∀ {Δ₁ Δ₂} → Δ₁ ≡ Δ₂ →
-            ε {T = T} {Δ = Δ₁} ≅-⇨ ε {T = T} {Δ = Δ₂}
+  ε⇨-cong : ∀ {Δ₁ Δ₂} → Δ₁ ≡ Δ₂ → ε⇨[ Δ₁ ] ≅-⇨ ε⇨[ Δ₂ ]
   ε⇨-cong P.refl = P.refl
 
   ▻⇨-cong :
     ∀ {Γ₁ Δ₁ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁} {t₁ : Δ₁ ⊢ σ₁ / ρ₁}
       {Γ₂ Δ₂ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} {t₂ : Δ₂ ⊢ σ₂ / ρ₂} →
     σ₁ ≅-Type σ₂ → ρ₁ ≅-⇨ ρ₂ → t₁ ≅-⊢ t₂ →
-    _▻_ {σ = σ₁} ρ₁ t₁ ≅-⇨ _▻_ {σ = σ₂} ρ₂ t₂
+    ρ₁ ▻⇨[ σ₁ ] t₁ ≅-⇨ ρ₂ ▻⇨[ σ₂ ] t₂
   ▻⇨-cong P.refl P.refl P.refl = P.refl
 
-  ε⇨⋆-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≡ Γ₂ →
-             ε {T = T} {Γ = Γ₁} ≅-⇨⋆ ε {T = T} {Γ = Γ₂}
+  ε⇨⋆-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≡ Γ₂ → ε⇨⋆[ Γ₁ ] ≅-⇨⋆ ε⇨⋆[ Γ₂ ]
   ε⇨⋆-cong P.refl = P.refl
 
   ▻⇨⋆-cong :
@@ -291,11 +303,11 @@ private
 
     -- Some eta-laws.
 
-    ηε : ∀ {Δ} {ρ̂ : ε ⇨̂ Δ} (ρ : Sub T ρ̂) → ρ ≅-⇨ Sub.ε {Δ = Δ}
+    ηε : ∀ {Δ} {ρ̂ : ε ⇨̂ Δ} (ρ : Sub T ρ̂) → ρ ≅-⇨ ε⇨[ Δ ]
     ηε ε = P.refl
 
     η▻ : ∀ {Γ Δ σ} {ρ̂ : Γ ▻ σ ⇨̂ Δ} (ρ : Sub T ρ̂) →
-         ρ ≅-⇨ _▻_ {σ = σ} (tail ρ) (head ρ)
+         ρ ≅-⇨ tail ρ ▻⇨[ σ ] head ρ
     η▻ (ρ ▻ t) = P.refl
 
     -- Two substitutions are equal if their indices are equal and

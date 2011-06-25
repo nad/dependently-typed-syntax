@@ -49,14 +49,16 @@ record Application₂₁
   open Simple simple₁
     using ()
     renaming ( id to id₁; sub to sub₁; var to var₁
-             ; weaken to weaken₁; wk to wk₁; wk-subst to wk-subst₁
+             ; weaken[_] to weaken₁[_]; wk to wk₁
+             ; wk-subst to wk-subst₁; wk-subst[_] to wk-subst₁[_]
              ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_
              ; _↑⋆_ to _↑⋆₁_; _↑⁺⋆_ to _↑⁺⋆₁_
              )
   open Simple simple₂
     using ()
-    renaming ( id to id₂; var to var₂
-             ; weaken to weaken₂; wk to wk₂; wk-subst to wk-subst₂
+    renaming ( id to id₂; id[_] to id₂[_]; var to var₂
+             ; weaken to weaken₂; weaken[_] to weaken₂[_]; wk to wk₂
+             ; wk-subst to wk-subst₂; wk-subst[_] to wk-subst₂[_]
              ; _↑ to _↑₂; _↑_ to _↑₂_
              )
 
@@ -68,8 +70,8 @@ record Application₂₁
   field
     -- The two weakening functions coincide.
     trans-weaken : ∀ {Γ σ τ} (t : Γ ⊢₁ τ) →
-                   trans · (weaken₁ {σ = σ} · t) ≅-⊢₂
-                   weaken₂ {σ = σ} · (trans · t)
+                   trans · (weaken₁[ σ ] · t) ≅-⊢₂
+                   weaken₂[ σ ] · (trans · t)
 
     -- The two variable inclusion functions coincide.
     trans-var : ∀ {Γ σ} (x : Γ ∋ σ) → trans · (var₁ · x) ≅-⊢₂ var₂ · x
@@ -175,7 +177,7 @@ record Application₂₁
 
     var-/⊢-wk-↑⁺ : ∀ {Γ σ} Γ⁺ {τ} (x : Γ ++ Γ⁺ ∋ τ) →
                    var₂ · x /⊢ wk₁ {σ = σ} ↑⁺₁ Γ⁺ ≅-⊢₂
-                   var₂ · (lift (weaken∋ {σ = σ}) Γ⁺ · x)
+                   var₂ · (lift weaken∋[ σ ] Γ⁺ · x)
     var-/⊢-wk-↑⁺ Γ⁺ x =
       /∋-≅-⊢-var x (wk₁ ↑⁺₁ Γ⁺) (Simple./∋-wk-↑⁺ simple₁ Γ⁺ x)
 
@@ -183,7 +185,7 @@ record Application₂₁
 
     var-/⊢-wk-↑⁺-↑⁺ : ∀ {Γ σ} Γ⁺ Γ⁺⁺ {τ} (x : Γ ++ Γ⁺ ++ Γ⁺⁺ ∋ τ) →
                       var₂ · x /⊢ wk₁ {σ = σ} ↑⁺₁ Γ⁺ ↑⁺₁ Γ⁺⁺ ≅-⊢₂
-                      var₂ · (lift (lift (weaken∋ {σ = σ}) Γ⁺) Γ⁺⁺ · x)
+                      var₂ · (lift (lift weaken∋[ σ ] Γ⁺) Γ⁺⁺ · x)
     var-/⊢-wk-↑⁺-↑⁺ Γ⁺ Γ⁺⁺ x =
       /∋-≅-⊢-var x (wk₁ ↑⁺₁ Γ⁺ ↑⁺₁ Γ⁺⁺)
                  (Simple./∋-wk-↑⁺-↑⁺ simple₁ Γ⁺ Γ⁺⁺ x)
@@ -191,13 +193,13 @@ record Application₂₁
     -- Variants of zero-/∋-↑.
 
     zero-/⊢-↑ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} σ (ρ : Sub T₁ ρ̂) →
-                var₂ · zero /⊢ ρ ↑₁ σ ≅-⊢₂ var₂ · zero {σ = σ / ρ}
+                var₂ · zero /⊢ ρ ↑₁ σ ≅-⊢₂ var₂ · zero[ σ / ρ ]
     zero-/⊢-↑ σ ρ =
       /∋-≅-⊢-var zero (ρ ↑₁ σ) (Simple.zero-/∋-↑ simple₁ σ ρ)
 
     zero-/⊢⋆-↑⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} σ (ρs : Subs T₁ ρ̂) →
                   var₂ · zero /⊢⋆ ρs ↑⋆₁ σ ≅-⊢₂
-                  var₂ · zero {σ = σ /⋆ ρs}
+                  var₂ · zero[ σ /⋆ ρs ]
     zero-/⊢⋆-↑⋆ σ ε        = P.refl
     zero-/⊢⋆-↑⋆ σ (ρs ▻ ρ) = begin
       [ var₂ · zero /⊢⋆ ρs ↑⋆₁ σ /⊢ ρ ↑₁ ]  ≡⟨ /⊢-cong (zero-/⊢⋆-↑⋆ σ ρs) (P.refl {x = [ ρ ↑₁ (σ /⋆ ρs) ]}) ⟩
@@ -258,7 +260,7 @@ record Application₂₁
     -- First weakening and then substituting something for the first
     -- variable is equivalent to doing nothing.
 
-    wk-∘-sub : ∀ {Γ σ} (t : Γ ⊢₁ σ) → wk₂ ∘ sub₁ t ≅-⇨ id₂ {Γ = Γ}
+    wk-∘-sub : ∀ {Γ σ} (t : Γ ⊢₁ σ) → wk₂ ∘ sub₁ t ≅-⇨ id₂[ Γ ]
     wk-∘-sub t = extensionality P.refl λ x → begin
       [ x /∋ wk₂ ∘ sub₁ t      ]  ≡⟨ /∋-∘ x wk₂ (sub₁ t) ⟩
       [ x /∋ wk₂ /⊢ sub₁ t     ]  ≡⟨ /⊢-cong (Simple./∋-wk simple₂ x) P.refl ⟩
@@ -280,13 +282,13 @@ record Application₂₁
     -- weakening it.
 
     map-trans-wk-subst : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T₁ ρ̂) →
-                         map trans (wk-subst₁ {σ = σ} ρ) ≅-⇨
-                         wk-subst₂ {σ = σ} (map trans ρ)
+                         map trans (wk-subst₁[ σ ] ρ) ≅-⇨
+                         wk-subst₂[ σ ] (map trans ρ)
     map-trans-wk-subst {σ = σ} ρ = begin
-      [ map trans (wk-subst₁ {σ = σ} ρ)   ]  ≡⟨ P.sym $ map-[∘] trans (weaken₁ {σ = σ}) ρ ⟩
-      [ map (trans [∘] weaken₁ {σ = σ}) ρ ]  ≡⟨ map-cong-ext₁ P.refl trans-weaken (P.refl {x = [ ρ ]}) ⟩
-      [ map (weaken₂ [∘] trans) ρ         ]  ≡⟨ map-[∘] weaken₂ trans ρ ⟩
-      [ wk-subst₂ (map trans ρ)           ]  ∎
+      [ map trans (wk-subst₁[ σ ] ρ)   ]  ≡⟨ P.sym $ map-[∘] trans weaken₁[ σ ] ρ ⟩
+      [ map (trans [∘] weaken₁[ σ ]) ρ ]  ≡⟨ map-cong-ext₁ P.refl trans-weaken (P.refl {x = [ ρ ]}) ⟩
+      [ map (weaken₂ [∘] trans) ρ      ]  ≡⟨ map-[∘] weaken₂ trans ρ ⟩
+      [ wk-subst₂ (map trans ρ)        ]  ∎
 
     -- One can translate a substitution either before or after lifting
     -- it.
@@ -294,11 +296,11 @@ record Application₂₁
     map-trans-↑ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T₁ ρ̂) →
                   map trans (ρ ↑₁ σ) ≅-⇨ map trans ρ ↑₂ σ
     map-trans-↑ {σ = σ} ρ = begin
-      [ map trans (ρ ↑₁ σ)                                          ]  ≡⟨ map-cong (P.refl {x = [ trans ]})
-                                                                                   (Simple.unfold-↑ simple₁ ρ) ⟩
-      [ map trans (wk-subst₁ {σ = σ / ρ} ρ ▻ var₁ · zero)           ]  ≡⟨ map-▻ trans (wk-subst₁ ρ) _ ⟩
-      [ map trans (wk-subst₁ {σ = σ / ρ} ρ) ▻ trans · (var₁ · zero) ]  ≡⟨ ▻⇨-cong P.refl (map-trans-wk-subst ρ) (trans-var zero) ⟩
-      [ wk-subst₂ (map trans ρ) ▻ var₂ · zero                       ]  ≡⟨ P.sym $ Simple.unfold-↑ simple₂ (map trans ρ) ⟩
-      [ map trans ρ ↑₂                                              ]  ∎
+      [ map trans (ρ ↑₁ σ)                                       ]  ≡⟨ map-cong (P.refl {x = [ trans ]})
+                                                                                (Simple.unfold-↑ simple₁ ρ) ⟩
+      [ map trans (wk-subst₁[ σ / ρ ] ρ ▻ var₁ · zero)           ]  ≡⟨ map-▻ trans (wk-subst₁ ρ) _ ⟩
+      [ map trans (wk-subst₁[ σ / ρ ] ρ) ▻ trans · (var₁ · zero) ]  ≡⟨ ▻⇨-cong P.refl (map-trans-wk-subst ρ) (trans-var zero) ⟩
+      [ wk-subst₂ (map trans ρ) ▻ var₂ · zero                    ]  ≡⟨ P.sym $ Simple.unfold-↑ simple₂ (map trans ρ) ⟩
+      [ map trans ρ ↑₂                                           ]  ∎
 
   open Application application public
