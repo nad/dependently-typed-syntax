@@ -14,7 +14,7 @@ open import Data.Product renaming (curry to c; uncurry to uc)
 open import deBruijn.Substitution.Data
 import deBruijn.TermLike as TermLike
 open import Function using (_$_; _ˢ_) renaming (const to k)
-import Relation.Binary.PropositionalEquality as P
+open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
 open P.≡-Reasoning
 open TermLike Uni renaming (_·_ to _⊙_; ·-cong to ⊙-cong)
@@ -37,7 +37,7 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
     _/⊢t_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Γ ⊢ σ type → Sub T ρ̂ → Δ ⊢ σ /̂ ρ̂ type
     ⋆       /⊢t ρ = ⋆
     el t    /⊢t ρ = P.subst (λ v → _ ⊢ k U.el ˢ v type)
-                            (≅-Value-⇒-≡ $ P.sym $ t /⊢-lemma ρ) $
+                            (P.sym $ t /⊢-lemma ρ) $
                       el (t /⊢ ρ)
     π σ′ τ′ /⊢t ρ = π (σ′ /⊢t ρ) (τ′ /⊢t ρ ↑)
 
@@ -48,7 +48,7 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
     ƛ σ′ t            /⊢ ρ = ƛ (σ′ /⊢t ρ) (t /⊢ ρ ↑)
     _·_ {τ = τ} t₁ t₂ /⊢ ρ =
       P.subst (λ v → _ ⊢ uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
-              (≅-Value-⇒-≡ $ P.sym $ t₂ /⊢-lemma ρ)
+              (P.sym $ t₂ /⊢-lemma ρ)
               ((t₁ /⊢ ρ) · (t₂ /⊢ ρ))
 
     abstract
@@ -60,32 +60,31 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
              t₁ · t₂ /⊢ ρ ≅-⊢ (t₁ /⊢ ρ) · (t₂ /⊢ ρ)
       ·-/⊢ {τ = τ} t₁ t₂ ρ =
         drop-subst-⊢ (λ v → uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
-                     (≅-Value-⇒-≡ $ P.sym $ t₂ /⊢-lemma ρ)
+                     (P.sym $ t₂ /⊢-lemma ρ)
 
       -- The application operation is well-behaved.
 
       _/⊢-lemma_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ σ) (ρ : Sub T ρ̂) →
-                   ⟦ t ⟧ /Val ρ ≅-Value ⟦ t /⊢ ρ ⟧
-      var x /⊢-lemma ρ = begin
+                   ⟦ t ⟧ /Val ρ ≡ ⟦ t /⊢ ρ ⟧
+      var x /⊢-lemma ρ = ≅-Value-⇒-≡ (begin
         [ x /̂∋ ⟦ ρ ⟧⇨              ]  ≡⟨ corresponds (app∋ ρ) x ⟩
         [ Term-like.⟦_⟧ T (x /∋ ρ) ]  ≡⟨ corresponds trans (x /∋ ρ) ⟩
-        [ ⟦ trans ⊙ (x /∋ ρ) ⟧     ]  ∎
-      ƛ σ′ t /⊢-lemma ρ = begin
+        [ ⟦ trans ⊙ (x /∋ ρ) ⟧     ]  ∎)
+      ƛ σ′ t /⊢-lemma ρ = ≅-Value-⇒-≡ (begin
         [ c ⟦ t ⟧ /Val ρ     ]  ≡⟨ P.refl ⟩
-        [ c (⟦ t ⟧ /Val ρ ↑) ]  ≡⟨ curry-cong (t /⊢-lemma (ρ ↑)) ⟩
-        [ c ⟦ t /⊢ ρ ↑ ⟧     ]  ∎
-      _·_ {τ = τ} t₁ t₂ /⊢-lemma ρ = begin
+        [ c (⟦ t ⟧ /Val ρ ↑) ]  ≡⟨ P.cong (λ v → [ c v ]) (t /⊢-lemma (ρ ↑)) ⟩
+        [ c ⟦ t /⊢ ρ ↑ ⟧     ]  ∎)
+      _·_ {τ = τ} t₁ t₂ /⊢-lemma ρ = ≅-Value-⇒-≡ (begin
         [ ⟦ t₁ · t₂ ⟧ /Val ρ                ]  ≡⟨ P.refl ⟩
-        [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ) ]  ≡⟨ ˢ-cong (P.refl {x = [ uc τ / ρ ↑ ]})
-                                                         (t₁ /⊢-lemma ρ) (t₂ /⊢-lemma ρ) ⟩
+        [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ) ]  ≡⟨ P.cong₂ (λ v₁ v₂ → [ v₁ ˢ v₂ ]) (t₁ /⊢-lemma ρ) (t₂ /⊢-lemma ρ) ⟩
         [ ⟦ t₁ /⊢ ρ ⟧ ˢ ⟦ t₂ /⊢ ρ ⟧         ]  ≡⟨ P.refl ⟩
         [ ⟦ (t₁ /⊢ ρ) · (t₂ /⊢ ρ) ⟧         ]  ≡⟨ ⟦⟧-cong (P.sym $ ·-/⊢ t₁ t₂ ρ) ⟩
-        [ ⟦ t₁ · t₂ /⊢ ρ ⟧                  ]  ∎
+        [ ⟦ t₁ · t₂ /⊢ ρ ⟧                  ]  ∎)
 
   app : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → [ Tm ⟶ Tm ] ρ̂
   app ρ = record
     { function    = λ _ t → t /⊢ ρ
-    ; corresponds = λ _ t → t /⊢-lemma ρ
+    ; corresponds = λ _ t → P.cong [_] (t /⊢-lemma ρ)
     }
 
   -- Application of multiple substitutions to syntactic types.
@@ -146,7 +145,7 @@ module Unfolding-lemmas
              el t /⊢t ρ ≅-type el (t /⊢ ρ)
     el-/⊢t t ρ =
       drop-subst-⊢-type (λ v → k U.el ˢ v)
-                        (≅-Value-⇒-≡ $ P.sym $ t /⊢-lemma ρ)
+                        (P.sym $ t /⊢-lemma ρ)
 
     el-/⊢t⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ k ⋆) (ρs : Subs T ρ̂) →
               el t /⊢t⋆ ρs ≅-type el (t /⊢⋆ ρs)
