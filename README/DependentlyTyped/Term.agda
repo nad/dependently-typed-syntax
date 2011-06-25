@@ -6,10 +6,12 @@
 
 -- The code is parametrised by an arbitrary (small) universe.
 
-open import Level using (zero)
+import Level
 open import Universe
 
-module README.DependentlyTyped.Term (Uni₀ : Universe zero zero) where
+module README.DependentlyTyped.Term
+  (Uni₀ : Universe Level.zero Level.zero)
+  where
 
 open import Data.Product renaming (curry to c; uncurry to uc)
 import deBruijn.Context
@@ -79,7 +81,7 @@ mutual
   data _⊢_ (Γ : Ctxt) : Type Γ → Set where
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ
     ƛ   : ∀ {σ τ}
-          (σ′ : Γ ⊢ σ type) (t : Γ ▻ σ ⊢ uc τ) → Γ ⊢ k U.π ˢ σ ˢ τ
+          (σ′ : Γ ⊢ σ type) (t : Γ ▻ σ ⊢ τ) → Γ ⊢ k U.π ˢ σ ˢ c τ
     _·_ : ∀ {σ τ}
           (t₁ : Γ ⊢ k U.π ˢ σ ˢ τ) (t₂ : Γ ⊢ σ) → Γ ⊢ uc τ /̂ ŝub ⟦ t₂ ⟧
 
@@ -101,6 +103,38 @@ Tm : Term-like _
 Tm = record { _⊢_ = _⊢_; ⟦_⟧ = ⟦_⟧ }
 
 open Term-like Tm public hiding (_⊢_; ⟦_⟧)
+
+------------------------------------------------------------------------
+-- Examples
+
+-- The polymorphic identity function.
+
+identity : ∀ {Γ} →
+           Γ ⊢ ⟦ π ⋆ (π (el (var zero)) (el (var (suc zero)))) ⟧type
+identity = ƛ ⋆ (ƛ (el (var zero)) (var zero))
+
+-- The polymorphic identity function, with the type written in a less
+-- compact way.
+
+identity′ : ∀ {Γ} →
+            Γ ⊢ k U.π ˢ k U.⋆ ˢ
+                        c (k U.π ˢ (k U.el ˢ ⟦ var zero ⟧) ˢ
+                                   c (k U.el ˢ ⟦ var (suc zero) ⟧))
+identity′ = ƛ ⋆ (ƛ (el (var zero)) (var zero))
+
+-- The polymorphic identity function applied to some variables from
+-- the context.
+
+identity· : ∀ {Γ} → Γ ▻ ⟦ ⋆ ⟧type ▻ ⟦ el (var zero) ⟧type ⊢
+                    ⟦ el (var (suc zero)) ⟧type
+identity· =
+  ƛ ⋆ (ƛ (el (var zero)) (var zero)) · var (suc zero) · var zero
+
+-- In "Outrageous but Meaningful Coincidences" Conor McBride suggests
+-- that ƛ should be defined with a curried τ (here an uncurried τ is
+-- used). However, with a curried τ the definition of identity·
+-- contains unsolved meta-variables (when a certain version of Agda is
+-- used).
 
 ------------------------------------------------------------------------
 -- Equality
@@ -136,21 +170,23 @@ drop-subst-⊢-type :
   P.subst (λ x → Γ ⊢ f x type) eq σ′ ≅-type σ′
 drop-subst-⊢-type f P.refl = P.refl
 
--- Function values are automatically "curried values" and vice versa.
-
-≅-Value-⇒-≅-Curried-Value :
-  ∀ {Γ₁ σ₁ τ₁} {v₁ : Value Γ₁ (k U.π ˢ σ₁ ˢ c τ₁)}
-    {Γ₂ σ₂ τ₂} {v₂ : Value Γ₂ (k U.π ˢ σ₂ ˢ c τ₂)} →
-  τ₁ ≅-Type τ₂ → v₁ ≅-Value v₂ → ≅-Curried-Value τ₁ v₁ τ₂ v₂
-≅-Value-⇒-≅-Curried-Value P.refl P.refl = P.refl
-
-≅-Curried-Value-⇒-≅-Value :
-  ∀ {Γ₁ σ₁ τ₁} {v₁ : Value Γ₁ (k U.π ˢ σ₁ ˢ c τ₁)}
-    {Γ₂ σ₂ τ₂} {v₂ : Value Γ₂ (k U.π ˢ σ₂ ˢ c τ₂)} →
-  ≅-Curried-Value τ₁ v₁ τ₂ v₂ → v₁ ≅-Value v₂
-≅-Curried-Value-⇒-≅-Value P.refl = P.refl
-
 -- Some congruence lemmas.
+
+-- Note that _ˢ_ and curry are the semantic counterparts of
+-- application and abstraction.
+
+ˢ-cong :
+  ∀ {Γ₁ σ₁ τ₁} {f₁ : Value Γ₁ (k U.π ˢ σ₁ ˢ c τ₁)} {v₁ : Value Γ₁ σ₁}
+    {Γ₂ σ₂ τ₂} {f₂ : Value Γ₂ (k U.π ˢ σ₂ ˢ c τ₂)} {v₂ : Value Γ₂ σ₂} →
+  τ₁ ≅-Type τ₂ → f₁ ≅-Value f₂ → v₁ ≅-Value v₂ →
+  f₁ ˢ v₁ ≅-Value f₂ ˢ v₂
+ˢ-cong P.refl P.refl P.refl = P.refl
+
+curry-cong :
+  ∀ {Γ₁ σ₁ τ₁} {v₁ : Value (Γ₁ ▻ σ₁) τ₁}
+    {Γ₂ σ₂ τ₂} {v₂ : Value (Γ₂ ▻ σ₂) τ₂} →
+  v₁ ≅-Value v₂ → c v₁ ≅-Value c v₂
+curry-cong P.refl = P.refl
 
 ⋆-cong : {Γ₁ Γ₂ : Ctxt} →
          Γ₁ ≅-Ctxt Γ₂ → ⋆ {Γ = Γ₁} ≅-type ⋆ {Γ = Γ₂}
@@ -171,14 +207,15 @@ var-cong : ∀ {Γ₁ σ₁} {x₁ : Γ₁ ∋ σ₁}
            x₁ ≅-∋ x₂ → var x₁ ≅-⊢ var x₂
 var-cong P.refl = P.refl
 
-ƛ-cong : ∀ {Γ₁ σ₁ τ₁} {σ′₁ : Γ₁ ⊢ σ₁ type} {t₁ : Γ₁ ▻ σ₁ ⊢ uc τ₁}
-           {Γ₂ σ₂ τ₂} {σ′₂ : Γ₂ ⊢ σ₂ type} {t₂ : Γ₂ ▻ σ₂ ⊢ uc τ₂} →
-         τ₁ ≅-Curried-Type τ₂ → σ′₁ ≅-type σ′₂ → t₁ ≅-⊢ t₂ →
-         ƛ {τ = τ₁} σ′₁ t₁ ≅-⊢ ƛ {τ = τ₂} σ′₂ t₂
-ƛ-cong P.refl P.refl P.refl = P.refl
+ƛ-cong : ∀ {Γ₁ σ₁ τ₁} {σ′₁ : Γ₁ ⊢ σ₁ type} {t₁ : Γ₁ ▻ σ₁ ⊢ τ₁}
+           {Γ₂ σ₂ τ₂} {σ′₂ : Γ₂ ⊢ σ₂ type} {t₂ : Γ₂ ▻ σ₂ ⊢ τ₂} →
+         σ′₁ ≅-type σ′₂ → t₁ ≅-⊢ t₂ → ƛ σ′₁ t₁ ≅-⊢ ƛ σ′₂ t₂
+ƛ-cong P.refl P.refl = P.refl
 
-·-cong : ∀ {Γ₁ σ₁ τ₁} {t₁₁ : Γ₁ ⊢ k U.π ˢ σ₁ ˢ τ₁} {t₂₁ : Γ₁ ⊢ σ₁}
-           {Γ₂ σ₂ τ₂} {t₁₂ : Γ₂ ⊢ k U.π ˢ σ₂ ˢ τ₂} {t₂₂ : Γ₂ ⊢ σ₂} →
-         τ₁ ≅-Curried-Type τ₂ → t₁₁ ≅-⊢ t₁₂ → t₂₁ ≅-⊢ t₂₂ →
-         t₁₁ · t₂₁ ≅-⊢ t₁₂ · t₂₂
-·-cong P.refl P.refl P.refl = P.refl
+-- Previously the following lemma was more general, with heterogeneous
+-- input equalities, at the cost of an extra input equality of type
+-- τ₁ ≅-Curried-Type τ₂. (_≅-Curried-Type_ has been removed.)
+
+·-cong : ∀ {Γ σ τ} {t₁₁ t₁₂ : Γ ⊢ k U.π ˢ σ ˢ τ} {t₂₁ t₂₂ : Γ ⊢ σ} →
+         t₁₁ ≅-⊢ t₁₂ → t₂₁ ≅-⊢ t₂₂ → t₁₁ · t₂₁ ≅-⊢ t₁₂ · t₂₂
+·-cong P.refl P.refl = P.refl

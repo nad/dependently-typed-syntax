@@ -202,8 +202,7 @@ mutual
 ------------------------------------------------------------------------
 -- Equality
 
-infix 4 _≅-Ctxt_ _≅-Type_ _≅-Curried-Type_
-        _≅-Value_ _≅-⇨̂_ _≅-∋_ _≅-Ctxt⁺_
+infix 4 _≅-Ctxt_ _≅-Type_ _≅-Value_ _≅-⇨̂_ _≅-∋_ _≅-Ctxt⁺_
 
 -- Equality of contexts.
 
@@ -266,27 +265,6 @@ drop-subst-Type f P.refl = P.refl
 -- TODO: Should functions like ≅-Type-⇒-≡ and drop-subst-Type be
 -- included for all types?
 
--- Equality of "curried" types.
---
--- TODO: Remove?
-
-record [Curried-Type] : Set (u ⊔ e) where
-  constructor [_]
-  field
-    {Γ} : Ctxt
-    {σ} : Type Γ
-    τ   : (γ : Env Γ) → El (σ γ) → U
-
-_≅-Curried-Type_ :
-  ∀ {Γ₁} {σ₁ : Type Γ₁} (τ₁ : (γ : Env Γ₁) → El (σ₁ γ) → U)
-    {Γ₂} {σ₂ : Type Γ₂} (τ₂ : (γ : Env Γ₂) → El (σ₂ γ) → U) → Set _
-τ₁ ≅-Curried-Type τ₂ = [Curried-Type].[_] τ₁ ≡ [ τ₂ ]
-
-≅-Curried-Type-⇒-≡ :
-  ∀ {Γ} {σ : Type Γ} {τ₁ τ₂ : (γ : Env Γ) → El (σ γ) → U} →
-  τ₁ ≅-Curried-Type τ₂ → τ₁ ≡ τ₂
-≅-Curried-Type-⇒-≡ P.refl = P.refl
-
 -- Equality of values.
 
 record [Value] : Set (u ⊔ e) where
@@ -303,32 +281,6 @@ v₁ ≅-Value v₂ = [Value].[_] v₁ ≡ [ v₂ ]
 ≅-Value-⇒-≡ : ∀ {Γ σ} {v₁ v₂ : Value Γ σ} →
               v₁ ≅-Value v₂ → v₁ ≡ v₂
 ≅-Value-⇒-≡ P.refl = P.refl
-
--- Equality of "curried" values.
---
--- TODO: Remove?
-
-record [Curried-Value] : Set (u ⊔ e) where
-  constructor [_]
-  field
-    {Γ} : Ctxt
-    {σ} : Type Γ
-    {τ} : Type (Γ ▻ σ)
-    v   : (γ : Env Γ) (x : El (σ γ)) → El (τ (γ , x))
-
-≅-Curried-Value :
-  ∀ {Γ₁ σ₁} (τ₁ : Type (Γ₁ ▻ σ₁))
-    (v₁ : (γ : Env Γ₁) (x : El (σ₁ γ)) → El (τ₁ (γ , x)))
-    {Γ₂ σ₂} (τ₂ : Type (Γ₂ ▻ σ₂))
-    (v₂ : (γ : Env Γ₂) (x : El (σ₂ γ)) → El (τ₂ (γ , x))) → Set _
-≅-Curried-Value τ₁ v₁ τ₂ v₂ =
-  [Curried-Value].[_] {τ = τ₁} v₁ ≡ [_] {τ = τ₂} v₂
-
-≅-Curried-Value-⇒-≡ :
-  ∀ {Γ σ} (τ : Type (Γ ▻ σ))
-    {v₁ v₂ : (γ : Env Γ) (x : El (σ γ)) → El (τ (γ , x))} →
-  ≅-Curried-Value τ v₁ τ v₂ → v₁ ≡ v₂
-≅-Curried-Value-⇒-≡ _ P.refl = P.refl
 
 -- Equality of context morphisms.
 
@@ -531,28 +483,6 @@ suc-cong P.refl P.refl = P.refl
             {Γ₂ Δ₂ σ₂} {x₂ : Γ₂ ∋ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} →
           x₁ ≅-∋ x₂ → ρ̂₁ ≅-⇨̂ ρ̂₂ → x₁ /̂∋ ρ̂₁ ≅-Value x₂ /̂∋ ρ̂₂
 /̂∋-cong P.refl P.refl = P.refl
-
-curry-cong-Type : ∀ {Γ₁ σ₁} {τ₁ : Type (Γ₁ ▻ σ₁)}
-                    {Γ₂ σ₂} {τ₂ : Type (Γ₂ ▻ σ₂)} →
-                  τ₁ ≅-Type τ₂ → curry τ₁ ≅-Curried-Type curry τ₂
-curry-cong-Type P.refl = P.refl
-
-curry-cong-Value :
-  ∀ {Γ₁ σ₁ τ₁} {v₁ : Value (Γ₁ ▻ σ₁) τ₁}
-    {Γ₂ σ₂ τ₂} {v₂ : Value (Γ₂ ▻ σ₂) τ₂} →
-  v₁ ≅-Value v₂ → ≅-Curried-Value τ₁ (curry v₁) τ₂ (curry v₂)
-curry-cong-Value P.refl = P.refl
-
-ˢ-cong :
-  ∀ {Γ₁ σ₁} {τ₁ : Type (Γ₁ ▻ σ₁)}
-    {f₁ : (γ : Env Γ₁) (v : El (σ₁ γ)) → El (τ₁ (γ , v))}
-    {v₁ : Value Γ₁ σ₁}
-    {Γ₂ σ₂} {τ₂ : Type (Γ₂ ▻ σ₂)}
-    {f₂ : (γ : Env Γ₂) (v : El (σ₂ γ)) → El (τ₂ (γ , v))}
-    {v₂ : Value Γ₂ σ₂} →
-  ≅-Curried-Value τ₁ f₁ τ₂ f₂ → v₁ ≅-Value v₂ →
-  f₁ ˢ v₁ ≅-Value f₂ ˢ v₂
-ˢ-cong P.refl P.refl = P.refl
 
 ------------------------------------------------------------------------
 -- Some properties which hold definitionally

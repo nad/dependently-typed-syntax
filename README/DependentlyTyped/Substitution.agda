@@ -70,16 +70,14 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
         [ x /̂∋ ⟦ ρ ⟧⇨              ]  ≡⟨ corresponds (app∋ ρ) x ⟩
         [ Term-like.⟦_⟧ T (x /∋ ρ) ]  ≡⟨ corresponds trans (x /∋ ρ) ⟩
         [ ⟦ trans ⊙ (x /∋ ρ) ⟧     ]  ∎
-      ƛ σ′ t /⊢-lemma ρ = ≅-Curried-Value-⇒-≅-Value (begin
+      ƛ σ′ t /⊢-lemma ρ = begin
         [ c ⟦ t ⟧ /Val ρ     ]  ≡⟨ P.refl ⟩
         [ c (⟦ t ⟧ /Val ρ ↑) ]  ≡⟨ curry-cong (t /⊢-lemma (ρ ↑)) ⟩
-        [ c ⟦ t /⊢ ρ ↑ ⟧     ]  ∎)
+        [ c ⟦ t /⊢ ρ ↑ ⟧     ]  ∎
       _·_ {τ = τ} t₁ t₂ /⊢-lemma ρ = begin
         [ ⟦ t₁ · t₂ ⟧ /Val ρ                ]  ≡⟨ P.refl ⟩
-        [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ) ]  ≡⟨ ˢ-cong {f₁ = ⟦ t₁ ⟧ /Val ρ} {f₂ = ⟦ t₁ /⊢ ρ ⟧}
-                                                         (≅-Value-⇒-≅-Curried-Value (P.refl {x = [ uc τ / ρ ↑ ]})
-                                                                                    (t₁ /⊢-lemma ρ))
-                                                         (t₂ /⊢-lemma ρ) ⟩
+        [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ) ]  ≡⟨ ˢ-cong (P.refl {x = [ uc τ / ρ ↑ ]})
+                                                         (t₁ /⊢-lemma ρ) (t₂ /⊢-lemma ρ) ⟩
         [ ⟦ t₁ /⊢ ρ ⟧ ˢ ⟦ t₂ /⊢ ρ ⟧         ]  ≡⟨ P.refl ⟩
         [ ⟦ (t₁ /⊢ ρ) · (t₂ /⊢ ρ) ⟧         ]  ≡⟨ ⟦⟧-cong (P.sym $ ·-/⊢ t₁ t₂ ρ) ⟩
         [ ⟦ t₁ · t₂ /⊢ ρ ⟧                  ]  ∎
@@ -167,15 +165,14 @@ module Unfolding-lemmas
       [ π (σ′ /⊢t⋆ ρs) (τ′ /⊢t⋆ ρs ↑⋆) /⊢t ρ         ]  ≡⟨ P.refl ⟩
       [ π (σ′ /⊢t⋆ ρs /⊢t ρ) (τ′ /⊢t⋆ ρs ↑⋆ /⊢t ρ ↑) ]  ∎
 
-    ƛ-/⊢⋆ : ∀ {Γ Δ σ} τ {ρ̂ : Γ ⇨̂ Δ}
-            (σ′ : Γ ⊢ σ type) (t : Γ ▻ σ ⊢ uc τ) (ρs : Subs T ρ̂) →
-            ƛ {τ = τ} σ′ t /⊢⋆ ρs ≅-⊢
-            ƛ {τ = c (uc τ /⋆ ρs ↑⋆)} (σ′ /⊢t⋆ ρs) (t /⊢⋆ ρs ↑⋆)
-    ƛ-/⊢⋆ τ σ′ t ε        = P.refl
-    ƛ-/⊢⋆ τ σ′ t (ρs ▻ ρ) = begin
-      [ ƛ {τ = τ} σ′ t /⊢⋆ ρs /⊢ ρ                                ]  ≡⟨ /⊢-cong (ƛ-/⊢⋆ τ σ′ t ρs) (P.refl {x = [ ρ ]}) ⟩
-      [ ƛ {τ = c (uc τ /⋆ ρs ↑⋆)} (σ′ /⊢t⋆ ρs) (t /⊢⋆ ρs ↑⋆) /⊢ ρ ]  ≡⟨ P.refl ⟩
-      [ ƛ (σ′ /⊢t⋆ (ρs ▻ ρ)) (t /⊢⋆ (ρs ▻ ρ) ↑⋆)                  ]  ∎
+    ƛ-/⊢⋆ : ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ}
+            (σ′ : Γ ⊢ σ type) (t : Γ ▻ σ ⊢ τ) (ρs : Subs T ρ̂) →
+            ƛ σ′ t /⊢⋆ ρs ≅-⊢ ƛ (σ′ /⊢t⋆ ρs) (t /⊢⋆ ρs ↑⋆)
+    ƛ-/⊢⋆ σ′ t ε        = P.refl
+    ƛ-/⊢⋆ σ′ t (ρs ▻ ρ) = begin
+      [ ƛ σ′ t /⊢⋆ ρs /⊢ ρ                       ]  ≡⟨ /⊢-cong (ƛ-/⊢⋆ σ′ t ρs) (P.refl {x = [ ρ ]}) ⟩
+      [ ƛ (σ′ /⊢t⋆ ρs) (t /⊢⋆ ρs ↑⋆) /⊢ ρ        ]  ≡⟨ P.refl ⟩
+      [ ƛ (σ′ /⊢t⋆ (ρs ▻ ρ)) (t /⊢⋆ (ρs ▻ ρ) ↑⋆) ]  ∎
 
     ·-/⊢⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} {σ τ}
             (t₁ : Γ ⊢ k U.π ˢ σ ˢ τ) (t₂ : Γ ⊢ σ) (ρs : Subs T ρ̂) →
@@ -231,18 +228,16 @@ module Apply-lemmas
            var x /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢ var x /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺) →
         ∀ Γ⁺ {σ} (t : Γ ++ Γ⁺ ⊢ σ) →
         t /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢ t /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺
-      var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp Γ⁺ (var x)          = hyp Γ⁺ x
-      var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp Γ⁺ (ƛ {τ = τ} σ′ t) = begin
-        [ ƛ {τ = τ} σ′ t /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺                              ]  ≡⟨ Unfolding-lemmas.ƛ-/⊢⋆ T₁↦T τ σ′ t (ρs₁ ↑⁺⋆₁ Γ⁺) ⟩
-        [ ƛ (σ′ /⊢t⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺) (t /⊢⋆₁ ρs₁ ↑⁺⋆₁ (Γ⁺ ▻ ⟦ σ′ ⟧type)) ]  ≡⟨ ƛ-cong P.refl
-                                                                                    (var-/⊢⋆-↑⁺⋆-⇒-/⊢t⋆-↑⁺⋆ hyp Γ⁺ σ′)
+      var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp Γ⁺ (var x)  = hyp Γ⁺ x
+      var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp Γ⁺ (ƛ σ′ t) = begin
+        [ ƛ σ′ t /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺                                      ]  ≡⟨ Unfolding-lemmas.ƛ-/⊢⋆ T₁↦T σ′ t (ρs₁ ↑⁺⋆₁ Γ⁺) ⟩
+        [ ƛ (σ′ /⊢t⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺) (t /⊢⋆₁ ρs₁ ↑⁺⋆₁ (Γ⁺ ▻ ⟦ σ′ ⟧type)) ]  ≡⟨ ƛ-cong (var-/⊢⋆-↑⁺⋆-⇒-/⊢t⋆-↑⁺⋆ hyp Γ⁺ σ′)
                                                                                     (var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp (Γ⁺ ▻ ⟦ σ′ ⟧type) t) ⟩
-        [ ƛ (σ′ /⊢t⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺) (t /⊢⋆₂ ρs₂ ↑⁺⋆₂ (Γ⁺ ▻ ⟦ σ′ ⟧type)) ]  ≡⟨ P.sym $ Unfolding-lemmas.ƛ-/⊢⋆ T₂↦T τ σ′ t (ρs₂ ↑⁺⋆₂ Γ⁺) ⟩
-        [ ƛ {τ = τ} σ′ t /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺                              ]  ∎
+        [ ƛ (σ′ /⊢t⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺) (t /⊢⋆₂ ρs₂ ↑⁺⋆₂ (Γ⁺ ▻ ⟦ σ′ ⟧type)) ]  ≡⟨ P.sym $ Unfolding-lemmas.ƛ-/⊢⋆ T₂↦T σ′ t (ρs₂ ↑⁺⋆₂ Γ⁺) ⟩
+        [ ƛ σ′ t /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺                                      ]  ∎
       var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp Γ⁺ (t₁ · t₂) = begin
         [ t₁ · t₂ /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺                      ]  ≡⟨ Unfolding-lemmas.·-/⊢⋆ T₁↦T t₁ t₂ (ρs₁ ↑⁺⋆₁ Γ⁺) ⟩
-        [ (t₁ /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺) · (t₂ /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺) ]  ≡⟨ ·-cong P.refl
-                                                                     (var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp Γ⁺ t₁)
+        [ (t₁ /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺) · (t₂ /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺) ]  ≡⟨ ·-cong (var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp Γ⁺ t₁)
                                                                      (var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ hyp Γ⁺ t₂) ⟩
         [ (t₁ /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺) · (t₂ /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺) ]  ≡⟨ P.sym $ Unfolding-lemmas.·-/⊢⋆ T₂↦T t₁ t₂ (ρs₂ ↑⁺⋆₂ Γ⁺) ⟩
         [ t₁ · t₂ /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺                      ]  ∎
