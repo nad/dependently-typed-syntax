@@ -6,7 +6,7 @@ import Level
 open import Universe
 
 module README.DependentlyTyped.Substitution
-  (Uni₀ : Universe Level.zero Level.zero) where
+  {Uni₀ : Universe Level.zero Level.zero} where
 
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 
@@ -113,11 +113,11 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
 
 substitution₁ : Substitution₁ Tm
 substitution₁ = record
-  { var     = record { function    = λ _ → var
-                     ; corresponds = λ _ _ → P.refl
-                     }
-  ; app     = Apply.app
-  ; app-var = λ _ _ _ → P.refl
+  { var      = record { function    = λ _ → var
+                      ; corresponds = λ _ _ → P.refl
+                      }
+  ; app′     = Apply.app
+  ; app′-var = λ _ _ _ → P.refl
   }
 
 open Substitution₁ substitution₁ hiding (var)
@@ -246,8 +246,10 @@ module Apply-lemmas
 
 substitution₂ : Substitution₂ Tm
 substitution₂ = record
-  { substitution₁         = substitution₁
-  ; var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ = Apply-lemmas.var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆
+  { substitution₁          = substitution₁
+  ; var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆′ = Apply-lemmas.var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆
   }
 
-open Substitution₂ substitution₂ public hiding (substitution₁)
+open Apply (Translation-from.translation no-translation) public
+  using (·-/⊢; _/⊢t_; /⊢t-cong; _/⊢t⋆_; /⊢t⋆-cong)
+open Substitution₂ substitution₂ public hiding (var; substitution₁)

@@ -97,14 +97,14 @@ record Substitution₁ (T : Term-like (u ⊔ e))
 
     -- Applies substitutions, which contain things which can be
     -- translated to terms, to terms.
-    app : {T′ : Term-like (u ⊔ e)} → T′ ↦ T →
-          ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T′ ρ̂ → [ T ⟶ T ] ρ̂
+    app′ : {T′ : Term-like (u ⊔ e)} → T′ ↦ T →
+           ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T′ ρ̂ → [ T ⟶ T ] ρ̂
 
-    -- A property relating app and var.
-    app-var :
+    -- A property relating app′ and var.
+    app′-var :
       ∀ {T′ : Term-like (u ⊔ e)} {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
       (T′↦T : T′ ↦ T) (x : Γ ∋ σ) (ρ : Sub T′ ρ̂) →
-      app T′↦T ρ · (var · x) ≅-⊢ _↦_.trans T′↦T · (x /∋ ρ)
+      app′ T′↦T ρ · (var · x) ≅-⊢ _↦_.trans T′↦T · (x /∋ ρ)
 
   -- Variables can be translated into terms.
 
@@ -119,7 +119,7 @@ record Substitution₁ (T : Term-like (u ⊔ e))
   -- Renamings can be applied to terms.
 
   app-renaming : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub Var ρ̂ → [ T ⟶ T ] ρ̂
-  app-renaming = app Var-↦′
+  app-renaming = app′ Var-↦′
 
   -- This gives us a way to define the weakening operation.
 
@@ -135,7 +135,7 @@ record Substitution₁ (T : Term-like (u ⊔ e))
                    app-renaming (Renaming.wk[_] σ) · (var · x) ≅-⊢
                    var · suc[ σ ] x
       weaken-var x = begin
-        [ app-renaming Renaming.wk · (var · x) ]  ≡⟨ app-var Var-↦′ x Renaming.wk ⟩
+        [ app-renaming Renaming.wk · (var · x) ]  ≡⟨ app′-var Var-↦′ x Renaming.wk ⟩
         [ var · (x /∋ Renaming.wk)             ]  ≡⟨ ·-cong (P.refl {x = [ var ]}) (Renaming./∋-wk x) ⟩
         [ var · suc x                          ]  ∎
 
@@ -161,10 +161,10 @@ record Substitution₁ (T : Term-like (u ⊔ e))
 
     application₂₁ : Application₂₁ simple′ simple trans
     application₂₁ = record
-      { application  = record { app = app translation }
+      { application  = record { app = app′ translation }
       ; trans-weaken = trans-weaken
       ; trans-var    = trans-var
-      ; var-/⊢       = app-var translation
+      ; var-/⊢       = app′-var translation
       }
 
     open _↦_ translation public
@@ -187,6 +187,15 @@ record Substitution₁ (T : Term-like (u ⊔ e))
         Simple.weaken[_] simple σ · (var · x)
       trans-weaken x = P.sym $ Simple.weaken-var simple x
 
+  -- Terms can be translated into terms.
+
+  no-translation : Translation-from T
+  no-translation = record
+    { translation  = record { trans = [id]; simple = simple }
+    ; trans-weaken = λ _ → P.refl
+    ; trans-var    = λ _ → P.refl
+    }
+
 record Substitution₂ (T : Term-like (u ⊔ e))
                      : Set (Level.suc (u ⊔ e)) where
 
@@ -200,7 +209,7 @@ record Substitution₂ (T : Term-like (u ⊔ e))
   field
     -- Lifts equalities valid for all variables and liftings to
     -- arbitrary terms.
-    var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ :
+    var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆′ :
       {T₁ T₂ : Term-like (u ⊔ e)}
       (T₁↦T : Translation-from T₁) (T₂↦T : Translation-from T₂) →
 
@@ -225,7 +234,7 @@ record Substitution₂ (T : Term-like (u ⊔ e))
     Application₂₂ simple′ simple trans
   application₂₂ T′↦T = record
     { application₂₁         = Translation-from.application₂₁ T′↦T
-    ; var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ = var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ T′↦T T′↦T
+    ; var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ = var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆′ T′↦T T′↦T
     ; /⊢-wk                 = /⊢-wk
     }
     where
@@ -245,7 +254,7 @@ record Substitution₂ (T : Term-like (u ⊔ e))
       /⊢-wk : ∀ {Γ σ τ} (t : Γ ⊢ τ) →
               t /⊢′ wk′[ σ ] ≅-⊢ t /⊢-renaming Renaming.wk[_] σ
       /⊢-wk =
-        var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ T′↦T Var-↦ (ε ▻ wk′) (ε ▻ Renaming.wk)
+        var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆′ T′↦T Var-↦ (ε ▻ wk′) (ε ▻ Renaming.wk)
           (λ Γ⁺ x → begin
              [ var · x /⊢⋆′ (ε ▻ wk′) ↑⁺⋆′ Γ⁺                         ]  ≡⟨ Translation-from./⊢⋆-ε-▻-↑⁺⋆ T′↦T Γ⁺ (var · x) wk′ ⟩
              [ var · x /⊢′ wk′ ↑⁺′ Γ⁺                                 ]  ≡⟨ Translation-from.var-/⊢-wk-↑⁺ T′↦T Γ⁺ x ⟩
@@ -265,13 +274,9 @@ record Substitution₂ (T : Term-like (u ⊔ e))
   application₁ : Application₁ T
   application₁ = record
     { simple        = simple
-    ; application₂₂ = application₂₂ (record
-        { translation  = record { trans = [id]; simple = simple }
-        ; trans-weaken = λ _ → P.refl
-        ; trans-var    = λ _ → P.refl
-        })
+    ; application₂₂ = application₂₂ no-translation
     }
 
   open Application₁ application₁ public
-    hiding (var; simple; application₂₂; app; var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆)
+    hiding (var; simple; application₂₂)
   open Substitution₁ substitution₁ public
