@@ -129,8 +129,8 @@ module Unfolding-lemmas
   (T↦Tm : Translation-from T)
   where
 
-  open Translation-from T↦Tm public
-  open Apply translation public hiding (_/⊢_; app)
+  open Translation-from T↦Tm
+  open Apply translation hiding (_/⊢_; app)
 
   abstract
 
@@ -190,12 +190,14 @@ module Apply-lemmas
   (T₁↦T : Translation-from T₁) (T₂↦T : Translation-from T₂)
   {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρs₁ : Subs T₁ ρ̂) (ρs₂ : Subs T₂ ρ̂) where
 
-  open Unfolding-lemmas T₁↦T
-    using ()
-    renaming (_↑⁺⋆_ to _↑⁺⋆₁_; _/⊢⋆_ to _/⊢⋆₁_; _/⊢t⋆_ to _/⊢t⋆₁_)
-  open Unfolding-lemmas T₂↦T
-    using ()
-    renaming (_↑⁺⋆_ to _↑⁺⋆₂_; _/⊢⋆_ to _/⊢⋆₂_; _/⊢t⋆_ to _/⊢t⋆₂_)
+  open Translation-from T₁↦T
+    using () renaming (_↑⁺⋆_ to _↑⁺⋆₁_; _/⊢⋆_ to _/⊢⋆₁_)
+  open Apply (Translation-from.translation T₁↦T)
+    using () renaming (_/⊢t⋆_ to _/⊢t⋆₁_)
+  open Translation-from T₂↦T
+    using () renaming (_↑⁺⋆_ to _↑⁺⋆₂_; _/⊢⋆_ to _/⊢⋆₂_)
+  open Apply (Translation-from.translation T₂↦T)
+    using () renaming (_/⊢t⋆_ to _/⊢t⋆₂_)
 
   abstract
 
@@ -252,4 +254,7 @@ substitution₂ = record
 
 open Apply (Translation-from.translation no-translation) public
   using (·-/⊢; _/⊢t_; /⊢t-cong; _/⊢t⋆_; /⊢t⋆-cong)
+open Unfolding-lemmas no-translation public
+open Apply-lemmas no-translation no-translation public
+  hiding (var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆)
 open Substitution₂ substitution₂ public hiding (var; substitution₁)
