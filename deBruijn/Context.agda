@@ -181,23 +181,51 @@ x /̂∋ ρ̂ = lookup x /̂Val ρ̂
 ------------------------------------------------------------------------
 -- Context extensions
 
-mutual
+-- Context extensions.
 
-  -- Context extensions.
+infixr 5 _◅_
 
-  infixl 5 _▻_
+data Ctxt⁺ (Γ : Ctxt) : Set (u ⊔ e) where
+  ε   : Ctxt⁺ Γ
+  _◅_ : (σ : Type Γ) (Γ⁺ : Ctxt⁺ (Γ ▻ σ)) → Ctxt⁺ Γ
 
-  data Ctxt⁺ (Γ : Ctxt) : Set (u ⊔ e) where
-    ε   : Ctxt⁺ Γ
-    _▻_ : (Γ⁺ : Ctxt⁺ Γ) (σ : Type (Γ ++ Γ⁺)) → Ctxt⁺ Γ
+-- Appends a context extension to a context.
 
-  -- Appends a context extension to a context.
+infixl 5 _++_
 
-  infixl 5 _++_
+_++_ : (Γ : Ctxt) → Ctxt⁺ Γ → Ctxt
+Γ ++ ε        = Γ
+Γ ++ (σ ◅ Γ⁺) = Γ ▻ σ ++ Γ⁺
 
-  _++_ : (Γ : Ctxt) → Ctxt⁺ Γ → Ctxt
-  Γ ++ ε        = Γ
-  Γ ++ (Γ⁺ ▻ σ) = (Γ ++ Γ⁺) ▻ σ
+-- Appends a context extension to a context extension.
+
+infixl 5 _++⁺_
+
+_++⁺_ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → Ctxt⁺ (Γ ++ Γ⁺) → Ctxt⁺ Γ
+ε        ++⁺ Γ⁺⁺ = Γ⁺⁺
+(σ ◅ Γ⁺) ++⁺ Γ⁺⁺ = σ ◅ (Γ⁺ ++⁺ Γ⁺⁺)
+
+-- Application of context morphisms to context extensions.
+
+infixl 8 _/̂⁺_
+
+_/̂⁺_ : ∀ {Γ Δ} → Ctxt⁺ Γ → Γ ⇨̂ Δ → Ctxt⁺ Δ
+ε        /̂⁺ ρ̂ = ε
+(σ ◅ Γ⁺) /̂⁺ ρ̂ = σ /̂ ρ̂ ◅ Γ⁺ /̂⁺ ρ̂ ↑̂
+
+-- N-ary lifting of context morphisms.
+
+infixl 10 _↑̂⁺_
+
+_↑̂⁺_ : ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) Γ⁺ → Γ ++ Γ⁺ ⇨̂ Δ ++ Γ⁺ /̂⁺ ρ̂
+ρ̂ ↑̂⁺ ε        = ρ̂
+ρ̂ ↑̂⁺ (σ ◅ Γ⁺) = ρ̂ ↑̂ ↑̂⁺ Γ⁺
+
+-- N-ary weakening.
+
+ŵk⁺ : ∀ {Γ} Γ⁺ → Γ ⇨̂ Γ ++ Γ⁺
+ŵk⁺ ε        = îd
+ŵk⁺ (σ ◅ Γ⁺) = ŵk[ σ ] ∘̂ ŵk⁺ Γ⁺
 
 ------------------------------------------------------------------------
 -- Equality
@@ -332,61 +360,10 @@ _≅-Ctxt⁺_ : ∀ {Γ₁} (Γ⁺₁ : Ctxt⁺ Γ₁)
 ≅-Ctxt⁺-⇒-≡ P.refl = P.refl
 
 ------------------------------------------------------------------------
--- Some lemmas
-
--- A congruence lemma.
+-- Some congruence lemmas
 
 ▻-cong : ∀ {Γ₁ Γ₂ σ₁ σ₂} → σ₁ ≅-Type σ₂ → Γ₁ ▻ σ₁ ≅-Ctxt Γ₂ ▻ σ₂
 ▻-cong P.refl = P.refl
-
-------------------------------------------------------------------------
--- More definitions related to context extensions
-
-mutual
-
-  -- Appends a context extension to a context extension.
-
-  infixl 5 _++⁺_
-
-  _++⁺_ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → Ctxt⁺ (Γ ++ Γ⁺) → Ctxt⁺ Γ
-  Γ⁺ ++⁺ ε         = Γ⁺
-  Γ⁺ ++⁺ (Γ⁺⁺ ▻ σ) = (Γ⁺ ++⁺ Γ⁺⁺) ▻ P.subst Type (++-assoc Γ⁺ Γ⁺⁺) σ
-
-  abstract
-
-    -- _++_/_++⁺_ are associative.
-
-    ++-assoc : ∀ {Γ} Γ⁺ Γ⁺⁺ → Γ ++ Γ⁺ ++ Γ⁺⁺ ≅-Ctxt Γ ++ (Γ⁺ ++⁺ Γ⁺⁺)
-    ++-assoc Γ⁺ ε         = P.refl
-    ++-assoc Γ⁺ (Γ⁺⁺ ▻ σ) =
-      ▻-cong (P.sym $ drop-subst-Type id (++-assoc Γ⁺ Γ⁺⁺))
-
-mutual
-
-  -- Application of context morphisms to context extensions.
-
-  infixl 8 _/̂⁺_
-
-  _/̂⁺_ : ∀ {Γ Δ} → Ctxt⁺ Γ → Γ ⇨̂ Δ → Ctxt⁺ Δ
-  ε        /̂⁺ ρ̂ = ε
-  (Γ⁺ ▻ σ) /̂⁺ ρ̂ = Γ⁺ /̂⁺ ρ̂ ▻ σ /̂ ρ̂ ↑̂⁺ Γ⁺
-
-  -- N-ary lifting of context morphisms.
-
-  infixl 10 _↑̂⁺_
-
-  _↑̂⁺_ : ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) Γ⁺ → Γ ++ Γ⁺ ⇨̂ Δ ++ Γ⁺ /̂⁺ ρ̂
-  ρ̂ ↑̂⁺ ε        = ρ̂
-  ρ̂ ↑̂⁺ (Γ⁺ ▻ σ) = (ρ̂ ↑̂⁺ Γ⁺) ↑̂
-
--- N-ary weakening.
-
-ŵk⁺ : ∀ {Γ} Γ⁺ → Γ ⇨̂ Γ ++ Γ⁺
-ŵk⁺ ε        = îd
-ŵk⁺ (Γ⁺ ▻ σ) = ŵk⁺ Γ⁺ ∘̂ ŵk[ σ ]
-
-------------------------------------------------------------------------
--- More congruence lemmas
 
 îd-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≅-Ctxt Γ₂ → îd[ Γ₁ ] ≅-⇨̂ îd[ Γ₂ ]
 îd-cong P.refl = P.refl
@@ -438,11 +415,10 @@ ĥead-cong P.refl = P.refl
          ρ̂₁ ≅-⇨̂ ρ̂₂ → σ₁ ≅-Type σ₂ → ρ̂₁ ↑̂ σ₁ ≅-⇨̂ ρ̂₂ ↑̂ σ₂
 ↑̂-cong P.refl P.refl = P.refl
 
-▻⁺-cong : ∀ {Γ₁} {Γ⁺₁ : Ctxt⁺ Γ₁} {σ₁}
-            {Γ₂} {Γ⁺₂ : Ctxt⁺ Γ₂} {σ₂} →
-          Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → σ₁ ≅-Type σ₂ →
-          Γ⁺₁ ▻ σ₁ ≅-Ctxt⁺ Γ⁺₂ ▻ σ₂
-▻⁺-cong P.refl P.refl = P.refl
+◅-cong : ∀ {Γ₁ σ₁} {Γ⁺₁ : Ctxt⁺ (Γ₁ ▻ σ₁)}
+           {Γ₂ σ₂} {Γ⁺₂ : Ctxt⁺ (Γ₂ ▻ σ₂)} →
+         Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → σ₁ ◅ Γ⁺₁ ≅-Ctxt⁺ σ₂ ◅ Γ⁺₂
+◅-cong P.refl = P.refl
 
 ++-cong : ∀ {Γ₁} {Γ⁺₁ : Ctxt⁺ Γ₁} {Γ₂} {Γ⁺₂ : Ctxt⁺ Γ₂} →
           Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → Γ₁ ++ Γ⁺₁ ≅-Ctxt Γ₂ ++ Γ⁺₂
@@ -454,10 +430,6 @@ ĥead-cong P.refl = P.refl
            Γ⁺₁ ++⁺ Γ⁺⁺₁ ≅-Ctxt⁺ Γ⁺₂ ++⁺ Γ⁺⁺₂
 ++⁺-cong P.refl P.refl = P.refl
 
-ŵk⁺-cong : ∀ {Γ₁} {Γ⁺₁ : Ctxt⁺ Γ₁} {Γ₂} {Γ⁺₂ : Ctxt⁺ Γ₂} →
-           Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → ŵk⁺ Γ⁺₁ ≅-⇨̂ ŵk⁺ Γ⁺₂
-ŵk⁺-cong P.refl = P.refl
-
 /̂⁺-cong : ∀ {Γ₁ Δ₁} {Γ⁺₁ : Ctxt⁺ Γ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
             {Γ₂ Δ₂} {Γ⁺₂ : Ctxt⁺ Γ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} →
           Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → ρ̂₁ ≅-⇨̂ ρ̂₂ → Γ⁺₁ /̂⁺ ρ̂₁ ≅-Ctxt⁺ Γ⁺₂ /̂⁺ ρ̂₂
@@ -467,6 +439,10 @@ ŵk⁺-cong P.refl = P.refl
             {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {Γ⁺₂ : Ctxt⁺ Γ₂} →
           ρ̂₁ ≅-⇨̂ ρ̂₂ → Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → ρ̂₁ ↑̂⁺ Γ⁺₁ ≅-⇨̂ ρ̂₂ ↑̂⁺ Γ⁺₂
 ↑̂⁺-cong P.refl P.refl = P.refl
+
+ŵk⁺-cong : ∀ {Γ₁} {Γ⁺₁ : Ctxt⁺ Γ₁} {Γ₂} {Γ⁺₂ : Ctxt⁺ Γ₂} →
+           Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → ŵk⁺ Γ⁺₁ ≅-⇨̂ ŵk⁺ Γ⁺₂
+ŵk⁺-cong P.refl = P.refl
 
 zero-cong : ∀ {Γ₁} {σ₁ : Type Γ₁}
               {Γ₂} {σ₂ : Type Γ₂} →
@@ -576,23 +552,21 @@ t̂ail-▻̂-ĥead ρ̂ = P.refl
 
 abstract
 
-  mutual
+  -- The identity substitution has no effect.
 
-    -- The identity substitution has no effect.
+  /̂⁺-îd : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → Γ⁺ /̂⁺ îd ≅-Ctxt⁺ Γ⁺
+  /̂⁺-îd ε        = P.refl
+  /̂⁺-îd (σ ◅ Γ⁺) = ◅-cong (/̂⁺-îd Γ⁺)
 
-    /̂⁺-îd : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → Γ⁺ /̂⁺ îd ≅-Ctxt⁺ Γ⁺
-    /̂⁺-îd ε        = P.refl
-    /̂⁺-îd (Γ⁺ ▻ σ) = ▻⁺-cong (/̂⁺-îd Γ⁺) (/̂-cong P.refl (îd-↑̂⁺ Γ⁺))
+  -- The n-ary lifting of the identity substitution is the identity
+  -- substitution.
 
-    -- The n-ary lifting of the identity substitution is the identity
-    -- substitution.
-
-    îd-↑̂⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → îd ↑̂⁺ Γ⁺ ≅-⇨̂ îd[ Γ ++ Γ⁺ ]
-    îd-↑̂⁺ ε        = P.refl
-    îd-↑̂⁺ (Γ⁺ ▻ σ) = begin
-      [ (îd ↑̂⁺ Γ⁺) ↑̂ ]  ≡⟨ ↑̂-cong (îd-↑̂⁺ Γ⁺) P.refl ⟩
-      [ îd ↑̂         ]  ≡⟨ P.refl ⟩
-      [ îd           ]  ∎
+  îd-↑̂⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → îd ↑̂⁺ Γ⁺ ≅-⇨̂ îd[ Γ ++ Γ⁺ ]
+  îd-↑̂⁺ ε        = P.refl
+  îd-↑̂⁺ (σ ◅ Γ⁺) = begin
+    [ îd ↑̂ ↑̂⁺ Γ⁺ ]  ≡⟨ P.refl ⟩
+    [ îd ↑̂⁺ Γ⁺   ]  ≡⟨ îd-↑̂⁺ Γ⁺ ⟩
+    [ îd         ]  ∎
 
   -- The identity substitution has no effect even if lifted.
 
@@ -602,26 +576,23 @@ abstract
     [ σ /̂ îd       ]  ≡⟨ P.refl ⟩
     [ σ            ]  ∎
 
-  mutual
+  -- Applying two substitutions is equivalent to applying their
+  -- composition.
 
-    -- Applying two substitutions is equivalent to applying their
-    -- composition.
+  /̂⁺-∘̂ : ∀ {Γ Δ Ε} Γ⁺ (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) →
+         Γ⁺ /̂⁺ ρ̂₁ ∘̂ ρ̂₂ ≅-Ctxt⁺ Γ⁺ /̂⁺ ρ̂₁ /̂⁺ ρ̂₂
+  /̂⁺-∘̂ ε        ρ̂₁ ρ̂₂ = P.refl
+  /̂⁺-∘̂ (σ ◅ Γ⁺) ρ̂₁ ρ̂₂ = ◅-cong (/̂⁺-∘̂ Γ⁺ (ρ̂₁ ↑̂) (ρ̂₂ ↑̂))
 
-    /̂⁺-∘̂ : ∀ {Γ Δ Ε} Γ⁺ (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) →
-           Γ⁺ /̂⁺ ρ̂₁ ∘̂ ρ̂₂ ≅-Ctxt⁺ Γ⁺ /̂⁺ ρ̂₁ /̂⁺ ρ̂₂
-    /̂⁺-∘̂ ε        ρ̂₁ ρ̂₂ = P.refl
-    /̂⁺-∘̂ (Γ⁺ ▻ σ) ρ̂₁ ρ̂₂ =
-      ▻⁺-cong (/̂⁺-∘̂ Γ⁺ ρ̂₁ ρ̂₂) (/̂-cong (P.refl {x = [ σ ]}) (∘̂-↑̂⁺ ρ̂₁ ρ̂₂ Γ⁺))
+  -- _↑̂⁺_ distributes over _∘̂_.
 
-    -- _↑̂⁺_ distributes over _∘̂_.
-
-    ∘̂-↑̂⁺ : ∀ {Γ Δ Ε} (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) Γ⁺ →
-           (ρ̂₁ ∘̂ ρ̂₂) ↑̂⁺ Γ⁺ ≅-⇨̂ ρ̂₁ ↑̂⁺ Γ⁺ ∘̂ ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)
-    ∘̂-↑̂⁺ ρ̂₁ ρ̂₂ ε        = P.refl
-    ∘̂-↑̂⁺ ρ̂₁ ρ̂₂ (Γ⁺ ▻ σ) = begin
-      [ ((ρ̂₁ ∘̂ ρ̂₂) ↑̂⁺ Γ⁺) ↑̂                   ]  ≡⟨ ↑̂-cong (∘̂-↑̂⁺ ρ̂₁ ρ̂₂ Γ⁺) P.refl ⟩
-      [ (ρ̂₁ ↑̂⁺ Γ⁺ ∘̂ ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)) ↑̂       ]  ≡⟨ P.refl ⟩
-      [ (ρ̂₁ ↑̂⁺ Γ⁺) ↑̂ σ ∘̂ (ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)) ↑̂ ]  ∎
+  ∘̂-↑̂⁺ : ∀ {Γ Δ Ε} (ρ̂₁ : Γ ⇨̂ Δ) (ρ̂₂ : Δ ⇨̂ Ε) Γ⁺ →
+         (ρ̂₁ ∘̂ ρ̂₂) ↑̂⁺ Γ⁺ ≅-⇨̂ ρ̂₁ ↑̂⁺ Γ⁺ ∘̂ ρ̂₂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁)
+  ∘̂-↑̂⁺ ρ̂₁ ρ̂₂ ε        = P.refl
+  ∘̂-↑̂⁺ ρ̂₁ ρ̂₂ (σ ◅ Γ⁺) = begin
+    [ (ρ̂₁ ∘̂ ρ̂₂) ↑̂ ↑̂⁺ Γ⁺                     ]  ≡⟨ P.refl ⟩
+    [ (ρ̂₁ ↑̂ ∘̂ ρ̂₂ ↑̂) ↑̂⁺ Γ⁺                   ]  ≡⟨ ∘̂-↑̂⁺ (ρ̂₁ ↑̂) (ρ̂₂ ↑̂) Γ⁺ ⟩
+    [ (ρ̂₁ ↑̂ ↑̂⁺ Γ⁺) ∘̂ (ρ̂₂ ↑̂ ↑̂⁺ (Γ⁺ /̂⁺ ρ̂₁ ↑̂)) ]  ∎
 
   -- A corollary.
 
@@ -639,37 +610,35 @@ abstract
   ∘̂-ŵk⁺ : ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) Γ⁺ →
           ρ̂ ∘̂ ŵk⁺ (Γ⁺ /̂⁺ ρ̂) ≅-⇨̂ ŵk⁺ Γ⁺ ∘̂ ρ̂ ↑̂⁺ Γ⁺
   ∘̂-ŵk⁺ ρ̂ ε        = P.refl
-  ∘̂-ŵk⁺ ρ̂ (Γ⁺ ▻ σ) = begin
-    [ ρ̂ ∘̂ ŵk⁺ (Γ⁺ /̂⁺ ρ̂) ∘̂ ŵk         ]  ≡⟨ ∘̂-cong (∘̂-ŵk⁺ ρ̂ Γ⁺) P.refl ⟩
-    [ ŵk⁺ Γ⁺ ∘̂ ρ̂ ↑̂⁺ Γ⁺ ∘̂ ŵk          ]  ≡⟨ P.refl ⟩
-    [ ŵk⁺ Γ⁺ ∘̂ ŵk[ σ ] ∘̂ (ρ̂ ↑̂⁺ Γ⁺) ↑̂ ]  ∎
+  ∘̂-ŵk⁺ ρ̂ (σ ◅ Γ⁺) = begin
+    [ ρ̂ ∘̂ ŵk ∘̂ ŵk⁺ (Γ⁺ /̂⁺ ρ̂ ↑̂)         ]  ≡⟨ P.refl ⟩
+    [ ŵk[ σ ] ∘̂ ρ̂ ↑̂ ∘̂ ŵk⁺ (Γ⁺ /̂⁺ ρ̂ ↑̂)  ]  ≡⟨ ∘̂-cong (P.refl {x = [ ŵk ]}) (∘̂-ŵk⁺ (ρ̂ ↑̂) Γ⁺) ⟩
+    [ ŵk ∘̂ ŵk⁺ Γ⁺ ∘̂ ρ̂ ↑̂ ↑̂⁺ Γ⁺          ]  ∎
 
   -- ŵk⁺ is homomorphic with respect to _++⁺_/_∘̂_.
 
   ŵk⁺-++⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) (Γ⁺⁺ : Ctxt⁺ (Γ ++ Γ⁺)) →
             ŵk⁺ (Γ⁺ ++⁺ Γ⁺⁺) ≅-⇨̂ ŵk⁺ Γ⁺ ∘̂ ŵk⁺ Γ⁺⁺
-  ŵk⁺-++⁺ Γ⁺ ε         = P.refl
-  ŵk⁺-++⁺ Γ⁺ (Γ⁺⁺ ▻ σ) =
-    ∘̂-cong (ŵk⁺-++⁺ Γ⁺ Γ⁺⁺)
-           (ŵk-cong (drop-subst-Type id (++-assoc Γ⁺ Γ⁺⁺)))
+  ŵk⁺-++⁺ ε        Γ⁺⁺ = P.refl
+  ŵk⁺-++⁺ (σ ◅ Γ⁺) Γ⁺⁺ = ∘̂-cong (P.refl {x = [ ŵk ]}) (ŵk⁺-++⁺ Γ⁺ Γ⁺⁺)
 
   -- Two n-ary liftings can be merged into one.
 
   ↑̂⁺-++⁺ : ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) Γ⁺ Γ⁺⁺ →
            ρ̂ ↑̂⁺ (Γ⁺ ++⁺ Γ⁺⁺) ≅-⇨̂ ρ̂ ↑̂⁺ Γ⁺ ↑̂⁺ Γ⁺⁺
-  ↑̂⁺-++⁺ ρ̂ Γ⁺ ε         = P.refl
-  ↑̂⁺-++⁺ ρ̂ Γ⁺ (Γ⁺⁺ ▻ σ) = begin
-    [ (ρ̂ ↑̂⁺ (Γ⁺ ++⁺ Γ⁺⁺)) ↑̂ ]  ≡⟨ ↑̂-cong (↑̂⁺-++⁺ ρ̂ Γ⁺ Γ⁺⁺) (drop-subst-Type id (++-assoc Γ⁺ Γ⁺⁺)) ⟩
-    [ (ρ̂ ↑̂⁺ Γ⁺ ↑̂⁺ Γ⁺⁺) ↑̂    ]  ∎
+  ↑̂⁺-++⁺ ρ̂ ε        Γ⁺⁺ = P.refl
+  ↑̂⁺-++⁺ ρ̂ (σ ◅ Γ⁺) Γ⁺⁺ = ↑̂⁺-++⁺ (ρ̂ ↑̂) Γ⁺ Γ⁺⁺
+
+  -- _++_/_++⁺_ are associative.
+
+  ++-++ : ∀ {Γ} Γ⁺ Γ⁺⁺ → Γ ++ Γ⁺ ++ Γ⁺⁺ ≅-Ctxt Γ ++ (Γ⁺ ++⁺ Γ⁺⁺)
+  ++-++ ε        Γ⁺⁺ = P.refl
+  ++-++ (σ ◅ Γ⁺) Γ⁺⁺ = ++-++ Γ⁺ Γ⁺⁺
 
   -- _/̂⁺_ distributes over _++⁺_ (sort of).
 
   ++-++⁺-/̂⁺ :
     ∀ {Γ Δ} (ρ̂ : Γ ⇨̂ Δ) Γ⁺ Γ⁺⁺ →
     Δ ++ (Γ⁺ ++⁺ Γ⁺⁺) /̂⁺ ρ̂ ≅-Ctxt Δ ++ Γ⁺ /̂⁺ ρ̂ ++ Γ⁺⁺ /̂⁺ ρ̂ ↑̂⁺ Γ⁺
-  ++-++⁺-/̂⁺         ρ̂ Γ⁺ ε         = P.refl
-  ++-++⁺-/̂⁺ {Δ = Δ} ρ̂ Γ⁺ (Γ⁺⁺ ▻ σ) = begin
-    Δ ++ (Γ⁺ ++⁺ Γ⁺⁺) /̂⁺ ρ̂ ▻
-      P.subst Type (++-assoc Γ⁺ Γ⁺⁺) σ /̂ ρ̂ ↑̂⁺ (Γ⁺ ++⁺ Γ⁺⁺)  ≡⟨ ▻-cong (/̂-cong (drop-subst-Type id (++-assoc Γ⁺ Γ⁺⁺))
-                                                                              (↑̂⁺-++⁺ ρ̂ Γ⁺ Γ⁺⁺)) ⟩
-    Δ ++ Γ⁺ /̂⁺ ρ̂ ++ Γ⁺⁺ /̂⁺ ρ̂ ↑̂⁺ Γ⁺ ▻ σ /̂ ρ̂ ↑̂⁺ Γ⁺ ↑̂⁺ Γ⁺⁺     ∎
+  ++-++⁺-/̂⁺         ρ̂ ε        Γ⁺⁺ = P.refl
+  ++-++⁺-/̂⁺ {Δ = Δ} ρ̂ (σ ◅ Γ⁺) Γ⁺⁺ = ++-++⁺-/̂⁺ (ρ̂ ↑̂) Γ⁺ Γ⁺⁺

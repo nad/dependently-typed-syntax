@@ -140,31 +140,6 @@ weaken∋ = record
 weaken∋[_] : ∀ {Γ} (σ : Type Γ) → [ Var ⟶ Var ] ŵk[ σ ]
 weaken∋[ _ ] = weaken∋
 
--- Lifts a function on variables, f, to a function which leaves a
--- prefix of the context unchanged and otherwise behaves as f.
-
-lift : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} →
-       [ Var ⟶ Var ] ρ̂ → ∀ Γ⁺ → [ Var ⟶ Var ] (ρ̂ ↑̂⁺ Γ⁺)
-lift             f ε        = f
-lift {Γ} {Δ} {ρ̂} f (Γ⁺ ▻ σ) = record
-  { function    = function
-  ; corresponds = corr
-  }
-  where
-  function : ∀ τ → Γ ++ Γ⁺ ▻ σ ∋ τ →
-             Δ ++ (Γ⁺ ▻ σ) /̂⁺ ρ̂ ∋ τ /̂ ρ̂ ↑̂⁺ (Γ⁺ ▻ σ)
-  function ._ zero    = zero
-  function ._ (suc x) = suc (lift f Γ⁺ · x)
-
-  abstract
-    corr : ∀ τ (x : Γ ++ Γ⁺ ▻ σ ∋ τ) →
-           lookup x /̂Val ρ̂ ↑̂⁺ (Γ⁺ ▻ σ) ≅-Value lookup (function _ x)
-    corr ._ zero    = P.refl
-    corr ._ (suc x) = begin
-      [ lookup x /̂Val ρ̂ ↑̂⁺ Γ⁺ /̂Val ŵk  ]  ≡⟨ /̂Val-cong (corresponds (lift f Γ⁺) x) P.refl ⟩
-      [ lookup (lift f Γ⁺ · x) /̂Val ŵk ]  ≡⟨ P.refl ⟩
-      [ lookup (suc (lift f Γ⁺ · x))   ]  ∎
-
 -- Some congruence lemmas.
 
 record [function] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
@@ -218,23 +193,6 @@ function-corresponds-cong P.refl P.refl P.refl = P.refl
     {Γ₂ Δ₂ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} {t₂ : Γ₂ ⊢₁ σ₂} →
   f₁ ≅-⟶ f₂ → t₁ ≅-⊢₁ t₂ → f₁ · t₁ ≅-⊢₂ f₂ · t₂
 ·-cong P.refl P.refl = P.refl
-
-abstract
-
-  -- lift ∘ weaken∋ sort of commutes with a lifted version of itself.
-
-  lift-weaken∋-lift-lift-weaken∋ :
-    ∀ {Γ} σ Γ⁺ τ Γ⁺⁺ {υ} (x : Γ ++ Γ⁺ ++ Γ⁺⁺ ∋ υ) →
-    lift weaken∋[ τ /̂ ŵk ↑̂⁺ Γ⁺ ] (Γ⁺⁺ /̂⁺ ŵk ↑̂⁺ Γ⁺) ·
-         (lift (lift weaken∋[ σ ] Γ⁺) Γ⁺⁺ · x) ≅-∋
-    lift (lift weaken∋[ σ ] (Γ⁺ ▻ τ)) (Γ⁺⁺ /̂⁺ ŵk) ·
-         (lift weaken∋[ τ ] Γ⁺⁺ · x)
-  lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ ε         x       = P.refl
-  lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ (Γ⁺⁺ ▻ υ) zero    =
-    zero-cong (/̂-↑̂⁺-/̂-ŵk-↑̂⁺ τ (ŵk ↑̂⁺ Γ⁺) Γ⁺⁺ υ)
-  lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ (Γ⁺⁺ ▻ υ) (suc x) =
-    suc-cong (/̂-↑̂⁺-/̂-ŵk-↑̂⁺ τ (ŵk ↑̂⁺ Γ⁺) Γ⁺⁺ υ)
-             (lift-weaken∋-lift-lift-weaken∋ σ Γ⁺ τ Γ⁺⁺ x)
 
 ------------------------------------------------------------------------
 -- Term-like t and [_⟶_] form a category

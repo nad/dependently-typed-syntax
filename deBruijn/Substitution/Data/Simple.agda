@@ -84,11 +84,11 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
 
   _↑⁺_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → ∀ Γ⁺ → Sub T (ρ̂ ↑̂⁺ Γ⁺)
   ρ ↑⁺ ε        = ρ
-  ρ ↑⁺ (Γ⁺ ▻ σ) = (ρ ↑⁺ Γ⁺) ↑
+  ρ ↑⁺ (σ ◅ Γ⁺) = ρ ↑ ↑⁺ Γ⁺
 
   _↑⁺⋆_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Subs T ρ̂ → ∀ Γ⁺ → Subs T (ρ̂ ↑̂⁺ Γ⁺)
   ρs ↑⁺⋆ ε        = ρs
-  ρs ↑⁺⋆ (Γ⁺ ▻ σ) = (ρs ↑⁺⋆ Γ⁺) ↑⋆
+  ρs ↑⁺⋆ (σ ◅ Γ⁺) = ρs ↑⋆ ↑⁺⋆ Γ⁺
 
   -- The identity substitution.
 
@@ -103,12 +103,12 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
 
   wk⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → Sub T (ŵk⁺ Γ⁺)
   wk⁺ ε        = id
-  wk⁺ (Γ⁺ ▻ σ) = wk-subst (wk⁺ Γ⁺)
+  wk⁺ (σ ◅ Γ⁺) = {!!}
 
   -- Weakening.
 
   wk[_] : ∀ {Γ} (σ : Type Γ) → Sub T ŵk[ σ ]
-  wk[ σ ] = wk⁺ (ε ▻ σ)
+  wk[ σ ] = wk⁺ (σ ◅ ε)
 
   wk : ∀ {Γ} {σ : Type Γ} → Sub T ŵk[ σ ]
   wk = wk[ _ ]
