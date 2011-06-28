@@ -17,7 +17,7 @@ open import Function using (_$_; _ˢ_) renaming (const to k)
 import Relation.Binary.PropositionalEquality as P
 
 open P.≡-Reasoning
-open TermLike Uni renaming (_·_ to _⊙_; ·-cong to ⊙-cong)
+open TermLike Uni hiding (·-cong) renaming (_·_ to _⊙_)
 
 -- Code for applying substitutions.
 --
@@ -66,10 +66,7 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
 
       _/⊢-lemma_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ σ) (ρ : Sub T ρ̂) →
                    ⟦ t ⟧ /Val ρ ≅-Value ⟦ t /⊢ ρ ⟧
-      var x /⊢-lemma ρ = begin
-        [ x /̂∋ ⟦ ρ ⟧⇨              ]  ≡⟨ corresponds (app∋ ρ) x ⟩
-        [ Term-like.⟦_⟧ T (x /∋ ρ) ]  ≡⟨ corresponds trans (x /∋ ρ) ⟩
-        [ ⟦ trans ⊙ (x /∋ ρ) ⟧     ]  ∎
+      var x  /⊢-lemma ρ = /̂∋-⟦⟧⇨ x ρ
       ƛ σ′ t /⊢-lemma ρ = begin
         [ c ⟦ t ⟧ /Val ρ     ]  ≡⟨ P.refl ⟩
         [ c (⟦ t ⟧ /Val ρ ↑) ]  ≡⟨ curry-cong (t /⊢-lemma (ρ ↑)) ⟩

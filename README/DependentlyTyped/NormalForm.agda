@@ -168,10 +168,7 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
       ne σ′ t /⊢n-lemma ρ = begin
         [ ⟦ t ⟧n /Val ρ ]  ≡⟨ t /⊢n-lemma ρ ⟩
         [ ⟦ t /⊢n ρ ⟧n  ]  ∎
-      var x /⊢n-lemma ρ = begin
-        [ x /̂∋ ⟦ ρ ⟧⇨              ]  ≡⟨ corresponds (app∋ ρ) x ⟩
-        [ Term-like.⟦_⟧ T (x /∋ ρ) ]  ≡⟨ corresponds trans (x /∋ ρ) ⟩
-        [ ⟦ trans ⊙ (x /∋ ρ) ⟧n    ]  ∎
+      var x  /⊢n-lemma ρ = /̂∋-⟦⟧⇨ x ρ
       ƛ σ′ t /⊢n-lemma ρ = begin
         [ c ⟦ t ⟧n /Val ρ     ]  ≡⟨ P.refl ⟩
         [ c (⟦ t ⟧n /Val ρ ↑) ]  ≡⟨ curry-cong (t /⊢n-lemma (ρ ↑)) ⟩

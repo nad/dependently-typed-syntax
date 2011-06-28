@@ -80,6 +80,16 @@ record _↦_ {t₁} (T₁ : Term-like t₁)
 
   open Simple simple public
 
+  open Term-like T₁ renaming (⟦_⟧ to ⟦_⟧₁)
+  open Term-like T₂ renaming (⟦_⟧ to ⟦_⟧₂)
+
+  /̂∋-⟦⟧⇨ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (x : Γ ∋ σ) (ρ : Sub T₁ ρ̂) →
+           x /̂∋ ⟦ ρ ⟧⇨ ≅-Value ⟦ trans · (x /∋ ρ) ⟧₂
+  /̂∋-⟦⟧⇨ x ρ = begin
+    [ x /̂∋ ⟦ ρ ⟧⇨           ]  ≡⟨ corresponds (app∋ ρ) x ⟩
+    [ ⟦ x /∋ ρ ⟧₁           ]  ≡⟨ corresponds trans (x /∋ ρ) ⟩
+    [ ⟦ trans · (x /∋ ρ) ⟧₂ ]  ∎
+
 -- "Term" substitutions.
 
 -- For simplicity I have chosen to use the universe level (u ⊔ e)
