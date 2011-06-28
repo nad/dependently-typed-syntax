@@ -4,25 +4,20 @@
 
 -- If we assume that equality of functions is extensional.
 
-open import Level using (zero)
+import Level
 open import Relation.Binary.PropositionalEquality as P using (_≡_; _≢_)
 open import Universe
 
 module README.DependentlyTyped.TypeOf
-  (Uni₀ : Universe zero zero)
-  (ext : {A : Set} {B : A → Set}
-         {f g : (x : A) → B x} →
-         (∀ x → f x ≡ g x) → f ≡ g)
+  {Uni₀ : Universe Level.zero Level.zero}
+  (ext : P.Extensionality Level.zero Level.zero)
   where
-
-import README.DependentlyTyped.Term as Term
-import README.DependentlyTyped.Substitution as Substitution
-open Term Uni₀
-open Substitution.Tm-subst Uni₀
 
 open import Data.Empty
 open import Data.Product renaming (uncurry to uc)
 open import Function renaming (const to k)
+open import README.DependentlyTyped.Substitution
+import README.DependentlyTyped.Term as Term; open Term Uni₀
 
 -- We can project out the second component of a syntactic Π-type.
 
@@ -70,18 +65,9 @@ snd πστ = snd′ πστ P.refl
 
 type-of : ∀ {Γ τ} → Γ ⊢ τ → (∀ {σ} → Γ ∋ σ → Γ ⊢ σ type) → Γ ⊢ τ type
 type-of     (var x)          hyp = hyp x
-
+type-of     (t₁ · t₂)        hyp = snd (type-of t₁ hyp) /⊢t sub t₂
 type-of {Γ} (ƛ {σ = σ} σ′ t) hyp = π σ′ (type-of t hyp′)
   where
   hyp′ : ∀ {τ} → Γ ▻ σ ∋ τ → Γ ▻ σ ⊢ τ type
-  hyp′ zero            = P.subst (λ ρ → Γ ▻ σ ⊢ σ /̂ ρ type)
-                                 (P.sym $ wk-lemma σ)
-                                 (σ′ /⊢t wk)
-  hyp′ (suc {σ = υ} x) = P.subst (λ ρ → Γ ▻ σ ⊢ υ /̂ ρ type)
-                                 (P.sym $ wk-lemma σ)
-                                 (hyp x /⊢t wk)
-
-type-of (_·_ {τ = τ} t₁ t₂) hyp =
-  P.subst (λ ρ → _ ⊢ uc τ /̂ ρ type)
-          (P.sym $ sub-lemma t₂)
-          (snd (type-of t₁ hyp) /⊢t sub t₂)
+  hyp′ zero    = σ′    /⊢t wk
+  hyp′ (suc x) = hyp x /⊢t wk
