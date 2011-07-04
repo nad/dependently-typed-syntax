@@ -26,8 +26,9 @@ private
    {t₂} {T₂ : Term-like t₂}
    where
 
-  open Term-like T₁ using () renaming (_⊢_ to _⊢₁_; _≅-⊢_ to _≅-⊢₁_)
-  open Term-like T₂ using ([_]) renaming (_≅-⊢_ to _≅-⊢₂_)
+  open Term-like T₁ using ()
+                    renaming (_⊢_ to _⊢₁_; _≅-⊢_ to _≅-⊢₁_; [_] to [_]₁)
+  open Term-like T₂ using () renaming (_≅-⊢_ to _≅-⊢₂_; [_] to [_]₂)
 
   -- Map.
 
@@ -51,16 +52,22 @@ private
       drop-subst-Sub (λ v → ⟦ ρ ⟧⇨ ∘̂ ρ̂₂ ▻̂ v)
                      (≅-Value-⇒-≡ $ P.sym $ corresponds f t)
 
-  -- A congruence lemma.
+    -- A congruence lemma.
 
-  map-cong : ∀ {Γ₁ Δ₁ Ε₁} {ρ̂₁₁ : Γ₁ ⇨̂ Δ₁} {ρ̂₂₁ : Δ₁ ⇨̂ Ε₁}
-               {f₁ : [ T₁ ⟶ T₂ ] ρ̂₂₁} {ρ₁ : Sub T₁ ρ̂₁₁}
-               {Γ₂ Δ₂ Ε₂} {ρ̂₁₂ : Γ₂ ⇨̂ Δ₂} {ρ̂₂₂ : Δ₂ ⇨̂ Ε₂}
-               {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂₂} {ρ₂ : Sub T₁ ρ̂₁₂} →
-             f₁ ≅-⟶ f₂ → ρ₁ ≅-⇨ ρ₂ → map f₁ ρ₁ ≅-⇨ map f₂ ρ₂
-  map-cong P.refl P.refl = P.refl
-
-  abstract
+    map-cong : ∀ {Γ₁ Δ₁ Ε₁} {ρ̂₁₁ : Γ₁ ⇨̂ Δ₁} {ρ̂₂₁ : Δ₁ ⇨̂ Ε₁}
+                 {f₁ : [ T₁ ⟶ T₂ ] ρ̂₂₁} {ρ₁ : Sub T₁ ρ̂₁₁}
+                 {Γ₂ Δ₂ Ε₂} {ρ̂₁₂ : Γ₂ ⇨̂ Δ₂} {ρ̂₂₂ : Δ₂ ⇨̂ Ε₂}
+                 {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂₂} {ρ₂ : Sub T₁ ρ̂₁₂} →
+               f₁ ≅-⟶ f₂ → ρ₁ ≅-⇨ ρ₂ → map f₁ ρ₁ ≅-⇨ map f₂ ρ₂
+    map-cong {f₁ = _ , _} {f₂ = ._ , _} {ρ₂ = ε} [ P.refl ] P.refl =
+             P.refl
+    map-cong {f₁ = f₁} {f₂ = f₂} {ρ₂ = ρ ▻ t} f₁≅f₂ P.refl = begin
+      [ map f₁ (ρ ▻ t)    ]  ≡⟨ map-▻ f₁ ρ t ⟩
+      [ map f₁ ρ ▻ f₁ · t ]  ≡⟨ ▻⇨-cong P.refl
+                                        (map-cong f₁≅f₂ (P.refl {x = [ ρ ]}))
+                                        (·-cong f₁≅f₂ (P.refl {x = [ t ]₁})) ⟩
+      [ map f₂ ρ ▻ f₂ · t ]  ≡⟨ P.sym $ map-▻ f₂ ρ t ⟩
+      [ map f₂ (ρ ▻ t)    ]  ∎
 
     -- Variants which only require that the functions are
     -- extensionally equal.
@@ -92,9 +99,7 @@ private
                        t₁ ≅-⊢₁ t₂ → f₁ · t₁ ≅-⊢₂ f₂ · t₂) →
                     ρ₁ ≅-⇨ ρ₂ → map f₁ ρ₁ ≅-⇨ map f₂ ρ₂
     map-cong-ext₂ P.refl Ε₁≅Ε₂ f₁≅f₂ ρ₁≅ρ₂ =
-      map-cong-ext₁ Ε₁≅Ε₂
-                    (λ t → f₁≅f₂ (P.refl {x = Term-like.[_] t}))
-                    ρ₁≅ρ₂
+      map-cong-ext₁ Ε₁≅Ε₂ (λ t → f₁≅f₂ (P.refl {x = [ t ]₁})) ρ₁≅ρ₂
 
     private
 
@@ -113,14 +118,14 @@ private
              (x : Γ ∋ σ) (f : [ T₁ ⟶ T₂ ] ρ̂₂) (ρ : Sub T₁ ρ̂₁) →
              x /∋ map f ρ ≅-⊢₂ f · (x /∋ ρ)
     /∋-map (zero {σ = σ}) f (ρ ▻ t) = begin
-      [ zero[ σ ] /∋ map f (ρ ▻ t)     ]  ≡⟨ /∋-map-▻ zero[ σ ] f ρ ⟩
-      [ zero[ σ ] /∋ (map f ρ ▻ f · t) ]  ≡⟨ P.refl ⟩
-      [ f · t                          ]  ∎
+      [ zero[ σ ] /∋ map f (ρ ▻ t)     ]₂  ≡⟨ /∋-map-▻ zero[ σ ] f ρ ⟩
+      [ zero[ σ ] /∋ (map f ρ ▻ f · t) ]₂  ≡⟨ P.refl ⟩
+      [ f · t                          ]₂  ∎
     /∋-map (suc {σ = σ} x) f (ρ ▻ t) = begin
-      [ suc      x /∋ map f (ρ ▻ t)     ]  ≡⟨ /∋-map-▻ (suc x) f ρ ⟩
-      [ suc[ σ ] x /∋ (map f ρ ▻ f · t) ]  ≡⟨ P.refl ⟩
-      [ x /∋ map f ρ                    ]  ≡⟨ /∋-map x f ρ ⟩
-      [ f · (x /∋ ρ)                    ]  ∎
+      [ suc      x /∋ map f (ρ ▻ t)     ]₂  ≡⟨ /∋-map-▻ (suc x) f ρ ⟩
+      [ suc[ σ ] x /∋ (map f ρ ▻ f · t) ]₂  ≡⟨ P.refl ⟩
+      [ x /∋ map f ρ                    ]₂  ≡⟨ /∋-map x f ρ ⟩
+      [ f · (x /∋ ρ)                    ]₂  ∎
 
 open Dummy public
 
@@ -146,5 +151,5 @@ abstract
     [ map (f₂ [∘] f₁) (ρ ▻ t)           ]  ≡⟨ map-▻ (f₂ [∘] f₁) ρ t ⟩
     [ map (f₂ [∘] f₁) ρ ▻ f₂ · (f₁ · t) ]  ≡⟨ ▻⇨-cong P.refl (map-[∘] f₂ f₁ ρ) P.refl ⟩
     [ map f₂ (map f₁ ρ) ▻ f₂ · (f₁ · t) ]  ≡⟨ P.sym $ map-▻ f₂ (map f₁ ρ) (f₁ · t) ⟩
-    [ map f₂ (map f₁ ρ ▻ f₁ · t)        ]  ≡⟨ map-cong (P.refl {x = [ f₂ ]}) (P.sym $ map-▻ f₁ ρ t) ⟩
+    [ map f₂ (map f₁ ρ ▻ f₁ · t)        ]  ≡⟨ map-cong (f₂ ∎-⟶) (P.sym $ map-▻ f₁ ρ t) ⟩
     [ map f₂ (map f₁ (ρ ▻ t))           ]  ∎

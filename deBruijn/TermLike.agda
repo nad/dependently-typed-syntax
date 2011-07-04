@@ -76,8 +76,11 @@ Var = record { _⊢_ = _∋_; ⟦_⟧ = lookup }
 
 record [_⟶_] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
              {Γ Δ : Ctxt} (ρ̂ : Γ ⇨̂ Δ) : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+  constructor _,_
+
   open Term-like T₁ renaming (_⊢_ to _⊢₁_; ⟦_⟧ to ⟦_⟧₁)
   open Term-like T₂ renaming (_⊢_ to _⊢₂_; ⟦_⟧ to ⟦_⟧₂)
+
   field
     function    : ∀ σ → Γ ⊢₁ σ → Δ ⊢₂ σ /̂ ρ̂
     corresponds :
@@ -108,26 +111,6 @@ corresponds :
   (f : [ T₁ ⟶ T₂ ] ρ̂) (t : Γ ⊢₁ σ) →
   ⟦ t ⟧₁ /̂Val ρ̂ ≅-Value ⟦ f · t ⟧₂
 corresponds f = [_⟶_].corresponds f _
-
--- Equality.
-
-record [⟶] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
-           : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
-  constructor [_]
-  field
-    {Γ Δ} : Ctxt
-    {ρ̂}   : Γ ⇨̂ Δ
-    f     : [ T₁ ⟶ T₂ ] ρ̂
-
-infix 4 _≅-⟶_
-
-_≅-⟶_ :
-  ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} →
-  let open Term-like T₁ renaming (_⊢_ to _⊢₁_; ⟦_⟧ to ⟦_⟧₁)
-      open Term-like T₂ renaming (⟦_⟧ to ⟦_⟧₂) in
-  ∀ {Γ₁ Δ₁ : Ctxt} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} (f₁ : [ T₁ ⟶ T₂ ] ρ̂₁)
-    {Γ₂ Δ₂ : Ctxt} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} (f₂ : [ T₁ ⟶ T₂ ] ρ̂₂) → Set _
-f₁ ≅-⟶ f₂ = [⟶].[_] f₁ ≡ [ f₂ ]
 
 -- Weakening of variables (the successor function).
 
@@ -165,10 +148,14 @@ lift {Γ} {Δ} {ρ̂} f (Γ⁺ ▻ σ) = record
       [ lookup (lift f Γ⁺ · x) /̂Val ŵk ]  ≡⟨ P.refl ⟩
       [ lookup (suc (lift f Γ⁺ · x))   ]  ∎
 
--- Some congruence lemmas.
+------------------------------------------------------------------------
+-- Equality for the functions introduced above
 
-record [function] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
-                  : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+-- Note that the definition of equality does not take the
+-- "corresponds" proof into account.
+
+record [⟶] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
+           : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
   constructor [_]
   open Term-like T₁ renaming (_⊢_ to _⊢₁_)
   open Term-like T₂ renaming (_⊢_ to _⊢₂_)
@@ -177,38 +164,53 @@ record [function] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
     {ρ̂}   : Γ ⇨̂ Δ
     f     : ∀ σ → Γ ⊢₁ σ → Δ ⊢₂ σ /̂ ρ̂
 
-record [corresponds] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
-                     : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
-  constructor [_]
-  open Term-like T₁ renaming (_⊢_ to _⊢₁_; ⟦_⟧ to ⟦_⟧₁)
-  open Term-like T₂ renaming (_⊢_ to _⊢₂_; ⟦_⟧ to ⟦_⟧₂)
-  field
-    {Γ Δ} : Ctxt
-    {ρ̂}   : Γ ⇨̂ Δ
-    {f}   : ∀ σ → Γ ⊢₁ σ → Δ ⊢₂ σ /̂ ρ̂
-    corr  : ∀ σ (t : Γ ⊢₁ σ) → ⟦ t ⟧₁ /̂Val ρ̂ ≅-Value ⟦ f σ t ⟧₂
+[_]⟶ : ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂}
+         {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} →
+       [ T₁ ⟶ T₂ ] ρ̂ → [⟶] T₁ T₂
+[ f ]⟶ = [ [_⟶_].function f ]
 
-function-corresponds-cong :
-  ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} →
-  let open Term-like T₁ renaming (_⊢_ to _⊢₁_; ⟦_⟧ to ⟦_⟧₁)
-      open Term-like T₂ renaming (_⊢_ to _⊢₂_; ⟦_⟧ to ⟦_⟧₂) in
-  ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
-    {function₁ : ∀ σ → Γ₁ ⊢₁ σ → Δ₁ ⊢₂ σ /̂ ρ̂₁}
-    {corresponds₁ : ∀ σ (t : Γ₁ ⊢₁ σ) →
-                    ⟦ t ⟧₁ /̂Val ρ̂₁ ≅-Value ⟦ function₁ σ t ⟧₂}
-    {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂}
-    {function₂ : ∀ σ → Γ₂ ⊢₁ σ → Δ₂ ⊢₂ σ /̂ ρ̂₂}
-    {corresponds₂ : ∀ σ (t : Γ₂ ⊢₁ σ) →
-                    ⟦ t ⟧₁ /̂Val ρ̂₂ ≅-Value ⟦ function₂ σ t ⟧₂} →
-  ρ̂₁ ≅-⇨̂ ρ̂₂ →
-  [function].[_] {T₁ = T₁} {T₂ = T₂} function₁ ≡
-             [_]                     function₂ →
-  [corresponds].[_] {T₁ = T₁} {T₂ = T₂} corresponds₁ ≡
-                [_]                     corresponds₂ →
-  _≅-⟶_ {T₁ = T₁} {T₂ = T₂}
-        (record { function = function₁; corresponds = corresponds₁ })
-        (record { function = function₂; corresponds = corresponds₂ })
-function-corresponds-cong P.refl P.refl P.refl = P.refl
+-- Equality is defined as a record type to make it possible to infer
+-- ρ₁ and ρ₂ from a value of type ρ₁ ≅-⟶ ρ₂.
+
+infix 4 _≅-⟶_
+
+record _≅-⟶_
+  {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂}
+  {Γ₁ Δ₁ : Ctxt} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} (f₁ : [ T₁ ⟶ T₂ ] ρ̂₁)
+  {Γ₂ Δ₂ : Ctxt} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} (f₂ : [ T₁ ⟶ T₂ ] ρ̂₂)
+  : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+  constructor [_]
+  field
+    [f₁]⟶≡[f₂]⟶ : [ f₁ ]⟶ ≡ [ f₂ ]⟶
+
+-- Some equational reasoning combinators.
+
+module ≅-⟶-Reasoning
+  {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂}
+  where
+
+  infix  2 _∎-⟶
+  infixr 2 _≅-⟶⟨_⟩_
+
+  _≅-⟶⟨_⟩_ : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
+               {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂}
+               {Γ₃ Δ₃} {ρ̂₃ : Γ₃ ⇨̂ Δ₃}
+             (f₁ : [ T₁ ⟶ T₂ ] ρ̂₁) {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂}
+                                   {f₃ : [ T₁ ⟶ T₂ ] ρ̂₃} →
+             f₁ ≅-⟶ f₂ → f₂ ≅-⟶ f₃ → f₁ ≅-⟶ f₃
+  _ ≅-⟶⟨ [ f₁≅f₂ ] ⟩ [ f₂≅f₃ ] = [ P.trans f₁≅f₂ f₂≅f₃ ]
+
+  _∎-⟶ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (f : [ T₁ ⟶ T₂ ] ρ̂) → f ≅-⟶ f
+  _ ∎-⟶ = [ P.refl ]
+
+  sym-⟶ : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {f₁ : [ T₁ ⟶ T₂ ] ρ̂₁}
+            {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} →
+          f₁ ≅-⟶ f₂ → f₂ ≅-⟶ f₁
+  sym-⟶ [ f₁≅f₂ ] = [ P.sym f₁≅f₂ ]
+
+open ≅-⟶-Reasoning public
+
+-- A congruence lemma.
 
 ·-cong :
   ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} →
@@ -217,9 +219,49 @@ function-corresponds-cong P.refl P.refl P.refl = P.refl
   ∀ {Γ₁ Δ₁ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {f₁ : [ T₁ ⟶ T₂ ] ρ̂₁} {t₁ : Γ₁ ⊢₁ σ₁}
     {Γ₂ Δ₂ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} {t₂ : Γ₂ ⊢₁ σ₂} →
   f₁ ≅-⟶ f₂ → t₁ ≅-⊢₁ t₂ → f₁ · t₁ ≅-⊢₂ f₂ · t₂
-·-cong P.refl P.refl = P.refl
+·-cong {f₁ = _ , _} {f₂ = ._ , _} [ P.refl ] P.refl = P.refl
 
 abstract
+
+  -- Two variants of extensional equality (assuming ordinary
+  -- extensional equality).
+
+  extensional-equality₁ :
+    ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} →
+    let open Term-like T₁ renaming (_⊢_ to _⊢₁_)
+        open Term-like T₂ renaming (_≅-⊢_ to _≅-⊢₂_)
+    in
+    P.Extensionality (u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
+    ∀ {Γ Δ₁} {ρ̂₁ : Γ ⇨̂ Δ₁} {f₁ : [ T₁ ⟶ T₂ ] ρ̂₁}
+        {Δ₂} {ρ̂₂ : Γ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} →
+    ρ̂₁ ≅-⇨̂ ρ̂₂ → (∀ {σ} (t : Γ ⊢₁ σ) → f₁ · t ≅-⊢₂ f₂ · t) →
+    f₁ ≅-⟶ f₂
+  extensional-equality₁ {t₁} {t₂} {T₂ = T₂} ext P.refl f₁≅f₂ =
+    [ P.cong [_] (ext₁ λ σ → ext₂ λ t → ≅-⊢₂-⇒-≡ (f₁≅f₂ t)) ]
+    where
+    open Term-like T₂ using () renaming (≅-⊢-⇒-≡ to ≅-⊢₂-⇒-≡)
+
+    ext₁ : P.Extensionality (u ⊔ e) (t₁ ⊔ t₂)
+    ext₁ = P.extensionality-for-lower-levels t₁ Level.zero ext
+
+    ext₂ : P.Extensionality t₁ t₂
+    ext₂ = P.extensionality-for-lower-levels (u ⊔ e) t₁ ext
+
+  extensional-equality₂ :
+    ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} →
+    let open Term-like T₁ renaming (_≅-⊢_ to _≅-⊢₁_; _⊢_ to _⊢₁_)
+        open Term-like T₂ renaming (_≅-⊢_ to _≅-⊢₂_)
+    in
+    P.Extensionality (u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
+    ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {f₁ : [ T₁ ⟶ T₂ ] ρ̂₁}
+      {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} →
+    ρ̂₁ ≅-⇨̂ ρ̂₂ →
+    (∀ {σ₁} {t₁ : Γ₁ ⊢₁ σ₁} {σ₂} {t₂ : Γ₂ ⊢₁ σ₂} →
+       t₁ ≅-⊢₁ t₂ → f₁ · t₁ ≅-⊢₂ f₂ · t₂) →
+    f₁ ≅-⟶ f₂
+  extensional-equality₂ {T₁ = T₁} ext P.refl f₁≅f₂ =
+    extensional-equality₁ ext P.refl (λ t → f₁≅f₂ (P.refl {x = [ t ]}))
+    where open Term-like T₁ using ([_])
 
   -- lift ∘ weaken∋ sort of commutes with a lifted version of itself.
 
@@ -272,50 +314,41 @@ _[∘]_ {T₁ = T₁} {T₂} {T₃} {ρ̂₁ = ρ̂₁} {ρ̂₂} f g = record
       [ ⟦ g · t ⟧₂ /̂Val ρ̂₂  ]  ≡⟨ corresponds f (g · t) ⟩
       [ ⟦ f · (g · t) ⟧₃    ]  ∎
 
-abstract
+-- [id] and _[∘]_ preserve equality.
 
-  -- If we assume extensionality, then [id] is a left and right
-  -- identity of _[∘]_, which is associative.
+[id]-cong :
+  ∀ {t} {T : Term-like t} {Γ₁ Γ₂} →
+  Γ₁ ≅-Ctxt Γ₂ → [id] {T = T} {Γ = Γ₁} ≅-⟶ [id] {T = T} {Γ = Γ₂}
+[id]-cong P.refl = [ P.refl ]
 
-  private
-   module Dummy
-     {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂}
-     (ext : P.Extensionality (u ⊔ e ⊔ t₁) (u ⊔ e ⊔ t₁))
-     where
+private
+ module Dummy {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} where
 
-    -- Some derived instances of extensionality.
+  [∘]-cong : ∀ {t₃} {T₃ : Term-like t₃}
+               {Γ₁ Δ₁ Ε₁} {ρ̂₁₁ : Γ₁ ⇨̂ Δ₁} {ρ̂₂₁ : Δ₁ ⇨̂ Ε₁}
+               {f₁₁ : [ T₁ ⟶ T₂ ] ρ̂₁₁} {f₂₁ : [ T₂ ⟶ T₃ ] ρ̂₂₁}
+               {Γ₂ Δ₂ Ε₂} {ρ̂₁₂ : Γ₂ ⇨̂ Δ₂} {ρ̂₂₂ : Δ₂ ⇨̂ Ε₂}
+               {f₁₂ : [ T₁ ⟶ T₂ ] ρ̂₁₂} {f₂₂ : [ T₂ ⟶ T₃ ] ρ̂₂₂} →
+             f₁₁ ≅-⟶ f₁₂ → f₂₁ ≅-⟶ f₂₂ → f₂₁ [∘] f₁₁ ≅-⟶ f₂₂ [∘] f₁₂
+  [∘]-cong {f₁₁ = _ , _} {f₂₁ = _ , _} {f₁₂ = ._ , _} {f₂₂ = ._ , _}
+           [ P.refl ] [ P.refl ] = [ P.refl ]
 
-    private
-      ext₁ : P.Extensionality (u ⊔ e) (u ⊔ e ⊔ t₁)
-      ext₁ = P.extensionality-for-lower-levels t₁ Level.zero ext
+  -- [id] is a left and right identity of _[∘]_, which is associative.
 
-      ext₂ : P.Extensionality t₁ (u ⊔ e)
-      ext₂ = P.extensionality-for-lower-levels (u ⊔ e) t₁ ext
+  [id]-[∘] : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ}
+             (f : [ T₁ ⟶ T₂ ] ρ̂) → [id] [∘] f ≅-⟶ f
+  [id]-[∘] f = [ P.refl ]
 
-    -- The uses of P.proof-irrelevance below can probably be replaced
-    -- by direct proofs if the definition of _[∘]_ is made fully
-    -- transparent.
+  [∘]-[id] : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ}
+             (f : [ T₁ ⟶ T₂ ] ρ̂) → f [∘] [id] ≅-⟶ f
+  [∘]-[id] f = [ P.refl ]
 
-    [id]-[∘] : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ}
-               (f : [ T₁ ⟶ T₂ ] ρ̂) → [id] [∘] f ≅-⟶ f
-    [id]-[∘] f =
-      function-corresponds-cong P.refl P.refl
-        (P.cong [_] (ext₁ λ _ → ext₂ λ _ → P.proof-irrelevance _ _))
+  [∘]-[∘] :
+    ∀ {t₃ t₄} {T₃ : Term-like t₃} {T₄ : Term-like t₄}
+      {Γ Δ Ε Ζ} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} {ρ̂₃ : Ε ⇨̂ Ζ}
+    (f₃ : [ T₃ ⟶ T₄ ] ρ̂₃) (f₂ : [ T₂ ⟶ T₃ ] ρ̂₂)
+    (f₁ : [ T₁ ⟶ T₂ ] ρ̂₁) →
+    f₃ [∘] (f₂ [∘] f₁) ≅-⟶ (f₃ [∘] f₂) [∘] f₁
+  [∘]-[∘] f₃ f₂ f₁ = [ P.refl ]
 
-    [∘]-[id] : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ}
-               (f : [ T₁ ⟶ T₂ ] ρ̂) → f [∘] [id] ≅-⟶ f
-    [∘]-[id] f =
-      function-corresponds-cong P.refl P.refl
-        (P.cong [_] (ext₁ λ _ → ext₂ λ _ → P.proof-irrelevance _ _))
-
-    [∘]-[∘] :
-      ∀ {t₃ t₄} {T₃ : Term-like t₃} {T₄ : Term-like t₄}
-        {Γ Δ Ε Ζ} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} {ρ̂₃ : Ε ⇨̂ Ζ}
-      (f₃ : [ T₃ ⟶ T₄ ] ρ̂₃) (f₂ : [ T₂ ⟶ T₃ ] ρ̂₂)
-      (f₁ : [ T₁ ⟶ T₂ ] ρ̂₁) →
-      f₃ [∘] (f₂ [∘] f₁) ≅-⟶ (f₃ [∘] f₂) [∘] f₁
-    [∘]-[∘] f₃ f₂ f₁ =
-      function-corresponds-cong P.refl P.refl
-        (P.cong [_] (ext₁ λ _ → ext₂ λ _ → P.proof-irrelevance _ _))
-
-  open Dummy public
+open Dummy public

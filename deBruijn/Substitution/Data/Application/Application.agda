@@ -63,7 +63,7 @@ record Application
   app-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T₁ ρ̂₁}
                {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T₁ ρ̂₂} →
              ρ₁ ≅-⇨ ρ₂ → app ρ₁ ≅-⟶ app ρ₂
-  app-cong P.refl = P.refl
+  app-cong P.refl = [ P.refl ]
 
   /⊢-cong :
     ∀ {Γ₁ Δ₁ σ₁} {t₁ : Γ₁ ⊢₂ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T₁ ρ̂₁}
@@ -82,7 +82,7 @@ record Application
   app⋆-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρs₁ : Subs T₁ ρ̂₁}
                 {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρs₂ : Subs T₁ ρ̂₂} →
               ρs₁ ≅-⇨⋆ ρs₂ → app⋆ ρs₁ ≅-⟶ app⋆ ρs₂
-  app⋆-cong P.refl = P.refl
+  app⋆-cong P.refl = [ P.refl ]
 
   /⊢⋆-cong :
     ∀ {Γ₁ Δ₁ σ₁} {t₁ : Γ₁ ⊢₂ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρs₁ : Subs T₁ ρ̂₁}

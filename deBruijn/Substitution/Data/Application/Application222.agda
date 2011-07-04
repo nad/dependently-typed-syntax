@@ -159,7 +159,7 @@ record Application₂₂₂
       [ wk-subst₂ (ρ₁ ∘ ρ₂) ▻ var₂ · zero                             ]  ≡⟨ ▻⇨-cong P.refl lemma₁ lemma₂ ⟩
       [ map (app ρ₂↑) (map weaken₂[ σ / ρ₁ ] ρ₁) ▻ var₂ · zero /⊢ ρ₂↑ ]  ≡⟨ P.sym $
                                                                               map-▻ (app ρ₂↑) (wk-subst₂[ σ / ρ₁ ] ρ₁) (var₂ · zero) ⟩
-      [ map (app ρ₂↑) (wk-subst₂[ σ / ρ₁ ] ρ₁ ▻ var₂ · zero)          ]  ≡⟨ map-cong (P.refl {x = [ app ρ₂↑ ]})
+      [ map (app ρ₂↑) (wk-subst₂[ σ / ρ₁ ] ρ₁ ▻ var₂ · zero)          ]  ≡⟨ map-cong (app ρ₂↑ ∎-⟶)
                                                                                      (P.sym $ Simple.unfold-↑ simple₂ ρ₁) ⟩
       [ map (app ρ₂↑) (ρ₁ ↑₂)                                         ]  ≡⟨ P.refl ⟩
       [ ρ₁ ↑₂ ∘ ρ₂ ↑₁                                                 ]  ∎

@@ -112,7 +112,7 @@ record Application₂₁
   app∋⋆-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρs₁ : Subs T₁ ρ̂₁}
                  {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρs₂ : Subs T₁ ρ̂₂} →
                ρs₁ ≅-⇨⋆ ρs₂ → app∋⋆ ρs₁ ≅-⟶ app∋⋆ ρs₂
-  app∋⋆-cong P.refl = P.refl
+  app∋⋆-cong P.refl = [ P.refl ]
 
   /∋⋆-cong :
     ∀ {Γ₁ Δ₁ σ₁} {x₁ : Γ₁ ∋ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρs₁ : Subs T₁ ρ̂₁}
@@ -296,8 +296,7 @@ record Application₂₁
     map-trans-↑ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T₁ ρ̂) →
                   map trans (ρ ↑₁ σ) ≅-⇨ map trans ρ ↑₂ σ
     map-trans-↑ {σ = σ} ρ = begin
-      [ map trans (ρ ↑₁ σ)                                       ]  ≡⟨ map-cong (P.refl {x = [ trans ]})
-                                                                                (Simple.unfold-↑ simple₁ ρ) ⟩
+      [ map trans (ρ ↑₁ σ)                                       ]  ≡⟨ map-cong (trans ∎-⟶) (Simple.unfold-↑ simple₁ ρ) ⟩
       [ map trans (wk-subst₁[ σ / ρ ] ρ ▻ var₁ · zero)           ]  ≡⟨ map-▻ trans (wk-subst₁ ρ) _ ⟩
       [ map trans (wk-subst₁[ σ / ρ ] ρ) ▻ trans · (var₁ · zero) ]  ≡⟨ ▻⇨-cong P.refl (map-trans-wk-subst ρ) (trans-var zero) ⟩
       [ wk-subst₂ (map trans ρ) ▻ var₂ · zero                    ]  ≡⟨ P.sym $ Simple.unfold-↑ simple₂ (map trans ρ) ⟩

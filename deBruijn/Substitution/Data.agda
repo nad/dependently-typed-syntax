@@ -146,7 +146,7 @@ record Substitution₁ (T : Term-like (u ⊔ e))
                    var · suc[ σ ] x
       weaken-var x = begin
         [ app-renaming Renaming.wk · (var · x) ]  ≡⟨ app′-var Var-↦′ x Renaming.wk ⟩
-        [ var · (x /∋ Renaming.wk)             ]  ≡⟨ ·-cong (P.refl {x = [ var ]}) (Renaming./∋-wk x) ⟩
+        [ var · (x /∋ Renaming.wk)             ]  ≡⟨ ·-cong (var ∎-⟶) (Renaming./∋-wk x) ⟩
         [ var · suc x                          ]  ∎
 
   -- A translation of T′'s to T's, plus a bit more.
