@@ -36,17 +36,19 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     -- Weakens terms.
     weaken : ∀ {Γ} {σ : Type Γ} → [ T ⟶ T ] ŵk[ σ ]
 
+  -- A synonym.
+
+  weaken[_] : ∀ {Γ} (σ : Type Γ) → [ T ⟶ T ] ŵk[ σ ]
+  weaken[_] _ = weaken
+
+  field
+
     -- Takes variables to terms.
     var : [ Var ⟶⁼ T ]
 
     -- A property relating weaken and var.
     weaken-var : ∀ {Γ σ τ} (x : Γ ∋ τ) →
-                 weaken {σ = σ} · (var · x) ≅-⊢ var · suc {σ = σ} x
-
-  -- A synonym.
-
-  weaken[_] : ∀ {Γ} (σ : Type Γ) → [ T ⟶ T ] ŵk[ σ ]
-  weaken[ _ ] = weaken
+                 weaken[ σ ] · (var · x) ≅-⊢ var · suc[ σ ] x
 
   -- Weakens substitutions.
 

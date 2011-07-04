@@ -19,7 +19,7 @@ open Context Uni
 open TermLike Uni
 
 private
- module Dummy₁ {t} (T : TermLike.Term-like Uni t) where
+ module Dummy₁ {t} (T : Term-like t) where
 
   open Term-like T
 
@@ -95,7 +95,7 @@ open Dummy₁ public
 --           [ ⟦ t ⟧₁ /̂Val ρ₂                              ]  ∎)
 
 private
- module Dummy₂ {t} {T : TermLike.Term-like Uni t} where
+ module Dummy₂ {t} {T : Term-like t} where
 
   open Term-like T
 
@@ -242,7 +242,7 @@ private
 
   -- Some congruence lemmas.
 
-  ε⇨-cong : ∀ {Δ₁ Δ₂} → Δ₁ ≡ Δ₂ → ε⇨[ Δ₁ ] ≅-⇨ ε⇨[ Δ₂ ]
+  ε⇨-cong : ∀ {Δ₁ Δ₂} → Δ₁ ≅-Ctxt Δ₂ → ε⇨[ Δ₁ ] ≅-⇨ ε⇨[ Δ₂ ]
   ε⇨-cong P.refl = P.refl
 
   ▻⇨-cong :

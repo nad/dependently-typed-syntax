@@ -80,7 +80,7 @@ îd[ _ ] = îd
 infixl 9 _∘̂_
 
 _∘̂_ : ∀ {Γ Δ Ε} → Γ ⇨̂ Δ → Δ ⇨̂ Ε → Γ ⇨̂ Ε
-σ ∘̂ ρ̂ = σ ∘ ρ̂
+ρ̂₁ ∘̂ ρ̂₂ = ρ̂₁ ∘ ρ̂₂
 
 -- Application of context morphisms to types.
 
