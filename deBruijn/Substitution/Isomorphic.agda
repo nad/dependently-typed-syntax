@@ -5,79 +5,96 @@
 
 {-# OPTIONS --universe-polymorphism #-}
 
-import deBruijn.TermLike as TermLike
 open import Universe
 
 module deBruijn.Substitution.Isomorphic
-  {u e t} {Uni : Universe u e} (T : TermLike.Term-like Uni t) where
+  {u e} {Uni : Universe u e} where
 
 import deBruijn.Context as Context
-import deBruijn.Substitution.Data.Basics
-import deBruijn.Substitution.Function.Basics
+open import deBruijn.Substitution.Data.Basics as D using (ε; _▻_; [_])
+open import deBruijn.Substitution.Function.Basics as F
+  using (ε⇨; _▻⇨_) renaming (_▻⇨[_]_ to _▻⇨[_]F_)
+import deBruijn.TermLike as TermLike
 open import Function using (_$_)
-open import Function.Inverse using (_↔_)
+open import Function.Inverse using (Inverse)
 open import Level using (_⊔_)
-open import Relation.Binary.HeterogeneousEquality as H using (_≅_)
-open import Relation.Binary.PropositionalEquality as P using (_≡_)
+import Relation.Binary.PropositionalEquality as P
 
 open Context Uni
-private
-  open module DB = deBruijn.Substitution.Data.Basics T using (ε; _▻_)
-  open module FB = deBruijn.Substitution.Function.Basics T
-    using (ε⇨; _▻⇨_)
+open P.≡-Reasoning
+open TermLike Uni
 
 isomorphic :
-  P.Extensionality (e ⊔ u) (Level.suc (e ⊔ u ⊔ t)) →
-  ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → FB.Sub ρ̂ ↔ DB.Sub ρ̂
-isomorphic ext = record
-  { to         = P.→-to-⟶ (to _)
+  ∀ {t} {T : Term-like t} →
+  P.Extensionality (u ⊔ e) (u ⊔ e ⊔ t) →
+  ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} →
+  Inverse ([ Var ⟶ T ]-setoid ρ̂) (P.setoid $ D.Sub T ρ̂)
+isomorphic {T = T} ext = record
+  { to         = record { _⟨$⟩_ = to _
+                        ; cong  = λ ρ₁≅ρ₂ → D.≅-⇨-⇒-≡ $ to-cong ρ₁≅ρ₂
+                        }
   ; from       = P.→-to-⟶ from
   ; inverse-of = record
     { left-inverse-of  = from∘to _
-    ; right-inverse-of = to∘from
+    ; right-inverse-of = λ ρ → D.≅-⇨-⇒-≡ $ to∘from ρ
     }
   }
   where
-  to : ∀ Γ {Δ} {ρ̂ : Γ ⇨̂ Δ} → FB.Sub ρ̂ → DB.Sub ρ̂
+  to : ∀ Γ {Δ} {ρ̂ : Γ ⇨̂ Δ} → F.Sub T ρ̂ → D.Sub T ρ̂
   to ε               ρ = ε
   to (Γ ▻ σ) {ρ̂ = ρ̂} ρ =
-    P.subst (λ v → DB.Sub (t̂ail ρ̂ ▻̂ v))
-            (P.sym $ FB.head-lemma ρ)
-            (to Γ (FB.tail ρ) ▻ FB.head ρ)
+    P.subst (λ v → D.Sub T (t̂ail ρ̂ ▻̂ v))
+            (≅-Value-⇒-≡ $ P.sym $ F.head-lemma ρ)
+            (to Γ (F.tail ρ) ▻ F.head ρ)
 
-  from : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → DB.Sub ρ̂ → FB.Sub ρ̂
+  from : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → D.Sub T ρ̂ → F.Sub T ρ̂
   from ε       = ε⇨
   from (ρ ▻ t) = from ρ ▻⇨ t
 
-  from-cong : ∀ {Γ Δ} {ρ̂₁ ρ̂₂ : Γ ⇨̂ Δ}
-                {ρ₁ : DB.Sub ρ̂₁} {ρ₂ : DB.Sub ρ̂₂} →
-              ρ̂₁ ≡ ρ̂₂ → ρ₁ ≅ ρ₂ → from ρ₁ ≅ from ρ₂
-  from-cong P.refl H.refl = H.refl
+  to-▻ : ∀ {Γ Δ σ} {ρ̂ : Γ ▻ σ ⇨̂ Δ} (ρ : F.Sub T ρ̂) →
+         D._≅-⇨_ (to (Γ ▻ σ) ρ) (to Γ (F.tail ρ) ▻ F.head ρ)
+  to-▻ {ρ̂ = ρ̂} ρ =
+    D.drop-subst-Sub (λ v → t̂ail ρ̂ ▻̂ v)
+                     (≅-Value-⇒-≡ $ P.sym $ F.head-lemma ρ)
 
   abstract
 
-    from∘to : ∀ Γ {Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : FB.Sub ρ̂) → from (to Γ ρ) ≡ ρ
-    from∘to ε ρ = begin
-      ε⇨  ≡⟨ P.sym $ FB.ηε ext ρ ⟩
-      ρ   ∎
-      where open P.≡-Reasoning
-    from∘to (Γ ▻ σ) {ρ̂ = ρ̂} ρ = H.≅-to-≡ (begin
-      from (P.subst (λ v → DB.Sub (t̂ail ρ̂ ▻̂ v))
-                    (P.sym $ FB.head-lemma ρ)
-                    (to Γ (FB.tail ρ) ▻ FB.head ρ))  ≅⟨ from-cong (H.≅-to-≡ $ ▻̂-cong P.refl P.refl H.refl H.refl
-                                                                                     (H.≡-to-≅ $ FB.head-lemma ρ))
-                                                                  (H.≡-subst-removable (λ v → DB.Sub (t̂ail ρ̂ ▻̂ v))
-                                                                                       (P.sym $ FB.head-lemma ρ) _) ⟩
-      from (to Γ (FB.tail ρ) ▻ FB.head ρ)            ≡⟨ P.refl ⟩
-      from (to Γ (FB.tail ρ)) ▻⇨ FB.head ρ           ≅⟨ FB.▻⇨-cong P.refl P.refl H.refl H.refl
-                                                                   (H.≡-to-≅ $ from∘to Γ (FB.tail ρ))
-                                                                   (H.refl {x = FB.head ρ}) ⟩
-      FB.tail ρ ▻⇨ FB.head ρ                         ≅⟨ H.sym $ FB.η▻ ext ρ ⟩
-      ρ                                              ∎)
-      where open H.≅-Reasoning
+    to-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : F.Sub T ρ̂₁}
+                {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : F.Sub T ρ̂₂} →
+              F._≅-⇨_ ρ₁ ρ₂ → D._≅-⇨_ (to Γ₁ ρ₁) (to Γ₂ ρ₂)
+    to-cong {Γ₁ = ε}               {ρ₂ = ._ , _}     [ P.refl ] = P.refl
+    to-cong {Γ₁ = Γ ▻ σ} {ρ₁ = ρ₁} {ρ₂ = ._ , corr₂} [ P.refl ] =
+      let ρ₂ = [_⟶_].function ρ₁ , corr₂ in begin
+       [ to (Γ ▻ σ) ρ₁                ]  ≡⟨ to-▻ ρ₁ ⟩
+       [ to Γ (F.tail ρ₁) ▻ F.head ρ₁ ]  ≡⟨ D.▻⇨-cong P.refl (to-cong [ P.refl ]) P.refl ⟩
+       [ to Γ (F.tail ρ₂) ▻ F.head ρ₂ ]  ≡⟨ P.sym $ to-▻ ρ₂ ⟩
+       [ to (Γ ▻ σ) ρ₂                ]  ∎
 
-    to∘from : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : DB.Sub ρ̂) → to Γ (from ρ) ≡ ρ
-    to∘from ε       = P.refl
-    to∘from (ρ ▻ t) = H.≅-to-≡ $
-      DB.▻⇨-cong P.refl P.refl H.refl H.refl
-        (H.≡-to-≅ (to∘from ρ)) H.refl
+  from-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : D.Sub T ρ̂₁}
+                {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : D.Sub T ρ̂₂} →
+              D._≅-⇨_ ρ₁ ρ₂ → F._≅-⇨_ (from ρ₁) (from ρ₂)
+  from-cong P.refl = [ P.refl ]
+
+  abstract
+
+    from∘to : ∀ Γ {Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : F.Sub T ρ̂) →
+              F._≅-⇨_ (from (to Γ ρ)) ρ
+    from∘to ε ρ =
+      ε⇨  ≅-⟶⟨ sym-⟶ $ F.ηε ext ρ ⟩
+      ρ   ∎-⟶
+    from∘to (Γ ▻ σ) {ρ̂ = ρ̂} ρ =
+      from (to (Γ ▻ σ) ρ)                 ≅-⟶⟨ from-cong $ to-▻ ρ ⟩
+      from (to Γ (F.tail ρ) ▻ F.head ρ)   ≅-⟶⟨ _ ∎-⟶ ⟩
+      from (to Γ (F.tail ρ)) ▻⇨ F.head ρ  ≅-⟶⟨ F.▻⇨-cong P.refl (from∘to Γ (F.tail ρ)) P.refl ⟩
+      F.tail ρ ▻⇨ F.head ρ                ≅-⟶⟨ sym-⟶ $ F.η▻ ext ρ ⟩
+      ρ                                   ∎-⟶
+
+    to∘from : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : D.Sub T ρ̂) →
+              D._≅-⇨_ (to Γ (from ρ)) ρ
+    to∘from ε                 = P.refl
+    to∘from (_▻_ {σ = σ} ρ t) = begin
+      [ to (_ ▻ _) (from ρ ▻⇨ t)            ]  ≡⟨ to-▻ (from ρ ▻⇨ t) ⟩
+      [ to _ (F.tail (from ρ ▻⇨[ σ ]F t)) ▻
+        F.head (from ρ ▻⇨[ σ ]F t)          ]  ≡⟨ D.▻⇨-cong P.refl (to-cong [ P.refl ]) P.refl ⟩
+      [ to _ (from ρ) ▻ t                   ]  ≡⟨ D.▻⇨-cong P.refl (to∘from ρ) P.refl ⟩
+      [ ρ ▻ t                               ]  ∎

@@ -12,6 +12,7 @@ open import Data.Product
 import deBruijn.Context as Context
 open import Function
 open import Level using (_⊔_)
+open import Relation.Binary using (Setoid)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
 open Context Uni
@@ -209,6 +210,20 @@ module ≅-⟶-Reasoning
   sym-⟶ [ f₁≅f₂ ] = [ P.sym f₁≅f₂ ]
 
 open ≅-⟶-Reasoning public
+
+-- A setoid for [_⟶_].
+
+[_⟶_]-setoid : ∀ {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂) →
+             ∀ {Γ Δ} → Γ ⇨̂ Δ → Setoid _ _
+[ T₁ ⟶ T₂ ]-setoid ρ̂ = record
+  { Carrier       = [ T₁ ⟶ T₂ ] ρ̂
+  ; _≈_           = λ f₁ f₂ → f₁ ≅-⟶ f₂
+  ; isEquivalence = record
+    { refl  = _ ∎-⟶
+    ; sym   = sym-⟶
+    ; trans = λ p q → _ ≅-⟶⟨ p ⟩ q
+    }
+  }
 
 -- A congruence lemma.
 
