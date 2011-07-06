@@ -77,6 +77,16 @@ mutual
          Γ ⊢ k π ˢ σ ˢ c τ type
 
   -- Terms.
+  --
+  -- Note that the lambda is annotated with the (syntactic) type of
+  -- its domain. Reason: Without this annotation closed terms are not
+  -- guaranteed to have any syntactic type. Example (assuming
+  -- nat : U₀):
+  --
+  --   ƛ (var zero) : ε ⊢ k (U.π (U.el nat) (k (U.el nat)))
+  --
+  -- There is no corresponding syntactic type, because there is no
+  -- term t : ε ⊢ k U.⋆ such that ⟦ t ⟧ _ = nat.
 
   data _⊢_ (Γ : Ctxt) : Type Γ → Set where
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ
