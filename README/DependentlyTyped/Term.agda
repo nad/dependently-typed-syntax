@@ -4,7 +4,8 @@
 
 {-# OPTIONS --universe-polymorphism #-}
 
--- The code is parametrised by an arbitrary (small) universe.
+-- The code is parametrised by an arbitrary (small, unindexed)
+-- universe.
 
 import Level
 open import Universe
@@ -13,7 +14,7 @@ module README.DependentlyTyped.Term
   (Uni₀ : Universe Level.zero Level.zero)
   where
 
-open import Data.Product renaming (curry to c; uncurry to uc)
+open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 import deBruijn.Context
 import deBruijn.TermLike
 open import Function renaming (const to k)
@@ -32,25 +33,31 @@ record El₀ (a : U₀) : Set where
   field El : Universe.El Uni₀ (U₀.a a)
 
 ------------------------------------------------------------------------
--- A universe
+-- An indexed universe
 
--- This universe contains the universe above and is closed under
+-- A type which represents the "spine" of a universe code (or type).
+
+data Spine : Set where
+  ⋆ el : Spine
+  π    : (sp₁ sp₂ : Spine) → Spine
+
+-- The universe contains the universe above and is closed under
 -- Π-types.
 
 mutual
 
-  data U : Set where
-    ⋆  : U
-    el : (a : U₀) → U
-    π  : (a : U) (b : El a → U) → U
+  data U : Spine → Set where
+    ⋆  : U ⋆
+    el : (a : U₀) → U el
+    π  : ∀ {sp₁ sp₂} (a : U sp₁) (b : El a → U sp₂) → U (π sp₁ sp₂)
 
-  El : U → Set
+  El : ∀ {sp} → U sp → Set
   El ⋆       = U₀
   El (el a)  = El₀ a
   El (π a b) = (x : El a) → El (b x)
 
-Uni : Universe _ _
-Uni = record { U = U; El = El }
+Uni : Indexed-universe _ _ _
+Uni = record { I = Spine; U = U; El = El }
 
 ------------------------------------------------------------------------
 -- Contexts and variables
@@ -71,10 +78,11 @@ mutual
   -- Types.
 
   data _⊢_type (Γ : Ctxt) : Type Γ → Set where
-    ⋆  : Γ ⊢ k ⋆ type
-    el : (t : Γ ⊢ k ⋆) → Γ ⊢ k el ˢ ⟦ t ⟧ type
-    π  : ∀ {σ τ} (σ′ : Γ ⊢ σ type) (τ′ : Γ ▻ σ ⊢ τ type) →
-         Γ ⊢ k π ˢ σ ˢ c τ type
+    ⋆  : Γ ⊢ , k ⋆ type
+    el : (t : Γ ⊢ , k ⋆) → Γ ⊢ , k U.el ˢ ⟦ t ⟧ type
+    π  : ∀ {sp₁ sp₂ σ τ}
+         (σ′ : Γ ⊢ sp₁ , σ type) (τ′ : Γ ▻ (, σ) ⊢ sp₂ , τ type) →
+         Γ ⊢ , k U.π ˢ σ ˢ c τ type
 
   -- Terms.
   --
@@ -83,17 +91,19 @@ mutual
   -- guaranteed to have any syntactic type. Example (assuming
   -- nat : U₀):
   --
-  --   ƛ (var zero) : ε ⊢ k (U.π (U.el nat) (k (U.el nat)))
+  --   ƛ (var zero) : ε ⊢ , k (U.π (U.el nat) (k (U.el nat)))
   --
   -- There is no corresponding syntactic type, because there is no
-  -- term t : ε ⊢ k U.⋆ such that ⟦ t ⟧ _ = nat.
+  -- term t : ε ⊢ , k U.⋆ such that ⟦ t ⟧ _ = nat.
 
   data _⊢_ (Γ : Ctxt) : Type Γ → Set where
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ
     ƛ   : ∀ {σ τ}
-          (σ′ : Γ ⊢ σ type) (t : Γ ▻ σ ⊢ τ) → Γ ⊢ k U.π ˢ σ ˢ c τ
+          (σ′ : Γ ⊢ σ type) (t : Γ ▻ σ ⊢ τ) →
+          Γ ⊢ , k U.π ˢ indexed-type σ ˢ c (indexed-type τ)
     _·_ : ∀ {σ τ}
-          (t₁ : Γ ⊢ k U.π ˢ σ ˢ τ) (t₂ : Γ ⊢ σ) → Γ ⊢ uc τ /̂ ŝub ⟦ t₂ ⟧
+          (t₁ : Γ ⊢ , k U.π ˢ indexed-type σ ˢ proj₂ τ) (t₂ : Γ ⊢ σ) →
+          Γ ⊢ Prod.map id uc τ /̂ ŝub ⟦ t₂ ⟧
 
   -- Semantics of terms.
 
@@ -127,9 +137,9 @@ identity = ƛ ⋆ (ƛ (el (var zero)) (var zero))
 -- compact way.
 
 identity′ : ∀ {Γ} →
-            Γ ⊢ k U.π ˢ k U.⋆ ˢ
-                        c (k U.π ˢ (k U.el ˢ ⟦ var zero ⟧) ˢ
-                                   c (k U.el ˢ ⟦ var (suc zero) ⟧))
+            Γ ⊢ , k U.π ˢ k U.⋆ ˢ
+                          c (k U.π ˢ (k U.el ˢ ⟦ var zero ⟧) ˢ
+                                     c (k U.el ˢ ⟦ var (suc zero) ⟧))
 identity′ = ƛ ⋆ (ƛ (el (var zero)) (var zero))
 
 -- The polymorphic identity function applied to some variables from
@@ -145,6 +155,51 @@ identity· =
 -- used). However, with a curried τ the definition of identity·
 -- contains unsolved meta-variables (when a certain version of Agda is
 -- used).
+
+------------------------------------------------------------------------
+-- Projections
+
+-- Types with π-spines can be split up into a first and a second part.
+
+ifst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → IType Γ sp₁
+ifst σ γ with σ γ
+... | π a b = a
+
+fst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → Type Γ
+fst σ = , ifst σ
+
+isnd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
+       IType (Γ ▻ fst σ) sp₂
+isnd σ (γ , v) with σ γ
+... | π a b = b v
+
+snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) → Type (Γ ▻ fst σ)
+snd σ = , isnd σ
+
+abstract
+
+  -- The split is correct (assuming extensionality).
+
+  π-fst-snd :
+    P.Extensionality Level.zero Level.zero →
+    ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
+    σ ≡ k U.π ˢ ifst σ ˢ c (isnd σ)
+  π-fst-snd ext σ = ext helper
+    where
+    helper : ∀ γ → σ γ ≡ U.π (ifst σ γ) (λ v → isnd σ (γ , v))
+    helper γ with σ γ
+    helper γ | π a b = P.refl
+
+-- We can also project out the first and second components of a
+-- syntactic Π-type.
+
+fst′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
+       Γ ⊢ , σ type → Γ ⊢ fst σ type
+fst′ (π σ′ τ′) = σ′
+
+snd′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
+       Γ ⊢ , σ type → Γ ▻ fst σ ⊢ snd σ type
+snd′ (π σ′ τ′) = τ′
 
 ------------------------------------------------------------------------
 -- Equality
@@ -186,8 +241,10 @@ drop-subst-⊢-type f P.refl = P.refl
 -- application and abstraction.
 
 ˢ-cong :
-  ∀ {Γ₁ σ₁ τ₁} {f₁ : Value Γ₁ (k U.π ˢ σ₁ ˢ c τ₁)} {v₁ : Value Γ₁ σ₁}
-    {Γ₂ σ₂ τ₂} {f₂ : Value Γ₂ (k U.π ˢ σ₂ ˢ c τ₂)} {v₂ : Value Γ₂ σ₂} →
+  ∀ {Γ₁ σ₁ τ₁} {v₁ : Value Γ₁ σ₁}
+    {f₁ : Value Γ₁ (, k U.π ˢ indexed-type σ₁ ˢ c (indexed-type τ₁))}
+    {Γ₂ σ₂ τ₂} {v₂ : Value Γ₂ σ₂}
+    {f₂ : Value Γ₂ (, k U.π ˢ indexed-type σ₂ ˢ c (indexed-type τ₂))} →
   τ₁ ≅-Type τ₂ → f₁ ≅-Value f₂ → v₁ ≅-Value v₂ →
   f₁ ˢ v₁ ≅-Value f₂ ˢ v₂
 ˢ-cong P.refl P.refl P.refl = P.refl
@@ -202,8 +259,8 @@ curry-cong P.refl = P.refl
          Γ₁ ≅-Ctxt Γ₂ → ⋆ {Γ = Γ₁} ≅-type ⋆ {Γ = Γ₂}
 ⋆-cong P.refl = P.refl
 
-el-cong : ∀ {Γ₁} {t₁ : Γ₁ ⊢ k ⋆}
-            {Γ₂} {t₂ : Γ₂ ⊢ k ⋆} →
+el-cong : ∀ {Γ₁} {t₁ : Γ₁ ⊢ , k ⋆}
+            {Γ₂} {t₂ : Γ₂ ⊢ , k ⋆} →
           t₁ ≅-⊢ t₂ → el t₁ ≅-type el t₂
 el-cong P.refl = P.refl
 
@@ -226,6 +283,10 @@ var-cong P.refl = P.refl
 -- input equalities, at the cost of an extra input equality of type
 -- τ₁ ≅-Curried-Type τ₂. (_≅-Curried-Type_ has been removed.)
 
-·-cong : ∀ {Γ σ τ} {t₁₁ t₁₂ : Γ ⊢ k U.π ˢ σ ˢ τ} {t₂₁ t₂₂ : Γ ⊢ σ} →
-         t₁₁ ≅-⊢ t₁₂ → t₂₁ ≅-⊢ t₂₂ → t₁₁ · t₂₁ ≅-⊢ t₁₂ · t₂₂
+·-cong :
+  ∀ {Γ σ}
+    {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
+    {t₂₁ t₂₂ : Γ ⊢ σ}
+    {t₁₁ t₁₂ : Γ ⊢ , k U.π ˢ indexed-type σ ˢ proj₂ τ} →
+  t₁₁ ≅-⊢ t₁₂ → t₂₁ ≅-⊢ t₂₂ → t₁₁ · t₂₁ ≅-⊢ t₁₂ · t₂₂
 ·-cong P.refl P.refl = P.refl

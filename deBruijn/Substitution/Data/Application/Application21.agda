@@ -10,16 +10,16 @@
 {-# OPTIONS --universe-polymorphism #-}
 
 open import Universe
-open import deBruijn.Substitution.Data.Simple
-import deBruijn.TermLike as TermLike
 
 module deBruijn.Substitution.Data.Application.Application21
-  {u e} {Uni : Universe u e} where
+  {i u e} {Uni : Indexed-universe i u e} where
 
 import deBruijn.Context as Context
 open import deBruijn.Substitution.Data.Application.Application
 open import deBruijn.Substitution.Data.Basics
 open import deBruijn.Substitution.Data.Map
+open import deBruijn.Substitution.Data.Simple
+import deBruijn.TermLike as TermLike
 open import Function using (_$_)
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
@@ -42,7 +42,7 @@ record Application₂₁
 
   -- A translation from the first to the second kind of terms.
   (trans : [ T₁ ⟶⁼ T₂ ])
-  : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+  : Set (i ⊔ u ⊔ e ⊔ t₁ ⊔ t₂) where
 
   open Term-like T₁ using () renaming (_⊢_ to _⊢₁_; _≅-⊢_ to _≅-⊢₁_)
   open Term-like T₂ using ([_]) renaming (_⊢_ to _⊢₂_; _≅-⊢_ to _≅-⊢₂_)

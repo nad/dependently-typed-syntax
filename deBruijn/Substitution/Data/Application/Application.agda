@@ -7,7 +7,7 @@
 open import Universe
 
 module deBruijn.Substitution.Data.Application.Application
-  {u e} {Uni : Universe u e} where
+  {i u e} {Uni : Indexed-universe i u e} where
 
 import deBruijn.Context as Context
 open import deBruijn.Substitution.Data.Basics
@@ -25,7 +25,7 @@ open TermLike Uni
 record Application
   {t₁} (T₁ : Term-like t₁)
   {t₂} (T₂ : Term-like t₂) :
-  Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+  Set (i ⊔ u ⊔ e ⊔ t₁ ⊔ t₂) where
 
   open Term-like T₂ renaming (_⊢_ to _⊢₂_; _≅-⊢_ to _≅-⊢₂_)
 

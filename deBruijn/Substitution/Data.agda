@@ -6,7 +6,8 @@
 
 open import Universe
 
-module deBruijn.Substitution.Data {u e} {Uni : Universe u e} where
+module deBruijn.Substitution.Data
+  {i u e} {Uni : Indexed-universe i u e} where
 
 import deBruijn.Context as Context
 import deBruijn.TermLike as TermLike
@@ -64,7 +65,7 @@ module Renaming where
 -- A translation of T₁'s to T₂'s, plus a bit more.
 
 record _↦_ {t₁} (T₁ : Term-like t₁)
-           {t₂} (T₂ : Term-like t₂) : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+           {t₂} (T₂ : Term-like t₂) : Set (i ⊔ u ⊔ e ⊔ t₁ ⊔ t₂) where
   field
     -- Translates T₁'s to T₂'s.
     trans : [ T₁ ⟶⁼ T₂ ]
@@ -86,12 +87,12 @@ record _↦_ {t₁} (T₁ : Term-like t₁)
 
 -- "Term" substitutions.
 
--- For simplicity I have chosen to use the universe level (u ⊔ e)
+-- For simplicity I have chosen to use the universe level (i ⊔ u ⊔ e)
 -- here; this is the level of Var. The code could perhaps be made more
 -- general.
 
-record Substitution₁ (T : Term-like (u ⊔ e))
-                     : Set (Level.suc (u ⊔ e)) where
+record Substitution₁ (T : Term-like (i ⊔ u ⊔ e))
+                     : Set (Level.suc (i ⊔ u ⊔ e)) where
 
   open Term-like T
 
@@ -101,12 +102,12 @@ record Substitution₁ (T : Term-like (u ⊔ e))
 
     -- Applies substitutions, which contain things which can be
     -- translated to terms, to terms.
-    app′ : {T′ : Term-like (u ⊔ e)} → T′ ↦ T →
+    app′ : {T′ : Term-like (i ⊔ u ⊔ e)} → T′ ↦ T →
            ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T′ ρ̂ → [ T ⟶ T ] ρ̂
 
     -- A property relating app′ and var.
     app′-var :
-      ∀ {T′ : Term-like (u ⊔ e)} {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
+      ∀ {T′ : Term-like (i ⊔ u ⊔ e)} {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
       (T′↦T : T′ ↦ T) (x : Γ ∋ σ) (ρ : Sub T′ ρ̂) →
       app′ T′↦T ρ · (var · x) ≅-⊢ _↦_.trans T′↦T · (x /∋ ρ)
 
@@ -145,7 +146,8 @@ record Substitution₁ (T : Term-like (u ⊔ e))
 
   -- A translation of T′'s to T's, plus a bit more.
 
-  record Translation-from (T′ : Term-like (u ⊔ e)) : Set (u ⊔ e) where
+  record Translation-from (T′ : Term-like (i ⊔ u ⊔ e))
+                          : Set (i ⊔ u ⊔ e) where
 
     field
       translation : T′ ↦ T
@@ -200,8 +202,8 @@ record Substitution₁ (T : Term-like (u ⊔ e))
     ; trans-var    = λ _ → P.refl
     }
 
-record Substitution₂ (T : Term-like (u ⊔ e))
-                     : Set (Level.suc (u ⊔ e)) where
+record Substitution₂ (T : Term-like (i ⊔ u ⊔ e))
+                     : Set (Level.suc (i ⊔ u ⊔ e)) where
 
   open Term-like T
 
@@ -214,7 +216,7 @@ record Substitution₂ (T : Term-like (u ⊔ e))
     -- Lifts equalities valid for all variables and liftings to
     -- arbitrary terms.
     var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆′ :
-      {T₁ T₂ : Term-like (u ⊔ e)}
+      {T₁ T₂ : Term-like (i ⊔ u ⊔ e)}
       (T₁↦T : Translation-from T₁) (T₂↦T : Translation-from T₂) →
 
       let open Translation-from T₁↦T
@@ -232,7 +234,7 @@ record Substitution₂ (T : Term-like (u ⊔ e))
   -- substitutions one can define an Application₂₂ record.
 
   application₂₂ :
-    {T′ : Term-like (u ⊔ e)} (T′↦T : Translation-from T′) →
+    {T′ : Term-like (i ⊔ u ⊔ e)} (T′↦T : Translation-from T′) →
     let open Translation-from T′↦T
           using (trans) renaming (simple to simple′) in
     Application₂₂ simple′ simple trans

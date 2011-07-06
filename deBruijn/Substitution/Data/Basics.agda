@@ -8,7 +8,7 @@ import deBruijn.TermLike as TermLike
 open import Universe
 
 module deBruijn.Substitution.Data.Basics
-  {u e} {Uni : Universe u e} where
+  {i u e} {Uni : Indexed-universe i u e} where
 
 import deBruijn.Context as Context
 open import Function using (id; _∘_; _$_)
@@ -27,7 +27,7 @@ private
 
   -- Substitutions, represented as sequences of terms.
 
-  data Sub : ∀ {Γ Δ} → Γ ⇨̂ Δ → Set (u ⊔ e ⊔ t) where
+  data Sub : ∀ {Γ Δ} → Γ ⇨̂ Δ → Set (i ⊔ u ⊔ e ⊔ t) where
     ε   : ∀ {Δ} → Sub ε̂[ Δ ]
     _▻_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
           (ρ : Sub ρ̂) (t : Δ ⊢ σ /̂ ρ̂) → Sub (ρ̂ ▻̂[ σ ] ⟦ t ⟧)
@@ -35,7 +35,7 @@ private
   -- A sequence of matching substitutions. (The reflexive transitive
   -- closure of Sub.)
 
-  data Subs {Γ} : ∀ {Δ} → Γ ⇨̂ Δ → Set (u ⊔ e ⊔ t) where
+  data Subs {Γ} : ∀ {Δ} → Γ ⇨̂ Δ → Set (i ⊔ u ⊔ e ⊔ t) where
     ε   : Subs îd[ Γ ]
     _▻_ : ∀ {Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε}
           (ρs : Subs ρ̂₁) (ρ : Sub ρ̂₂) → Subs (ρ̂₁ ∘̂ ρ̂₂)
@@ -115,7 +115,7 @@ private
 
   -- Equality of substitutions.
 
-  record [⇨] : Set (u ⊔ e ⊔ t) where
+  record [⇨] : Set (i ⊔ u ⊔ e ⊔ t) where
     constructor [_]
     field
       {Γ Δ} : Ctxt
@@ -142,7 +142,7 @@ private
 
   -- Equality of sequences of substitutions.
 
-  record [⇨⋆] : Set (u ⊔ e ⊔ t) where
+  record [⇨⋆] : Set (i ⊔ u ⊔ e ⊔ t) where
     constructor [_]
     field
       {Γ Δ} : Ctxt

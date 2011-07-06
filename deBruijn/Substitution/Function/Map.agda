@@ -8,8 +8,7 @@ import deBruijn.TermLike as TermLike
 open import Universe
 
 module deBruijn.Substitution.Function.Map
-  {u e} {Uni : Universe u e}
-  where
+  {i u e} {Uni : Indexed-universe i u e} where
 
 import deBruijn.Context as Context
 open import deBruijn.Substitution.Function.Basics

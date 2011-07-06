@@ -11,8 +11,7 @@
 open import Universe
 
 module deBruijn.Substitution.Data.Simple
-  {u e} {Uni : Universe u e}
-  where
+  {i u e} {Uni : Indexed-universe i u e} where
 
 import deBruijn.Context as Context
 open import deBruijn.Substitution.Data.Basics
@@ -28,7 +27,7 @@ open TermLike Uni
 
 -- Simple substitutions.
 
-record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
+record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
 
   open Term-like T
 

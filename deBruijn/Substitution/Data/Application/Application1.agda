@@ -7,7 +7,7 @@
 open import Universe
 
 module deBruijn.Substitution.Data.Application.Application1
-  {u e} {Uni : Universe u e} where
+  {i u e} {Uni : Indexed-universe i u e} where
 
 import deBruijn.Context as Context
 open import deBruijn.Substitution.Data.Application.Application22
@@ -27,7 +27,7 @@ open TermLike Uni
 -- the application operator is assumed to be homogeneous, so some
 -- previously proved lemmas can be stated in a less complicated way.
 
-record Application₁ {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
+record Application₁ {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
 
   open Term-like T
 

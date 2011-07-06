@@ -7,7 +7,7 @@
 open import Universe
 
 module deBruijn.Substitution.Data.Application.Application22
-  {u e} {Uni : Universe u e}
+  {i u e} {Uni : Indexed-universe i u e}
   where
 
 import deBruijn.Context as Context
@@ -39,7 +39,7 @@ record Application₂₂
 
   -- A translation from the first to the second kind of terms.
   (trans : [ T₁ ⟶⁼ T₂ ])
-  : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+  : Set (i ⊔ u ⊔ e ⊔ t₁ ⊔ t₂) where
 
   open Term-like T₂ renaming (_⊢_ to _⊢₂_; _≅-⊢_ to _≅-⊢₂_)
   open Simple simple₁

@@ -11,9 +11,9 @@
 
 open import Universe
 
-module deBruijn.Context {u e} (Uni : Universe u e) where
+module deBruijn.Context {i u e} (Uni : Indexed-universe i u e) where
 
-open Universe.Universe Uni
+open Indexed-universe Uni
 
 open import Data.Empty
 open import Data.Product as Prod
@@ -33,25 +33,40 @@ mutual
 
   infixl 5 _▻_
 
-  data Ctxt : Set (u ⊔ e) where
+  data Ctxt : Set (i ⊔ u ⊔ e) where
     ε   : Ctxt
     _▻_ : (Γ : Ctxt) (σ : Type Γ) → Ctxt
 
-  -- Semantic types: maps from environments to universe codes.
+  -- Semantic types: maps from environments to universe codes. The
+  -- semantic types come in two flavours: indexed and unindexed
+  -- (paired up with an index).
 
-  Type : Ctxt → Set (u ⊔ e)
-  Type Γ = Env Γ → U
+  IType : Ctxt → I → Set (u ⊔ e)
+  IType Γ i = Env Γ → U i
+
+  Type : Ctxt → Set (i ⊔ u ⊔ e)
+  Type Γ = ∃ λ i → IType Γ i
+
+  -- Extracts the index from an unindexed type.
+
+  index : ∀ {Γ} → Type Γ → I
+  index = proj₁
+
+  -- Converts a type to an indexed type.
+
+  indexed-type : ∀ {Γ} (σ : Type Γ) → IType Γ (index σ)
+  indexed-type = proj₂
 
   -- Interpretation of contexts: environments.
 
   Env : Ctxt → Set e
   Env ε       = Lift ⊤
-  Env (Γ ▻ σ) = Σ (Env Γ) λ γ → El (σ γ)
+  Env (Γ ▻ σ) = Σ (Env Γ) λ γ → El (indexed-type σ γ)
 
 -- Semantic values: maps from environments to universe values.
 
 Value : (Γ : Ctxt) → Type Γ → Set _
-Value Γ σ = (γ : Env Γ) → El (σ γ)
+Value Γ σ = (γ : Env Γ) → El (indexed-type σ γ)
 
 ------------------------------------------------------------------------
 -- Context morphisms
@@ -87,7 +102,7 @@ _∘̂_ : ∀ {Γ Δ Ε} → Γ ⇨̂ Δ → Δ ⇨̂ Ε → Γ ⇨̂ Ε
 infixl 8 _/̂_
 
 _/̂_ : ∀ {Γ Δ} → Type Γ → Γ ⇨̂ Δ → Type Δ
-σ /̂ ρ̂ = σ ∘ ρ̂
+(i , σ) /̂ ρ̂ = (i , σ ∘ ρ̂)
 
 -- Application of context morphisms to values.
 
@@ -155,7 +170,7 @@ _↑̂ : ∀ {Γ Δ σ} (ρ̂ : Γ ⇨̂ Δ) → Γ ▻ σ ⇨̂ Δ ▻ σ /̂ �
 
 infix 4 _∋_
 
-data _∋_ : (Γ : Ctxt) → Type Γ → Set (u ⊔ e) where
+data _∋_ : (Γ : Ctxt) → Type Γ → Set (i ⊔ u ⊔ e) where
   zero : ∀ {Γ σ}               → Γ ▻ σ ∋ σ /̂ ŵk
   suc  : ∀ {Γ σ τ} (x : Γ ∋ τ) → Γ ▻ σ ∋ τ /̂ ŵk
 
@@ -187,7 +202,7 @@ mutual
 
   infixl 5 _▻_
 
-  data Ctxt⁺ (Γ : Ctxt) : Set (u ⊔ e) where
+  data Ctxt⁺ (Γ : Ctxt) : Set (i ⊔ u ⊔ e) where
     ε   : Ctxt⁺ Γ
     _▻_ : (Γ⁺ : Ctxt⁺ Γ) (σ : Type (Γ ++ Γ⁺)) → Ctxt⁺ Γ
 
@@ -239,7 +254,7 @@ _≅-Ctxt_ : Ctxt → Ctxt → Set _
 -- new one. This meant that proofs using various congruences became
 -- unnecessarily large and complicated.
 
-record [Type] : Set (u ⊔ e) where
+record [Type] : Set (i ⊔ u ⊔ e) where
   constructor [_]
   field
     {Γ} : Ctxt
@@ -267,7 +282,7 @@ drop-subst-Type f P.refl = P.refl
 
 -- Equality of values.
 
-record [Value] : Set (u ⊔ e) where
+record [Value] : Set (i ⊔ u ⊔ e) where
   constructor [_]
   field
     {Γ} : Ctxt
@@ -284,7 +299,7 @@ v₁ ≅-Value v₂ = [Value].[_] v₁ ≡ [ v₂ ]
 
 -- Equality of context morphisms.
 
-record [⇨̂] : Set (u ⊔ e) where
+record [⇨̂] : Set (i ⊔ u ⊔ e) where
   constructor [_]
   field
     {Γ Δ} : Ctxt
@@ -300,7 +315,7 @@ _≅-⇨̂_ : ∀ {Γ₁ Δ₁} (ρ̂₁ : Γ₁ ⇨̂ Δ₁)
 
 -- Equality of variables.
 
-record [∋] : Set (u ⊔ e) where
+record [∋] : Set (i ⊔ u ⊔ e) where
   constructor [_]
   field
     {Γ} : Ctxt
@@ -317,7 +332,7 @@ x₁ ≅-∋ x₂ = [∋].[_] x₁ ≡ [ x₂ ]
 
 -- Equality of context extensions.
 
-record [Ctxt⁺] : Set (u ⊔ e) where
+record [Ctxt⁺] : Set (i ⊔ u ⊔ e) where
   constructor [_]
   field
     {Γ} : Ctxt
@@ -486,6 +501,12 @@ suc-cong P.refl P.refl = P.refl
 
 ------------------------------------------------------------------------
 -- Some properties which hold definitionally
+
+-- _/̂_ preserves the index.
+
+index-/̂ : ∀ {Γ Δ} (σ : Type Γ) (ρ̂ : Γ ⇨̂ Δ) →
+          index (σ /̂ ρ̂) ≡ index σ
+index-/̂ σ ρ̂ = P.refl
 
 -- îd and _∘̂_ form a monoid.
 

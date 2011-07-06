@@ -6,7 +6,7 @@
 
 open import Universe
 
-module deBruijn.TermLike {u e} (Uni : Universe u e) where
+module deBruijn.TermLike {i u e} (Uni : Indexed-universe i u e) where
 
 open import Data.Product
 import deBruijn.Context as Context
@@ -21,7 +21,7 @@ open P.≡-Reasoning
 ------------------------------------------------------------------------
 -- Term-like things
 
-record Term-like ℓ : Set (u ⊔ e ⊔ Level.suc ℓ) where
+record Term-like ℓ : Set (i ⊔ u ⊔ e ⊔ Level.suc ℓ) where
   infix 4 _⊢_
   field
     _⊢_ : (Γ : Ctxt) → Type Γ → Set ℓ
@@ -29,7 +29,7 @@ record Term-like ℓ : Set (u ⊔ e ⊔ Level.suc ℓ) where
 
   -- Equality of term-like things.
 
-  record [⊢] : Set (u ⊔ e ⊔ ℓ) where
+  record [⊢] : Set (i ⊔ u ⊔ e ⊔ ℓ) where
     constructor [_]
     field
       {Γ} : Ctxt
@@ -76,7 +76,7 @@ Var = record { _⊢_ = _∋_; ⟦_⟧ = lookup }
 -- the application of a given context morphism
 
 record [_⟶_] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
-             {Γ Δ : Ctxt} (ρ̂ : Γ ⇨̂ Δ) : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+             {Γ Δ : Ctxt} (ρ̂ : Γ ⇨̂ Δ) : Set (i ⊔ u ⊔ e ⊔ t₁ ⊔ t₂) where
   constructor _,_
 
   open Term-like T₁ renaming (_⊢_ to _⊢₁_; ⟦_⟧ to ⟦_⟧₁)
@@ -156,7 +156,7 @@ lift {Γ} {Δ} {ρ̂} f (Γ⁺ ▻ σ) = record
 -- "corresponds" proof into account.
 
 record [⟶] {t₁ t₂} (T₁ : Term-like t₁) (T₂ : Term-like t₂)
-           : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+           : Set (i ⊔ u ⊔ e ⊔ t₁ ⊔ t₂) where
   constructor [_]
   open Term-like T₁ renaming (_⊢_ to _⊢₁_)
   open Term-like T₂ renaming (_⊢_ to _⊢₂_)
@@ -179,7 +179,7 @@ record _≅-⟶_
   {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂}
   {Γ₁ Δ₁ : Ctxt} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} (f₁ : [ T₁ ⟶ T₂ ] ρ̂₁)
   {Γ₂ Δ₂ : Ctxt} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} (f₂ : [ T₁ ⟶ T₂ ] ρ̂₂)
-  : Set (u ⊔ e ⊔ t₁ ⊔ t₂) where
+  : Set (i ⊔ u ⊔ e ⊔ t₁ ⊔ t₂) where
   constructor [_]
   field
     [f₁]⟶≡[f₂]⟶ : [ f₁ ]⟶ ≡ [ f₂ ]⟶
@@ -246,7 +246,7 @@ abstract
     let open Term-like T₁ renaming (_⊢_ to _⊢₁_)
         open Term-like T₂ renaming (_≅-⊢_ to _≅-⊢₂_)
     in
-    P.Extensionality (u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
+    P.Extensionality (i ⊔ u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
     ∀ {Γ Δ₁} {ρ̂₁ : Γ ⇨̂ Δ₁} {f₁ : [ T₁ ⟶ T₂ ] ρ̂₁}
         {Δ₂} {ρ̂₂ : Γ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} →
     ρ̂₁ ≅-⇨̂ ρ̂₂ → (∀ {σ} (t : Γ ⊢₁ σ) → f₁ · t ≅-⊢₂ f₂ · t) →
@@ -256,18 +256,18 @@ abstract
     where
     open Term-like T₂ using () renaming (≅-⊢-⇒-≡ to ≅-⊢₂-⇒-≡)
 
-    ext₁ : P.Extensionality (u ⊔ e) (t₁ ⊔ t₂)
+    ext₁ : P.Extensionality (i ⊔ u ⊔ e) (t₁ ⊔ t₂)
     ext₁ = P.extensionality-for-lower-levels t₁ Level.zero ext
 
     ext₂ : P.Extensionality t₁ t₂
-    ext₂ = P.extensionality-for-lower-levels (u ⊔ e) t₁ ext
+    ext₂ = P.extensionality-for-lower-levels (i ⊔ u ⊔ e) t₁ ext
 
   extensional-equality₂ :
     ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} →
     let open Term-like T₁ renaming (_≅-⊢_ to _≅-⊢₁_; _⊢_ to _⊢₁_)
         open Term-like T₂ renaming (_≅-⊢_ to _≅-⊢₂_)
     in
-    P.Extensionality (u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
+    P.Extensionality (i ⊔ u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
     ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {f₁ : [ T₁ ⟶ T₂ ] ρ̂₁}
       {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} →
     ρ̂₁ ≅-⇨̂ ρ̂₂ →

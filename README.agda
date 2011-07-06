@@ -76,22 +76,23 @@ import deBruijn.Substitution.Isomorphic
 
 import README.DependentlyTyped.Term
 
--- Substitutions.
-
-import README.DependentlyTyped.Substitution
-
 -- Normal and neutral terms.
 
 import README.DependentlyTyped.NormalForm
 
+-- Instantiation of deBruijn.Substitution.Data for terms.
+
+import README.DependentlyTyped.Term.Substitution
+
+-- Instantiation of deBruijn.Substitution.Data for normal and neutral
+-- terms.
+
+import README.DependentlyTyped.NormalForm.Substitution
+
 -- A proof showing that the type of every closed term exists in
--- syntactic form (assuming extensionality).
+-- syntactic form.
 
 import README.DependentlyTyped.TypeOf
-
--- Spines.
-
-import README.DependentlyTyped.Spine
 
 -- A Kripke model (unfinished).
 
