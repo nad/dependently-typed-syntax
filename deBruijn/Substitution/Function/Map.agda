@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Map for substitutions
+-- A map function for the substitutions
 ------------------------------------------------------------------------
 
 {-# OPTIONS --universe-polymorphism #-}

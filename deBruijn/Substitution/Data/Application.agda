@@ -2,6 +2,11 @@
 -- Application of substitutions
 ------------------------------------------------------------------------
 
+-- Given an operation which applies a substitution to a term, subject
+-- to some conditions, more operations and lemmas are defined/proved.
+
+-- (This module reexports various other modules.)
+
 {-# OPTIONS --universe-polymorphism #-}
 
 open import Universe

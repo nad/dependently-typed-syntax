@@ -1,9 +1,10 @@
 ------------------------------------------------------------------------
--- Some simple substitutions
+-- Some simple substitution combinators
 ------------------------------------------------------------------------
 
 -- Given a term type which supports weakening and transformation of
--- variables to terms one can define various substitutions.
+-- variables to terms various substitutions are defined and various
+-- lemmas proved.
 
 {-# OPTIONS --universe-polymorphism #-}
 

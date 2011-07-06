@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Contexts, variables, substitutions, etc.
+-- Contexts, variables, context morphisms, etc.
 ------------------------------------------------------------------------
 
 {-# OPTIONS --universe-polymorphism #-}

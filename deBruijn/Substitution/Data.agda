@@ -1,14 +1,8 @@
 ------------------------------------------------------------------------
--- Substitutions
+-- Parallel substitutions (defined using an inductive family)
 ------------------------------------------------------------------------
 
 {-# OPTIONS --universe-polymorphism #-}
-
--- Uses a variant of Conor McBride's technique from "Type-Preserving
--- Renaming and Substitution".
-
--- TODO: See MMM for an example of how this module can be used: a
--- definition of substitution for the untyped λ-calculus.
 
 open import Universe
 

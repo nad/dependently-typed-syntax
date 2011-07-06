@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Substitutions containing certain term-like things
+-- Parallel substitutions (defined using an inductive family)
 ------------------------------------------------------------------------
 
 {-# OPTIONS --universe-polymorphism #-}
