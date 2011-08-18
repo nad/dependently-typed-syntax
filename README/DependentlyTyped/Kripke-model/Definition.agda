@@ -6,10 +6,14 @@
 -- actually forms a Kripke model.
 
 import Level
+open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Universe
+
+-- The code assumes that equality of functions is extensional.
 
 module README.DependentlyTyped.Kripke-model.Definition
   {Uni₀ : Universe Level.zero Level.zero}
+  (ext : P.Extensionality Level.zero Level.zero)
   where
 
 open import Data.Product renaming (curry to c; uncurry to uc)
@@ -18,91 +22,110 @@ open import Function as F using (_ˢ_; _$_) renaming (const to k)
 open import README.DependentlyTyped.NormalForm
 open import README.DependentlyTyped.NormalForm.Substitution
 import README.DependentlyTyped.Term as Term; open Term Uni₀
-open import README.DependentlyTyped.Term.Substitution
-import Relation.Binary.PropositionalEquality as P
 
 open P.≡-Reasoning
+
+-- A wrapper which is used to make V̌alue "constructor-headed", which
+-- in turn makes Agda infer more types for us.
+
+infix 4 _⊢_⟨ne⟩
+
+record _⊢_⟨ne⟩ (Γ : Ctxt) (σ : Type Γ) : Set where
+  constructor [_]
+  field t : Γ ⊢ σ ⟨ ne ⟩
 
 mutual
 
   -- The Kripke model.
 
-  V̌alue : ∀ Γ {σ} → Γ ⊢ σ type → Set
-  V̌alue Γ ⋆         = Γ ⊢ , k ⋆ ⟨ ne ⟩
-  V̌alue Γ (el t)    = Γ ⊢ , k U.el ˢ ⟦ t ⟧ ⟨ ne ⟩
-  V̌alue Γ (π σ′ τ′) =
+  V̌alue : ∀ Γ (σ : Type Γ) → Set
+  V̌alue Γ (⋆         , σ) = Γ ⊢ ⋆  , σ ⟨ ne ⟩
+  V̌alue Γ (el        , σ) = Γ ⊢ el , σ ⟨ne⟩
+  V̌alue Γ (π sp₁ sp₂ , σ) =
     (Γ⁺ : Ctxt⁺ Γ)
-    (v : V̌alue (Γ ++ Γ⁺) (σ′ /⊢t wk⁺ Γ⁺)) →
-    V̌alue (Γ ++ Γ⁺)
-      (τ′ /⊢t wk⁺ Γ⁺ ↑ ∘ sub ⌊ řeify (σ′ /⊢t wk⁺ Γ⁺) v ⌋)
+    (v : V̌alue (Γ ++ Γ⁺) (sp₁ , ifst σ /̂I ŵk⁺ Γ⁺)) →
+    V̌alue (Γ ++ Γ⁺) (sp₂ , isnd σ /̂I ŵk⁺ Γ⁺ ↑̂ ∘̂ ŝub ⟦ řeify sp₁ v ⟧n)
+
+  -- Neutral terms can be turned into normal terms using reflection
+  -- followed by reification.
+
+  ňeutral-to-normal :
+    ∀ {Γ} sp {σ} → Γ ⊢ sp , σ ⟨ ne ⟩ → Γ ⊢ sp , σ ⟨ no ⟩
+  ňeutral-to-normal sp t = řeify sp (řeflect sp t)
+
+  -- A normal term corresponding to variable zero.
+
+  žero : ∀ {Γ} sp σ → Γ ▻ (sp , σ) ⊢ sp , σ /̂I ŵk ⟨ no ⟩
+  žero sp σ = ňeutral-to-normal sp (var zero[ , σ ])
 
   -- Reification.
 
-  řeify : ∀ {Γ sp σ} (σ′ : Γ ⊢ sp , σ type) →
-          V̌alue Γ σ′ → Γ ⊢ sp , σ ⟨ no ⟩
-  řeify     ⋆                         t = ne ⋆       t
-  řeify     (el t′)                   t = ne (el t′) t
-  řeify {Γ} (π {σ = σ} {τ = τ} σ′ τ′) f =
-    ƛ σ′ (P.subst (λ τ → Γ ▻ (, σ) ⊢ τ ⟨ no ⟩)
-                  (≅-Type-⇒-≡ $ /̂-ŵk-↑̂-∘̂-ŝub σ′ (, τ))
-                  (řeify (τ′ /⊢t ρ) (f (ε ▻ (, σ)) v)))
+  řeify : ∀ {Γ} sp {σ} → V̌alue Γ (sp , σ) → Γ ⊢ sp , σ ⟨ no ⟩
+  řeify     ⋆               t     = ne ⋆  t
+  řeify     el              [ t ] = ne el t
+  řeify {Γ} (π sp₁ sp₂) {σ} f     = cast $
+    ƛ (řeify sp₂ (f (ε ▻ fst σ) (řeflect sp₁ (var zero))))
     where
-    v = řeflect (σ′ /⊢t wk) (var zero)
-    ρ = wk ↑ ∘ sub ⌊ řeify (σ′ /⊢t wk) v ⌋
+    cast = P.subst (λ σ → Γ ⊢ π sp₁ sp₂ , σ ⟨ no ⟩)
+                   (ifst-isnd-ŵk-ŝub-žero sp₁ σ)
 
   -- Reflection.
 
-  řeflect : ∀ {Γ sp σ} (σ′ : Γ ⊢ sp , σ type) →
-            Γ ⊢ sp , σ ⟨ ne ⟩ → V̌alue Γ σ′
-  řeflect ⋆         t = t
-  řeflect (el t′)   t = t
-  řeflect (π σ′ τ′) t = λ Γ⁺ v →
-    řeflect (τ′ /⊢t wk⁺ Γ⁺ ↑ ∘ sub ⌊ řeify (σ′ /⊢t wk⁺ Γ⁺) v ⌋)
-            ((t /⊢n Renaming.wk⁺ Γ⁺) · řeify (σ′ /⊢t wk⁺ Γ⁺) v)
+  řeflect : ∀ {Γ} sp {σ} → Γ ⊢ sp , σ ⟨ ne ⟩ → V̌alue Γ (sp , σ)
+  řeflect     ⋆               t = t
+  řeflect     el              t = [ t ]
+  řeflect {Γ} (π sp₁ sp₂) {σ} t = λ Γ⁺ v →
+    řeflect sp₂ ((cast t /⊢n Renaming.wk⁺ Γ⁺) · řeify sp₁ v)
+    where
+    cast = P.subst (λ σ → Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩) (π-fst-snd ext σ)
 
   abstract
 
-    -- A given context morphism is equal to the identity.
+    -- A lemma.
 
-    /̂-ŵk-↑̂-∘̂-ŝub :
-      ∀ {Γ sp σ} (σ′ : Γ ⊢ sp , σ type) (τ : Type (Γ ▻ (sp , σ))) →
-      let t′ = řeify (σ′ /⊢t wk[ sp , σ ])
-                 (řeflect (σ′ /⊢t wk) (var zero)) in
-      τ /̂ ŵk ↑̂ ∘̂ ŝub ⟦ t′ ⟧n ≅-Type τ
-    /̂-ŵk-↑̂-∘̂-ŝub σ′ τ = /̂-cong (P.refl {x = [ τ ]}) (begin
-      [ ŵk ↑̂ ∘̂ ŝub ⟦ řeify (σ′ /⊢t wk)
-                       (řeflect (σ′ /⊢t wk) (var zero)) ⟧n ]  ≡⟨ ∘̂-cong (P.refl {x = [ ŵk ↑̂ ]})
-                                                                        (ŝub-cong (řeify∘řeflect (σ′ /⊢t wk) (var zero))) ⟩
-      [ ŵk ↑̂ ∘̂ ŝub ⟦ var zero ⟧n ]                            ≡⟨ P.refl ⟩
-      [ îd ]                                                  ∎)
+    ifst-isnd-ŵk-ŝub-žero :
+      ∀ {Γ} sp₁ {sp₂} (σ : IType Γ (π sp₁ sp₂)) →
+      k U.π ˢ ifst σ ˢ c (isnd σ /̂I ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n) ≡
+      σ
+    ifst-isnd-ŵk-ŝub-žero sp₁ σ =
+      let lem = begin
+            [ ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n ]  ≡⟨ ∘̂-cong (P.refl {x = [ ŵk ↑̂ ]})
+                                                             (ŝub-cong (ňeutral-to-normal-identity sp₁ (var zero))) ⟩
+            [ ŵk ↑̂ ∘̂ ŝub ⟦ var zero          ⟧n ]  ≡⟨ P.refl ⟩
+            [ îd                                ]  ∎
+
+      in begin
+      k U.π ˢ ifst σ ˢ c (isnd σ /̂I ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n)  ≡⟨ P.cong (λ ρ → k U.π ˢ ifst σ ˢ c (isnd σ /̂I ρ))
+                                                                                  (≅-⇨̂-⇒-≡ lem) ⟩
+      k U.π ˢ ifst σ ˢ c (isnd σ)                                       ≡⟨ P.sym $ π-fst-snd ext σ ⟩
+      σ                                                                 ∎
 
     -- In the semantics řeify is a left inverse of řeflect.
 
-    řeify∘řeflect :
-      ∀ {Γ sp σ} (σ′ : Γ ⊢ sp , σ type) (t : Γ ⊢ sp , σ ⟨ ne ⟩) →
-      ⟦ řeify σ′ (řeflect σ′ t) ⟧n ≅-Value ⟦ t ⟧n
-    řeify∘řeflect     ⋆                         t = P.refl
-    řeify∘řeflect     (el t′)                   t = P.refl
-    řeify∘řeflect {Γ} (π {σ = σ} {τ = τ} σ′ τ′) t =
-      let t′ = řeify (σ′ /⊢t wk) (řeflect (σ′ /⊢t wk) (var zero))
-          ρ  = wk ↑ ∘ sub ⌊ t′ ⌋
-          v  = ⟦ P.subst (λ τ → Γ ▻ (, σ) ⊢ τ ⟨ no ⟩)
-                         (≅-Type-⇒-≡ $ /̂-ŵk-↑̂-∘̂-ŝub σ′ (, τ))
-                         (řeify (τ′ /⊢t ρ) (řeflect (τ′ /⊢t ρ)
-                            ((t /⊢n Renaming.wk) · t′))) ⟧n
+    ňeutral-to-normal-identity :
+      ∀ {Γ} sp {σ} (t : Γ ⊢ sp , σ ⟨ ne ⟩) →
+      ⟦ ňeutral-to-normal sp t ⟧n ≅-Value ⟦ t ⟧n
+    ňeutral-to-normal-identity     ⋆               t = P.refl
+    ňeutral-to-normal-identity     el              t = P.refl
+    ňeutral-to-normal-identity {Γ} (π sp₁ sp₂) {σ} t =
+      let cast = P.subst (λ σ → Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩)
+                         (π-fst-snd ext σ)
+          v    = ⟦ ňeutral-to-normal sp₂
+                     ((cast t /⊢n Renaming.wk) · žero sp₁ (ifst σ)) ⟧n
 
-          lemma = begin
-            [ v                                      ]  ≡⟨ ⟦⟧n-cong (drop-subst-⊢n F.id (≅-Type-⇒-≡ $ /̂-ŵk-↑̂-∘̂-ŝub σ′ (, τ))) ⟩
-            [ ⟦ řeify (τ′ /⊢t ρ) (řeflect (τ′ /⊢t ρ)
-                  ((t /⊢n Renaming.wk) · t′)) ⟧n     ]  ≡⟨ řeify∘řeflect (τ′ /⊢t ρ) ((t /⊢n Renaming.wk) · t′) ⟩
-            [ ⟦ (t /⊢n Renaming.wk) · t′ ⟧n          ]  ≡⟨ P.refl ⟩
-            [ ⟦ t /⊢n Renaming.wk ⟧n ˢ ⟦ t′ ⟧n       ]  ≡⟨ ˢ-cong (P.refl {x = [ (, τ) /̂ ŵk ↑̂ ]})
-                                                                  (P.sym $ t /⊢n-lemma Renaming.wk)
-                                                                  (řeify∘řeflect (σ′ /⊢t wk) (var zero)) ⟩
-            [ (⟦ t ⟧n /̂Val ŵk) ˢ ⟦ var zero ⟧n       ]  ≡⟨ P.refl ⟩
-            [ uc ⟦ t ⟧n                              ]  ∎
+          lem = begin
+            [ v                                                    ]  ≡⟨ ňeutral-to-normal-identity sp₂
+                                                                           ((cast t /⊢n Renaming.wk) · žero sp₁ (ifst σ)) ⟩
+            [ ⟦ (cast t /⊢n Renaming.wk) · žero sp₁ (ifst σ) ⟧n    ]  ≡⟨ P.refl ⟩
+            [ ⟦ cast t /⊢n Renaming.wk ⟧n ˢ ⟦ žero sp₁ (ifst σ) ⟧n ]  ≡⟨ ˢ-cong (P.refl {x = [ snd σ /̂ ŵk ↑̂ ]})
+                                                                                (P.sym $ cast t /⊢n-lemma Renaming.wk)
+                                                                                (ňeutral-to-normal-identity sp₁ (var zero)) ⟩
+            [ (⟦ cast t ⟧n /̂Val ŵk) ˢ ⟦ var zero ⟧n                ]  ≡⟨ P.refl ⟩
+            [ uc ⟦ cast t ⟧n                                       ]  ∎
 
       in begin
-        [ ⟦ řeify (π σ′ τ′) (řeflect (π σ′ τ′) t) ⟧n ]  ≡⟨ curry-cong {v₁ = v} {v₂ = uc ⟦ t ⟧n} lemma ⟩
-        [ c {C = λ γ → El (τ γ)} (uc ⟦ t ⟧n)         ]  ≡⟨ P.refl ⟩
-        [ ⟦ t ⟧n                                     ]  ∎
+        [ ⟦ ňeutral-to-normal (π sp₁ sp₂) t ⟧n   ]  ≡⟨ ⟦⟧n-cong (drop-subst-⊢n (λ σ → π sp₁ sp₂ , σ) (ifst-isnd-ŵk-ŝub-žero sp₁ σ)) ⟩
+        [ c v                                    ]  ≡⟨ curry-cong lem ⟩
+        [ c {C = k El ˢ isnd σ} (uc ⟦ cast t ⟧n) ]  ≡⟨ P.refl ⟩
+        [ ⟦ cast t ⟧n                            ]  ≡⟨ ⟦⟧n-cong (drop-subst-⊢n (λ σ → π sp₁ sp₂ , σ) (π-fst-snd ext σ)) ⟩
+        [ ⟦ t ⟧n                                 ]  ∎

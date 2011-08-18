@@ -18,7 +18,8 @@ open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 import deBruijn.Context
 import deBruijn.TermLike
 open import Function renaming (const to k)
-open import Relation.Binary.PropositionalEquality as P using (_≡_)
+open import Relation.Binary.PropositionalEquality as P using (_≡_; _≢_)
+open import Relation.Nullary
 
 ------------------------------------------------------------------------
 -- Wrapper types
@@ -85,21 +86,10 @@ mutual
          Γ ⊢ , k U.π ˢ σ ˢ c τ type
 
   -- Terms.
-  --
-  -- Note that the lambda is annotated with the (syntactic) type of
-  -- its domain. Reason: Without this annotation closed terms are not
-  -- guaranteed to have any syntactic type. Example (assuming
-  -- nat : U₀):
-  --
-  --   ƛ (var zero) : ε ⊢ , k (U.π (U.el nat) (k (U.el nat)))
-  --
-  -- There is no corresponding syntactic type, because there is no
-  -- term t : ε ⊢ , k U.⋆ such that ⟦ t ⟧ _ = nat.
 
   data _⊢_ (Γ : Ctxt) : Type Γ → Set where
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ
-    ƛ   : ∀ {σ τ}
-          (σ′ : Γ ⊢ σ type) (t : Γ ▻ σ ⊢ τ) →
+    ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ) →
           Γ ⊢ , k U.π ˢ indexed-type σ ˢ c (indexed-type τ)
     _·_ : ∀ {σ τ}
           (t₁ : Γ ⊢ , k U.π ˢ indexed-type σ ˢ proj₂ τ) (t₂ : Γ ⊢ σ) →
@@ -109,7 +99,7 @@ mutual
 
   ⟦_⟧ : ∀ {Γ σ} → Γ ⊢ σ → Value Γ σ
   ⟦ var x   ⟧ γ = lookup x γ
-  ⟦ ƛ _ t   ⟧ γ = λ v → ⟦ t ⟧ (γ , v)
+  ⟦ ƛ t     ⟧ γ = λ v → ⟦ t ⟧ (γ , v)
   ⟦ t₁ · t₂ ⟧ γ = (⟦ t₁ ⟧ γ) (⟦ t₂ ⟧ γ)
 
 -- Semantics of types.
@@ -131,7 +121,7 @@ open Term-like Tm public hiding (_⊢_; ⟦_⟧)
 
 identity : ∀ {Γ} →
            Γ ⊢ ⟦ π ⋆ (π (el (var zero)) (el (var (suc zero)))) ⟧type
-identity = ƛ ⋆ (ƛ (el (var zero)) (var zero))
+identity = ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (var zero))
 
 -- The polymorphic identity function, with the type written in a less
 -- compact way.
@@ -140,7 +130,7 @@ identity′ : ∀ {Γ} →
             Γ ⊢ , k U.π ˢ k U.⋆ ˢ
                           c (k U.π ˢ (k U.el ˢ ⟦ var zero ⟧) ˢ
                                      c (k U.el ˢ ⟦ var (suc zero) ⟧))
-identity′ = ƛ ⋆ (ƛ (el (var zero)) (var zero))
+identity′ = ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (var zero))
 
 -- The polymorphic identity function applied to some variables from
 -- the context.
@@ -148,13 +138,40 @@ identity′ = ƛ ⋆ (ƛ (el (var zero)) (var zero))
 identity· : ∀ {Γ} → Γ ▻ ⟦ ⋆ ⟧type ▻ ⟦ el (var zero) ⟧type ⊢
                     ⟦ el (var (suc zero)) ⟧type
 identity· =
-  ƛ ⋆ (ƛ (el (var zero)) (var zero)) · var (suc zero) · var zero
+  ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (var zero)) ·
+  var (suc zero) · var zero
 
--- In "Outrageous but Meaningful Coincidences" Conor McBride suggests
--- that ƛ should be defined with a curried τ (here an uncurried τ is
--- used). However, with a curried τ the definition of identity·
--- contains unsolved meta-variables (when a certain version of Agda is
--- used).
+------------------------------------------------------------------------
+-- An observation
+
+-- There are terms without syntactic types, assuming that U₀ is
+-- inhabited and that no closed term computes to the given inhabitant.
+-- (TODO: Is it possible to drop the last assumption? Can we prove
+-- that no term in the empty context has type , U.⋆?)
+
+term-without-type : (u : U₀) → ε ⊢ , k (U.π (U.el u) (k (U.el u)))
+term-without-type u = ƛ (var zero)
+
+no-type : (u : U₀) → ∄ (λ (t : ε ⊢ , k U.⋆) → ⟦ t ⟧ _ ≡ u) →
+          ¬ ε ⊢ , k (U.π (U.el u) (k (U.el u))) type
+no-type u ⟦t⟧≢u σ′ = helper σ′ P.refl
+  where
+  helper : ∀ {σ} → ε ⊢ , σ type → σ ≢ k (U.π (U.el u) (k (U.el u)))
+  helper (π (el t) (el t′)) eq = ⟦t⟧≢u (t , ⟦t⟧≡u)
+    where
+    proj : U (π el el) → U₀
+    proj (π (el a) _) = a
+
+    ⟦t⟧≡u : ⟦ t ⟧ _ ≡ u
+    ⟦t⟧≡u = P.cong (λ f → proj (f _)) eq
+
+-- One could avoid this situation by annotating lambdas with the
+-- (syntactic) type of their domain. I tried this, and found it to be
+-- awkward. One case of the function
+-- README.DependentlyTyped.Kripke-model.Definition.řeify returns a
+-- lambda, and I didn't find a way to synthesise the annotation
+-- without supplying a syntactic type to řeify (and hence also to
+-- V̌alue).
 
 ------------------------------------------------------------------------
 -- Projections
@@ -274,10 +291,10 @@ var-cong : ∀ {Γ₁ σ₁} {x₁ : Γ₁ ∋ σ₁}
            x₁ ≅-∋ x₂ → var x₁ ≅-⊢ var x₂
 var-cong P.refl = P.refl
 
-ƛ-cong : ∀ {Γ₁ σ₁ τ₁} {σ′₁ : Γ₁ ⊢ σ₁ type} {t₁ : Γ₁ ▻ σ₁ ⊢ τ₁}
-           {Γ₂ σ₂ τ₂} {σ′₂ : Γ₂ ⊢ σ₂ type} {t₂ : Γ₂ ▻ σ₂ ⊢ τ₂} →
-         σ′₁ ≅-type σ′₂ → t₁ ≅-⊢ t₂ → ƛ σ′₁ t₁ ≅-⊢ ƛ σ′₂ t₂
-ƛ-cong P.refl P.refl = P.refl
+ƛ-cong : ∀ {Γ₁ σ₁ τ₁} {t₁ : Γ₁ ▻ σ₁ ⊢ τ₁}
+           {Γ₂ σ₂ τ₂} {t₂ : Γ₂ ▻ σ₂ ⊢ τ₂} →
+         t₁ ≅-⊢ t₂ → ƛ t₁ ≅-⊢ ƛ t₂
+ƛ-cong P.refl = P.refl
 
 -- Previously the following lemma was more general, with heterogeneous
 -- input equalities, at the cost of an extra input equality of type

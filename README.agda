@@ -89,11 +89,6 @@ import README.DependentlyTyped.Term.Substitution
 
 import README.DependentlyTyped.NormalForm.Substitution
 
--- A proof showing that the type of every closed term exists in
--- syntactic form.
-
-import README.DependentlyTyped.TypeOf
-
 -- A Kripke model (unfinished).
 
 import README.DependentlyTyped.Kripke-model

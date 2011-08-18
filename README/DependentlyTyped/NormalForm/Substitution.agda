@@ -42,11 +42,8 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
 
   _/⊢a_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} →
           Γ ⊢ σ atomic-type → (ρ : Sub T ρ̂) → Δ ⊢ σ / ρ atomic-type
-  ⋆    /⊢a ρ = ⋆
-  el t /⊢a ρ =
-    P.subst (λ v → _ ⊢ , k U.el ˢ v atomic-type)
-            (≅-Value-⇒-≡ $ P.sym $ corresponds (app ρ) t)
-            (el (t /⊢ ρ))
+  ⋆  /⊢a ρ = ⋆
+  el /⊢a ρ = el
 
   mutual
 
@@ -58,7 +55,7 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
             Γ ⊢ σ ⟨ k ⟩ → (ρ : Sub T ρ̂) → Δ ⊢ σ / ρ ⟨ k ⟩
     ne σ′ t           /⊢n ρ = ne (σ′ /⊢a ρ) (t /⊢n ρ)
     var x             /⊢n ρ = trans ⊙ (x /∋ ρ)
-    ƛ σ′ t            /⊢n ρ = ƛ (σ′ /⊢t ρ) (t /⊢n ρ ↑)
+    ƛ t               /⊢n ρ = ƛ (t /⊢n ρ ↑)
     _·_ {τ = τ} t₁ t₂ /⊢n ρ =
       P.subst (λ v → _ ⊢ Prod.map F.id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v ⟨ ne ⟩)
               (≅-Value-⇒-≡ $ P.sym (t₂ /⊢n-lemma ρ))
@@ -86,8 +83,8 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
       ne σ′ t /⊢n-lemma ρ = begin
         [ ⟦ t ⟧n /Val ρ ]  ≡⟨ t /⊢n-lemma ρ ⟩
         [ ⟦ t /⊢n ρ ⟧n  ]  ∎
-      var x  /⊢n-lemma ρ = /̂∋-⟦⟧⇨ x ρ
-      ƛ σ′ t /⊢n-lemma ρ = begin
+      var x /⊢n-lemma ρ = /̂∋-⟦⟧⇨ x ρ
+      ƛ t   /⊢n-lemma ρ = begin
         [ c ⟦ t ⟧n /Val ρ     ]  ≡⟨ P.refl ⟩
         [ c (⟦ t ⟧n /Val ρ ↑) ]  ≡⟨ curry-cong (t /⊢n-lemma (ρ ↑)) ⟩
         [ c ⟦ t /⊢n ρ ↑ ⟧n    ]  ∎

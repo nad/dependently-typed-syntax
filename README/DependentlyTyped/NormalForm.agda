@@ -20,8 +20,8 @@ open TermLike Uni hiding (_·_)
 -- η-expansion).
 
 data _⊢_atomic-type (Γ : Ctxt) : Type Γ → Set where
-  ⋆  : Γ ⊢ , k ⋆ atomic-type
-  el : (t : Γ ⊢ , k ⋆) → Γ ⊢ , k U.el ˢ ⟦ t ⟧ atomic-type
+  ⋆  : ∀ {σ} → Γ ⊢ ⋆  , σ atomic-type
+  el : ∀ {σ} → Γ ⊢ el , σ atomic-type
 
 -- Two kinds: normal and neutral.
 
@@ -39,7 +39,7 @@ mutual
     ne  : ∀ {σ} (σ′ : Γ ⊢ σ atomic-type) (t : Γ ⊢ σ ⟨ ne ⟩) →
           Γ ⊢ σ ⟨ no ⟩
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ ⟨ ne ⟩
-    ƛ   : ∀ {σ τ} (σ′ : Γ ⊢ σ type) (t : Γ ▻ σ ⊢ τ ⟨ no ⟩) →
+    ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ ⟨ no ⟩) →
           Γ ⊢ , k U.π ˢ indexed-type σ ˢ c (indexed-type τ) ⟨ no ⟩
     _·_ : ∀ {σ τ}
           (t₁ : Γ ⊢ , k U.π ˢ indexed-type σ ˢ proj₂ τ ⟨ ne ⟩)
@@ -51,7 +51,7 @@ mutual
   ⌊_⌋ : ∀ {Γ σ k} → Γ ⊢ σ ⟨ k ⟩ → Γ ⊢ σ
   ⌊ ne σ′ t ⌋ = ⌊ t ⌋
   ⌊ var x   ⌋ = var x
-  ⌊ ƛ σ′ t  ⌋ = ƛ σ′ ⌊ t ⌋
+  ⌊ ƛ t     ⌋ = ƛ ⌊ t ⌋
   ⌊ t₁ · t₂ ⌋ = ⌊ t₁ ⌋ · ⌊ t₂ ⌋
 
 -- Normal and neutral terms are "term-like".
@@ -87,10 +87,10 @@ var-n-cong : ∀ {Γ₁ σ₁} {x₁ : Γ₁ ∋ σ₁}
              x₁ ≅-∋ x₂ → var x₁ ≅-⊢n var x₂
 var-n-cong P.refl = P.refl
 
-ƛn-cong : ∀ {Γ₁ σ₁ τ₁} {σ′₁ : Γ₁ ⊢ σ₁ type} {t₁ : Γ₁ ▻ σ₁ ⊢ τ₁ ⟨ no ⟩}
-            {Γ₂ σ₂ τ₂} {σ′₂ : Γ₂ ⊢ σ₂ type} {t₂ : Γ₂ ▻ σ₂ ⊢ τ₂ ⟨ no ⟩} →
-          σ′₁ ≅-type σ′₂ → t₁ ≅-⊢n t₂ → ƛ σ′₁ t₁ ≅-⊢n ƛ σ′₂ t₂
-ƛn-cong P.refl P.refl = P.refl
+ƛn-cong : ∀ {Γ₁ σ₁ τ₁} {t₁ : Γ₁ ▻ σ₁ ⊢ τ₁ ⟨ no ⟩}
+            {Γ₂ σ₂ τ₂} {t₂ : Γ₂ ▻ σ₂ ⊢ τ₂ ⟨ no ⟩} →
+          t₁ ≅-⊢n t₂ → ƛ t₁ ≅-⊢n ƛ t₂
+ƛn-cong P.refl = P.refl
 
 ·n-cong :
   ∀ {Γ σ τ} {t₂₁ t₂₂ : Γ ⊢ σ ⟨ no ⟩}
