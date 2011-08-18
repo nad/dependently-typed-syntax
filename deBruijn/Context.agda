@@ -365,16 +365,16 @@ mutual
 
   _++⁺_ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → Ctxt⁺ (Γ ++ Γ⁺) → Ctxt⁺ Γ
   Γ⁺ ++⁺ ε         = Γ⁺
-  Γ⁺ ++⁺ (Γ⁺⁺ ▻ σ) = (Γ⁺ ++⁺ Γ⁺⁺) ▻ P.subst Type (++-assoc Γ⁺ Γ⁺⁺) σ
+  Γ⁺ ++⁺ (Γ⁺⁺ ▻ σ) = (Γ⁺ ++⁺ Γ⁺⁺) ▻ P.subst Type (++-++ Γ⁺ Γ⁺⁺) σ
 
   abstract
 
     -- _++_/_++⁺_ are associative.
 
-    ++-assoc : ∀ {Γ} Γ⁺ Γ⁺⁺ → Γ ++ Γ⁺ ++ Γ⁺⁺ ≅-Ctxt Γ ++ (Γ⁺ ++⁺ Γ⁺⁺)
-    ++-assoc Γ⁺ ε         = P.refl
-    ++-assoc Γ⁺ (Γ⁺⁺ ▻ σ) =
-      ▻-cong (P.sym $ drop-subst-Type id (++-assoc Γ⁺ Γ⁺⁺))
+    ++-++ : ∀ {Γ} Γ⁺ Γ⁺⁺ → Γ ++ Γ⁺ ++ Γ⁺⁺ ≅-Ctxt Γ ++ (Γ⁺ ++⁺ Γ⁺⁺)
+    ++-++ Γ⁺ ε         = P.refl
+    ++-++ Γ⁺ (Γ⁺⁺ ▻ σ) =
+      ▻-cong (P.sym $ drop-subst-Type id (++-++ Γ⁺ Γ⁺⁺))
 
 mutual
 
@@ -672,7 +672,7 @@ abstract
   ŵk⁺-++⁺ Γ⁺ ε         = P.refl
   ŵk⁺-++⁺ Γ⁺ (Γ⁺⁺ ▻ σ) =
     ∘̂-cong (ŵk⁺-++⁺ Γ⁺ Γ⁺⁺)
-           (ŵk-cong (drop-subst-Type id (++-assoc Γ⁺ Γ⁺⁺)))
+           (ŵk-cong (drop-subst-Type id (++-++ Γ⁺ Γ⁺⁺)))
 
   -- Two n-ary liftings can be merged into one.
 
@@ -680,7 +680,7 @@ abstract
            ρ̂ ↑̂⁺ (Γ⁺ ++⁺ Γ⁺⁺) ≅-⇨̂ ρ̂ ↑̂⁺ Γ⁺ ↑̂⁺ Γ⁺⁺
   ↑̂⁺-++⁺ ρ̂ Γ⁺ ε         = P.refl
   ↑̂⁺-++⁺ ρ̂ Γ⁺ (Γ⁺⁺ ▻ σ) = begin
-    [ (ρ̂ ↑̂⁺ (Γ⁺ ++⁺ Γ⁺⁺)) ↑̂ ]  ≡⟨ ↑̂-cong (↑̂⁺-++⁺ ρ̂ Γ⁺ Γ⁺⁺) (drop-subst-Type id (++-assoc Γ⁺ Γ⁺⁺)) ⟩
+    [ (ρ̂ ↑̂⁺ (Γ⁺ ++⁺ Γ⁺⁺)) ↑̂ ]  ≡⟨ ↑̂-cong (↑̂⁺-++⁺ ρ̂ Γ⁺ Γ⁺⁺) (drop-subst-Type id (++-++ Γ⁺ Γ⁺⁺)) ⟩
     [ (ρ̂ ↑̂⁺ Γ⁺ ↑̂⁺ Γ⁺⁺) ↑̂    ]  ∎
 
   -- _/̂⁺_ distributes over _++⁺_ (sort of).
@@ -691,6 +691,6 @@ abstract
   ++-++⁺-/̂⁺         ρ̂ Γ⁺ ε         = P.refl
   ++-++⁺-/̂⁺ {Δ = Δ} ρ̂ Γ⁺ (Γ⁺⁺ ▻ σ) = begin
     Δ ++ (Γ⁺ ++⁺ Γ⁺⁺) /̂⁺ ρ̂ ▻
-      P.subst Type (++-assoc Γ⁺ Γ⁺⁺) σ /̂ ρ̂ ↑̂⁺ (Γ⁺ ++⁺ Γ⁺⁺)  ≡⟨ ▻-cong (/̂-cong (drop-subst-Type id (++-assoc Γ⁺ Γ⁺⁺))
-                                                                              (↑̂⁺-++⁺ ρ̂ Γ⁺ Γ⁺⁺)) ⟩
-    Δ ++ Γ⁺ /̂⁺ ρ̂ ++ Γ⁺⁺ /̂⁺ ρ̂ ↑̂⁺ Γ⁺ ▻ σ /̂ ρ̂ ↑̂⁺ Γ⁺ ↑̂⁺ Γ⁺⁺     ∎
+      P.subst Type (++-++ Γ⁺ Γ⁺⁺) σ /̂ ρ̂ ↑̂⁺ (Γ⁺ ++⁺ Γ⁺⁺)  ≡⟨ ▻-cong (/̂-cong (drop-subst-Type id (++-++ Γ⁺ Γ⁺⁺))
+                                                                           (↑̂⁺-++⁺ ρ̂ Γ⁺ Γ⁺⁺)) ⟩
+    Δ ++ Γ⁺ /̂⁺ ρ̂ ++ Γ⁺⁺ /̂⁺ ρ̂ ↑̂⁺ Γ⁺ ▻ σ /̂ ρ̂ ↑̂⁺ Γ⁺ ↑̂⁺ Γ⁺⁺  ∎

@@ -307,5 +307,5 @@ record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
     ↑⁺-++⁺ ρ Γ⁺ ε         = ρ ↑⁺ Γ⁺ ∎-⟶
     ↑⁺-++⁺ ρ Γ⁺ (Γ⁺⁺ ▻ σ) =
       (ρ ↑⁺ (Γ⁺ ++⁺ Γ⁺⁺)) ↑  ≅-⟶⟨ ↑-cong (↑⁺-++⁺ ρ Γ⁺ Γ⁺⁺)
-                                         (drop-subst-Type F.id (++-assoc Γ⁺ Γ⁺⁺)) ⟩
+                                         (drop-subst-Type F.id (++-++ Γ⁺ Γ⁺⁺)) ⟩
       (ρ ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺) ↑     ∎-⟶

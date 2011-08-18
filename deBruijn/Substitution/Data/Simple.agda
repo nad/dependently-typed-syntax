@@ -330,5 +330,5 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
     ↑⁺-++⁺ ρ Γ⁺ ε         = P.refl
     ↑⁺-++⁺ ρ Γ⁺ (Γ⁺⁺ ▻ σ) = begin
       [ (ρ ↑⁺ (Γ⁺ ++⁺ Γ⁺⁺)) ↑ ]  ≡⟨ ↑-cong (↑⁺-++⁺ ρ Γ⁺ Γ⁺⁺)
-                                           (drop-subst-Type F.id (++-assoc Γ⁺ Γ⁺⁺)) ⟩
+                                           (drop-subst-Type F.id (++-++ Γ⁺ Γ⁺⁺)) ⟩
       [ (ρ ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺) ↑    ]  ∎
