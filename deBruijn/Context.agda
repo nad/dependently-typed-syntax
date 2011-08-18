@@ -97,12 +97,19 @@ infixl 9 _∘̂_
 _∘̂_ : ∀ {Γ Δ Ε} → Γ ⇨̂ Δ → Δ ⇨̂ Ε → Γ ⇨̂ Ε
 ρ̂₁ ∘̂ ρ̂₂ = ρ̂₁ ∘ ρ̂₂
 
+-- Application of context morphisms to indexed types.
+
+infixl 8 _/̂I_
+
+_/̂I_ : ∀ {Γ Δ i} → IType Γ i → Γ ⇨̂ Δ → IType Δ i
+σ /̂I ρ̂ = σ ∘ ρ̂
+
 -- Application of context morphisms to types.
 
 infixl 8 _/̂_
 
 _/̂_ : ∀ {Γ Δ} → Type Γ → Γ ⇨̂ Δ → Type Δ
-(i , σ) /̂ ρ̂ = (i , σ ∘ ρ̂)
+(i , σ) /̂ ρ̂ = (i , σ /̂I ρ̂)
 
 -- Application of context morphisms to values.
 
@@ -217,7 +224,7 @@ mutual
 ------------------------------------------------------------------------
 -- Equality
 
-infix 4 _≅-Ctxt_ _≅-Type_ _≅-Value_ _≅-⇨̂_ _≅-∋_ _≅-Ctxt⁺_
+infix 4 _≅-Ctxt_ _≅-Type_ _≅-IType_ _≅-Value_ _≅-⇨̂_ _≅-∋_ _≅-Ctxt⁺_
 
 -- Equality of contexts.
 
@@ -279,6 +286,23 @@ drop-subst-Type f P.refl = P.refl
 
 -- TODO: Should functions like ≅-Type-⇒-≡ and drop-subst-Type be
 -- included for all types?
+
+record [IType] : Set (i ⊔ u ⊔ e) where
+  constructor [_]
+  field
+    {Γ}   : Ctxt
+    {idx} : I
+    σ     : IType Γ idx
+
+_≅-IType_ : ∀ {Γ₁ i₁} (σ₁ : IType Γ₁ i₁)
+              {Γ₂ i₂} (σ₂ : IType Γ₂ i₂) → Set _
+σ₁ ≅-IType σ₂ = [IType].[_] σ₁ ≡ [ σ₂ ]
+
+-- If the indices are equal, then _≅-IType_ coincides with _≡_.
+
+≅-IType-⇒-≡ : ∀ {Γ i} {σ₁ σ₂ : IType Γ i} →
+              σ₁ ≅-IType σ₂ → σ₁ ≡ σ₂
+≅-IType-⇒-≡ P.refl = P.refl
 
 -- Equality of values.
 
@@ -410,6 +434,11 @@ îd-cong P.refl = P.refl
            {Γ₂ Δ₂ Ε₂} {ρ̂₁₂ : Γ₂ ⇨̂ Δ₂} {ρ̂₂₂ : Δ₂ ⇨̂ Ε₂} →
          ρ̂₁₁ ≅-⇨̂ ρ̂₁₂ → ρ̂₂₁ ≅-⇨̂ ρ̂₂₂ → ρ̂₁₁ ∘̂ ρ̂₂₁ ≅-⇨̂ ρ̂₁₂ ∘̂ ρ̂₂₂
 ∘̂-cong P.refl P.refl = P.refl
+
+/̂I-cong : ∀ {Γ₁ Δ₁ i₁} {σ₁ : IType Γ₁ i₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
+            {Γ₂ Δ₂ i₂} {σ₂ : IType Γ₂ i₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} →
+          σ₁ ≅-IType σ₂ → ρ̂₁ ≅-⇨̂ ρ̂₂ → σ₁ /̂I ρ̂₁ ≅-IType σ₂ /̂I ρ̂₂
+/̂I-cong P.refl P.refl = P.refl
 
 /̂-cong : ∀ {Γ₁ Δ₁ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
            {Γ₂ Δ₂ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} →
