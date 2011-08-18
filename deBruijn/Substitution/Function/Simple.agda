@@ -58,6 +58,15 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
   wk-subst[_] : ∀ {Γ Δ} σ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk[ σ ])
   wk-subst[ _ ] = wk-subst
 
+  -- N-ary weakening of substitutions.
+
+  weaken⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → [ T ⟶ T ] (ŵk⁺ Γ⁺)
+  weaken⁺ ε        = [id]
+  weaken⁺ (Γ⁺ ▻ σ) = weaken [∘] weaken⁺ Γ⁺
+
+  wk-subst⁺ : ∀ {Γ Δ} Γ⁺ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk⁺ Γ⁺)
+  wk-subst⁺ Γ⁺ ρ = map (weaken⁺ Γ⁺) ρ
+
   -- Lifting.
 
   infixl 10 _↑_
@@ -137,6 +146,19 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
                   σ₁ ≅-Type σ₂ → ρ₁ ≅-⇨ ρ₂ →
                   wk-subst[ σ₁ ] ρ₁ ≅-⇨ wk-subst[ σ₂ ] ρ₂
   wk-subst-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
+    [ P.refl ]
+
+  weaken⁺-cong : ∀ {Γ₁ Γ⁺₁ τ₁} {t₁ : Γ₁ ⊢ τ₁}
+                   {Γ₂ Γ⁺₂ τ₂} {t₂ : Γ₂ ⊢ τ₂} →
+                 Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → t₁ ≅-⊢ t₂ →
+                 weaken⁺ Γ⁺₁ · t₁ ≅-⊢ weaken⁺ Γ⁺₂ · t₂
+  weaken⁺-cong P.refl P.refl = P.refl
+
+  wk-subst⁺-cong : ∀ {Γ₁ Δ₁ Γ⁺₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
+                     {Γ₂ Δ₂ Γ⁺₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
+                   Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → ρ₁ ≅-⇨ ρ₂ →
+                   wk-subst⁺ Γ⁺₁ ρ₁ ≅-⇨ wk-subst⁺ Γ⁺₂ ρ₂
+  wk-subst⁺-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
     [ P.refl ]
 
   abstract
