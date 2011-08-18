@@ -26,7 +26,7 @@ open TermLike Uni
 
 isomorphic :
   ∀ {t} {T : Term-like t} →
-  P.Extensionality (u ⊔ e) (u ⊔ e ⊔ t) →
+  P.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
   ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} →
   Inverse ([ Var ⟶ T ]-setoid ρ̂) (P.setoid $ D.Sub T ρ̂)
 isomorphic {T = T} ext = record

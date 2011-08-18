@@ -27,7 +27,7 @@ open TermLike Uni
 
 -- Simple substitutions.
 
-record Simple {t} (T : Term-like t) : Set (u ⊔ e ⊔ t) where
+record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
 
   open Term-like T
 
