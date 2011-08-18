@@ -68,7 +68,7 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
       ·-/⊢n :
         ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
           {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
-        (t₁ : Γ ⊢ , k U.π ˢ indexed-type σ ˢ proj₂ τ ⟨ ne ⟩)
+        (t₁ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ ⟨ ne ⟩)
         (t₂ : Γ ⊢ σ ⟨ no ⟩) (ρ : Sub T ρ̂) →
         t₁ · t₂ /⊢n ρ ≅-⊢n (t₁ /⊢n ρ) · (t₂ /⊢n ρ)
       ·-/⊢n {τ = τ} t₁ t₂ ρ =

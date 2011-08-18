@@ -40,9 +40,9 @@ mutual
           Γ ⊢ σ ⟨ no ⟩
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ ⟨ ne ⟩
     ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ ⟨ no ⟩) →
-          Γ ⊢ , k U.π ˢ indexed-type σ ˢ c (indexed-type τ) ⟨ no ⟩
+          Γ ⊢ , k U-π ˢ indexed-type σ ˢ c (indexed-type τ) ⟨ no ⟩
     _·_ : ∀ {σ τ}
-          (t₁ : Γ ⊢ , k U.π ˢ indexed-type σ ˢ proj₂ τ ⟨ ne ⟩)
+          (t₁ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ ⟨ ne ⟩)
           (t₂ : Γ ⊢ σ ⟨ no ⟩) →
           Γ ⊢ Prod.map id uc τ /̂ ŝub ⟦ ⌊ t₂ ⌋ ⟧ ⟨ ne ⟩
 
@@ -94,7 +94,7 @@ var-n-cong P.refl = P.refl
 
 ·n-cong :
   ∀ {Γ σ τ} {t₂₁ t₂₂ : Γ ⊢ σ ⟨ no ⟩}
-    {t₁₁ t₁₂ : Γ ⊢ , k U.π ˢ indexed-type σ
+    {t₁₁ t₁₂ : Γ ⊢ , k U-π ˢ indexed-type σ
                            ˢ c (indexed-type τ) ⟨ ne ⟩} →
   t₁₁ ≅-⊢n t₁₂ → t₂₁ ≅-⊢n t₂₂ → t₁₁ · t₂₁ ≅-⊢n t₁₂ · t₂₂
 ·n-cong P.refl P.refl = P.refl

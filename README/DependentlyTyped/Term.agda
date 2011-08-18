@@ -15,6 +15,7 @@ module README.DependentlyTyped.Term
   where
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
+open import Data.Unit
 import deBruijn.Context
 import deBruijn.TermLike
 open import Function renaming (const to k)
@@ -47,18 +48,29 @@ data Spine : Set where
 
 mutual
 
-  data U : Spine → Set where
-    ⋆  : U ⋆
-    el : (a : U₀) → U el
-    π  : ∀ {sp₁ sp₂} (a : U sp₁) (b : El a → U sp₂) → U (π sp₁ sp₂)
+  U : Spine → Set
+  U ⋆           = ⊤
+  U el          = U₀
+  U (π sp₁ sp₂) = Σ (U sp₁) λ a → El a → U sp₂
 
   El : ∀ {sp} → U sp → Set
-  El ⋆       = U₀
-  El (el a)  = El₀ a
-  El (π a b) = (x : El a) → El (b x)
+  El {⋆}         _       = U₀
+  El {el}        a       = El₀ a
+  El {π sp₁ sp₂} (a , b) = (x : El a) → El (b x)
 
 Uni : Indexed-universe _ _ _
 Uni = record { I = Spine; U = U; El = El }
+
+-- Some synonyms/specialisations.
+
+U-⋆ : U ⋆
+U-⋆ = _
+
+U-el : U₀ → U el
+U-el = id
+
+U-π : ∀ {sp₁} {sp₂} (a : U sp₁) → (El a → U sp₂) → U (π sp₁ sp₂)
+U-π = _,_
 
 ------------------------------------------------------------------------
 -- Contexts and variables
@@ -79,20 +91,20 @@ mutual
   -- Types.
 
   data _⊢_type (Γ : Ctxt) : Type Γ → Set where
-    ⋆  : Γ ⊢ , k ⋆ type
-    el : (t : Γ ⊢ , k ⋆) → Γ ⊢ , k U.el ˢ ⟦ t ⟧ type
+    ⋆  : Γ ⊢ , k U-⋆ type
+    el : (t : Γ ⊢ , k U-⋆) → Γ ⊢ , k U-el ˢ ⟦ t ⟧ type
     π  : ∀ {sp₁ sp₂ σ τ}
          (σ′ : Γ ⊢ sp₁ , σ type) (τ′ : Γ ▻ (, σ) ⊢ sp₂ , τ type) →
-         Γ ⊢ , k U.π ˢ σ ˢ c τ type
+         Γ ⊢ , k U-π ˢ σ ˢ c τ type
 
   -- Terms.
 
   data _⊢_ (Γ : Ctxt) : Type Γ → Set where
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ
     ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ) →
-          Γ ⊢ , k U.π ˢ indexed-type σ ˢ c (indexed-type τ)
+          Γ ⊢ , k U-π ˢ indexed-type σ ˢ c (indexed-type τ)
     _·_ : ∀ {σ τ}
-          (t₁ : Γ ⊢ , k U.π ˢ indexed-type σ ˢ proj₂ τ) (t₂ : Γ ⊢ σ) →
+          (t₁ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ) (t₂ : Γ ⊢ σ) →
           Γ ⊢ Prod.map id uc τ /̂ ŝub ⟦ t₂ ⟧
 
   -- Semantics of terms.
@@ -127,9 +139,9 @@ identity = ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (var z
 -- compact way.
 
 identity′ : ∀ {Γ} →
-            Γ ⊢ , k U.π ˢ k U.⋆ ˢ
-                          c (k U.π ˢ (k U.el ˢ ⟦ var zero ⟧) ˢ
-                                     c (k U.el ˢ ⟦ var (suc zero) ⟧))
+            Γ ⊢ , k U-π ˢ k U-⋆ ˢ
+                          c (k U-π ˢ (k U-el ˢ ⟦ var zero ⟧) ˢ
+                                     c (k U-el ˢ ⟦ var (suc zero) ⟧))
 identity′ = ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (var zero))
 
 -- The polymorphic identity function applied to some variables from
@@ -147,23 +159,20 @@ identity· =
 -- There are terms without syntactic types, assuming that U₀ is
 -- inhabited and that no closed term computes to the given inhabitant.
 -- (TODO: Is it possible to drop the last assumption? Can we prove
--- that no term in the empty context has type , U.⋆?)
+-- that no term in the empty context has type , U-⋆?)
 
-term-without-type : (u : U₀) → ε ⊢ , k (U.π (U.el u) (k (U.el u)))
+term-without-type : (u : U₀) → ε ⊢ , k (U-π (U-el u) (k (U-el u)))
 term-without-type u = ƛ (var zero)
 
-no-type : (u : U₀) → ∄ (λ (t : ε ⊢ , k U.⋆) → ⟦ t ⟧ _ ≡ u) →
-          ¬ ε ⊢ , k (U.π (U.el u) (k (U.el u))) type
+no-type : (u : U₀) → ∄ (λ (t : ε ⊢ , k U-⋆) → ⟦ t ⟧ _ ≡ u) →
+          ¬ ε ⊢ , k (U-π (U-el u) (k (U-el u))) type
 no-type u ⟦t⟧≢u σ′ = helper σ′ P.refl
   where
-  helper : ∀ {σ} → ε ⊢ , σ type → σ ≢ k (U.π (U.el u) (k (U.el u)))
+  helper : ∀ {σ} → ε ⊢ , σ type → σ ≢ k (U-π (U-el u) (k (U-el u)))
   helper (π (el t) (el t′)) eq = ⟦t⟧≢u (t , ⟦t⟧≡u)
     where
-    proj : U (π el el) → U₀
-    proj (π (el a) _) = a
-
     ⟦t⟧≡u : ⟦ t ⟧ _ ≡ u
-    ⟦t⟧≡u = P.cong (λ f → proj (f _)) eq
+    ⟦t⟧≡u = P.cong (λ f → proj₁ (f _)) eq
 
 -- One could avoid this situation by annotating lambdas with the
 -- (syntactic) type of their domain. I tried this, and found it to be
@@ -179,33 +188,23 @@ no-type u ⟦t⟧≢u σ′ = helper σ′ P.refl
 -- Types with π-spines can be split up into a first and a second part.
 
 ifst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → IType Γ sp₁
-ifst σ γ with σ γ
-... | π a b = a
+ifst σ γ = proj₁ (σ γ)
 
 fst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → Type Γ
 fst σ = , ifst σ
 
 isnd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
        IType (Γ ▻ fst σ) sp₂
-isnd σ (γ , v) with σ γ
-... | π a b = b v
+isnd σ (γ , v) = proj₂ (σ γ) v
 
 snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) → Type (Γ ▻ fst σ)
 snd σ = , isnd σ
 
-abstract
+-- The split is correct.
 
-  -- The split is correct (assuming extensionality).
-
-  π-fst-snd :
-    P.Extensionality Level.zero Level.zero →
-    ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
-    σ ≡ k U.π ˢ ifst σ ˢ c (isnd σ)
-  π-fst-snd ext σ = ext helper
-    where
-    helper : ∀ γ → σ γ ≡ U.π (ifst σ γ) (λ v → isnd σ (γ , v))
-    helper γ with σ γ
-    helper γ | π a b = P.refl
+π-fst-snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
+            σ ≡ k U-π ˢ ifst σ ˢ c (isnd σ)
+π-fst-snd σ = P.refl
 
 -- We can also project out the first and second components of a
 -- syntactic Π-type.
@@ -259,9 +258,9 @@ drop-subst-⊢-type f P.refl = P.refl
 
 ˢ-cong :
   ∀ {Γ₁ σ₁ τ₁} {v₁ : Value Γ₁ σ₁}
-    {f₁ : Value Γ₁ (, k U.π ˢ indexed-type σ₁ ˢ c (indexed-type τ₁))}
+    {f₁ : Value Γ₁ (, k U-π ˢ indexed-type σ₁ ˢ c (indexed-type τ₁))}
     {Γ₂ σ₂ τ₂} {v₂ : Value Γ₂ σ₂}
-    {f₂ : Value Γ₂ (, k U.π ˢ indexed-type σ₂ ˢ c (indexed-type τ₂))} →
+    {f₂ : Value Γ₂ (, k U-π ˢ indexed-type σ₂ ˢ c (indexed-type τ₂))} →
   τ₁ ≅-Type τ₂ → f₁ ≅-Value f₂ → v₁ ≅-Value v₂ →
   f₁ ˢ v₁ ≅-Value f₂ ˢ v₂
 ˢ-cong P.refl P.refl P.refl = P.refl
@@ -276,8 +275,8 @@ curry-cong P.refl = P.refl
          Γ₁ ≅-Ctxt Γ₂ → ⋆ {Γ = Γ₁} ≅-type ⋆ {Γ = Γ₂}
 ⋆-cong P.refl = P.refl
 
-el-cong : ∀ {Γ₁} {t₁ : Γ₁ ⊢ , k ⋆}
-            {Γ₂} {t₂ : Γ₂ ⊢ , k ⋆} →
+el-cong : ∀ {Γ₁} {t₁ : Γ₁ ⊢ , k U-⋆}
+            {Γ₂} {t₂ : Γ₂ ⊢ , k U-⋆} →
           t₁ ≅-⊢ t₂ → el t₁ ≅-type el t₂
 el-cong P.refl = P.refl
 
@@ -304,6 +303,6 @@ var-cong P.refl = P.refl
   ∀ {Γ σ}
     {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
     {t₂₁ t₂₂ : Γ ⊢ σ}
-    {t₁₁ t₁₂ : Γ ⊢ , k U.π ˢ indexed-type σ ˢ proj₂ τ} →
+    {t₁₁ t₁₂ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ} →
   t₁₁ ≅-⊢ t₁₂ → t₂₁ ≅-⊢ t₂₂ → t₁₁ · t₂₁ ≅-⊢ t₁₂ · t₂₂
 ·-cong P.refl P.refl = P.refl

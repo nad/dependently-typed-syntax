@@ -3,14 +3,10 @@
 ------------------------------------------------------------------------
 
 import Level
-import Relation.Binary.PropositionalEquality as P
 open import Universe
-
--- The code assumes that equality of functions is extensional.
 
 module README.DependentlyTyped.Kripke-model
   {Uni₀ : Universe Level.zero Level.zero}
-  (ext : P.Extensionality Level.zero Level.zero)
   where
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
@@ -20,6 +16,7 @@ open import Function renaming (const to k)
 open import README.DependentlyTyped.NormalForm
 open import README.DependentlyTyped.NormalForm.Substitution
 import README.DependentlyTyped.Term as Term; open Term Uni₀
+import Relation.Binary.PropositionalEquality as P
 
 open P.≡-Reasoning
 open TermLike Uni hiding (·-cong) renaming (_·_ to _⊙_)
@@ -27,7 +24,7 @@ open TermLike Uni hiding (·-cong) renaming (_·_ to _⊙_)
 -- The family of types which forms a Kripke model.
 
 import README.DependentlyTyped.Kripke-model.Definition as Definition
-open Definition {Uni₀} ext public
+open Definition {Uni₀} public
 
 -- The semantics of a value.
 
@@ -78,7 +75,7 @@ řeflect-cong P.refl = P.refl
 infixl 9 _·̌_
 
 _·̌_ : ∀ {Γ σ τ} →
-      V̌alue Γ (, k U.π ˢ indexed-type σ ˢ proj₂ τ) → (v : V̌alue Γ σ) →
+      V̌alue Γ (, k U-π ˢ indexed-type σ ˢ proj₂ τ) → (v : V̌alue Γ σ) →
       V̌alue Γ (Prod.map id uc τ /̂ ŝub {σ = σ} ⟦̌ v ⟧)
 f ·̌ v = f ε v
 
@@ -196,7 +193,7 @@ mutual
     eval-· : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
                {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
              (t₁ : Γ ⊢ π (proj₁ σ) (proj₁ τ) ,
-                       k U.π ˢ indexed-type σ ˢ proj₂ τ)
+                       k U-π ˢ indexed-type σ ˢ proj₂ τ)
              (t₂ : Γ ⊢ σ) (ρ : Sub V̌al ρ̂) →
              eval (t₁ · t₂) ρ ≅-V̌alue eval t₁ ρ ε (eval t₂ ρ)
     eval-· {τ = τ} t₁ t₂ ρ =
@@ -207,30 +204,33 @@ mutual
 
   eval-lemma : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ σ) (ρ : Sub V̌al ρ̂) →
                ⟦ t ⟧ /Val ρ ≅-Value ⟦̌ eval t ρ ⟧
-  eval-lemma (var x)       ρ = V̌al-subst./̂∋-⟦⟧⇨ x ρ
+  eval-lemma (var x)               ρ = V̌al-subst./̂∋-⟦⟧⇨ x ρ
 
-  eval-lemma (ƛ {σ = σ} t) ρ =
+  eval-lemma (ƛ {σ = σ} {τ = τ} t) ρ =
     let ρ↑ = V̌al-subst.wk-subst⁺ (ε ▻ σ / ρ) ρ ▻ v̌ar ⊙ zero
 
     in begin
     [ c (⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ↑̂)      ]  ≡⟨ curry-cong (/̂Val-cong (P.refl {x = [ ⟦ t ⟧ ]}) (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _)) ⟩
     [ c (⟦ t ⟧ /Val ρ↑)            ]  ≡⟨ curry-cong (eval-lemma t ρ↑) ⟩
     [ c ⟦̌ eval t ρ↑ ⟧              ]  ≡⟨ P.refl ⟩
-    [ ⟦ ƛ (řeify _ (eval t ρ↑)) ⟧n ]  ≡⟨ ⟦⟧n-cong $ P.sym $ drop-subst-⊢n (λ σ → , σ) (ifst-isnd-ŵk-ŝub-žero _ _) ⟩
+    [ ⟦ ƛ (řeify _ (eval t ρ↑)) ⟧n ]  ≡⟨ ⟦⟧n-cong $ P.sym $ drop-subst-⊢n (λ υ → _ , υ)
+                                                                          (ifst-isnd-ŵk-ŝub-žero (proj₁ σ) {sp₂ = proj₁ τ} _) ⟩
     [ ⟦̌ eval (ƛ t) ρ ⟧             ]  ∎
 
   eval-lemma (_·_ {σ = σ} {τ = τ} t₁ t₂) ρ =
-    let υ = (k U.π ˢ proj₂ σ ˢ proj₂ τ) /̂I ⟦ ρ ⟧⇨
+    let υ = (k U-π ˢ proj₂ σ ˢ proj₂ τ) /̂I ⟦ ρ ⟧⇨
 
     in begin
     [ ⟦ t₁ · t₂ ⟧ /Val ρ                                       ]  ≡⟨ P.refl ⟩
     [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)                        ]  ≡⟨ ˢ-cong (P.refl {x = [ Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ ]})
                                                                             (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
-    [ ⟦̌_⟧ {σ = , υ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧                ]  ≡⟨ ˢ-cong (/̂-cong (P.refl {x = [ Prod.map id uc τ ]})
-                                                                                    (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _))
-                                                                            (⟦⟧n-cong $
-                                                                               drop-subst-⊢n (λ σ → , σ) (ifst-isnd-ŵk-ŝub-žero _ _))
-                                                                            (P.refl {x = [ ⟦̌ eval t₂ ρ ⟧ ]}) ⟩
+    [ ⟦̌_⟧ {σ = , υ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧                ]  ≡⟨ ˢ-cong
+                                                                       (/̂-cong (P.refl {x = [ Prod.map id uc τ ]})
+                                                                               (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _))
+                                                                       (⟦⟧n-cong $
+                                                                          drop-subst-⊢n (λ σ → , σ)
+                                                                            (ifst-isnd-ŵk-ŝub-žero (proj₁ σ) {sp₂ = proj₁ τ} _))
+                                                                       (P.refl {x = [ ⟦̌ eval t₂ ρ ⟧ ]}) ⟩
     [ c ⟦̌ eval t₁ ρ (ε ▻ fst υ) (v̌ar ⊙ zero) ⟧ ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ {!!} ⟩
     [ ⟦̌ eval t₁ ρ ε (eval t₂ ρ) ⟧                              ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
     [ ⟦̌ eval (t₁ · t₂) ρ ⟧                                     ]  ∎
