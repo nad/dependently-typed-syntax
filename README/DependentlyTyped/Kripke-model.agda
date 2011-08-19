@@ -26,11 +26,6 @@ open TermLike Uni hiding (·-cong) renaming (_·_ to _⊙_)
 import README.DependentlyTyped.Kripke-model.Definition as Definition
 open Definition {Uni₀} public
 
--- The semantics of a value.
-
-⟦̌_⟧ : ∀ {Γ σ} → V̌alue Γ σ → Value Γ σ
-⟦̌ v ⟧ = ⟦ řeify _ v ⟧n
-
 -- Values are term-like.
 
 V̌al : Term-like _
@@ -72,12 +67,12 @@ řeflect-cong P.refl = P.refl
 
 -- Application.
 
-infixl 9 _·̌_
+infix 9 [_]_·̌_
 
-_·̌_ : ∀ {Γ σ τ} →
-      V̌alue Γ (, k U-π ˢ indexed-type σ ˢ proj₂ τ) → (v : V̌alue Γ σ) →
-      V̌alue Γ (Prod.map id uc τ /̂ ŝub {σ = σ} ⟦̌ v ⟧)
-f ·̌ v = f ε v
+[_]_·̌_ : ∀ {Γ sp₁ sp₂} σ →
+         V̌alue Γ (π sp₁ sp₂ , σ) → (v : V̌alue Γ (fst σ)) →
+         V̌alue Γ (snd σ /̂ ŝub ⟦̌ v ⟧)
+[ _ ] f ·̌ v = proj₁ f ε v
 
 -- Variables can be turned into values.
 
@@ -177,16 +172,41 @@ mutual
   eval : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} →
          Γ ⊢ σ → Sub V̌al ρ̂ → V̌alue Δ (σ /̂ ρ̂)
   eval (var x)             ρ = x /∋ ρ
-  eval (ƛ t)               ρ = λ Γ⁺ v →
-                               eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v)
-  eval (_·_ {τ = τ} t₁ t₂) ρ = cast (eval t₁ ρ ε (eval t₂ ρ))
-    -- (_·̌_ {τ = Prod.map id c (Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂)}
-    --      (eval t₁ ρ) (eval t₂ ρ))
+  eval (_·_ {τ = τ} t₁ t₂) ρ = cast ([ υ ] eval t₁ ρ ·̌ eval t₂ ρ)
     where
+    υ    = k U-π ˢ _ ˢ c (uc (proj₂ τ) /̂I ⟦ ρ ⟧⇨ ↑̂)
     cast = P.subst (λ v → V̌alue _ (Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v))
                    (≅-Value-⇒-≡ $ P.sym $ eval-lemma t₂ ρ)
+  eval (ƛ t) ρ = (λ Γ⁺ v → eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v)) ,
+                 eval-ƛ-well-behaved t ρ
 
   abstract
+
+    eval-ƛ-well-behaved :
+      ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ▻ σ ⊢ τ) (ρ : Sub V̌al ρ̂) Γ⁺ v →
+      let υ = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /̂I ρ̂
+          f = λ Γ⁺ v → eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v) in
+      ⟦ řeify-π _ _ υ f ⟧n /̂Val ŵk⁺ Γ⁺ ˢ ⟦̌ v ⟧ ≅-Value
+      ⟦̌ eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v) ⟧
+    eval-ƛ-well-behaved {σ = σ} {τ = τ} t ρ Γ⁺ v =
+      let υ  = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /̂I ⟦ ρ ⟧⇨
+          f  = λ Γ⁺ v → eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v)
+          ρ↑ = V̌al-subst.wk-subst⁺ (ε ▻ fst υ) ρ ▻ řeflect _ (var zero)
+          ρ̂↑̂ = ⟦ ρ ⟧⇨ ∘̂ ŵk ▻̂ ⟦̌ řeflect _ (var zero) ⟧
+
+          lemma = begin
+            [ ⟦ řeify-π _ _ υ f ⟧n    ]  ≡⟨ ⟦⟧n-cong $ drop-subst-⊢n (λ σ → , σ) (ifst-isnd-ŵk-ŝub-žero _ υ) ⟩
+            [ c ⟦̌ eval t ρ↑ ⟧         ]  ≡⟨ curry-cong $ P.sym $ eval-lemma t ρ↑ ⟩
+            [ c (⟦ t ⟧ /̂Val ρ̂↑̂)       ]  ≡⟨ curry-cong $ /̂Val-cong (P.refl {x = [ ⟦ t ⟧ ]}) (∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ σ) ⟩
+            [ c (⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ↑̂) ]  ≡⟨ P.refl ⟩
+            [ c ⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨     ]  ∎
+
+      in begin
+      [ (⟦ řeify-π _ _ υ f ⟧n /̂Val ŵk⁺ Γ⁺) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong (P.refl {x = [ τ /̂ (⟦ ρ ⟧⇨ ∘̂ ŵk⁺ Γ⁺) ↑̂ ]})
+                                                                (/̂Val-cong lemma P.refl) P.refl ⟩
+      [ (c ⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ∘̂ ŵk⁺ Γ⁺) ˢ ⟦̌ v ⟧     ]  ≡⟨ P.refl ⟩
+      [ ⟦ t ⟧ /̂Val (⟦ ρ ⟧⇨ ∘̂ ŵk⁺ Γ⁺ ▻̂ ⟦̌ v ⟧)       ]  ≡⟨ eval-lemma t _ ⟩
+      [ ⟦̌ eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v) ⟧  ]  ∎
 
     -- An unfolding lemma.
 
@@ -195,59 +215,49 @@ mutual
              (t₁ : Γ ⊢ π (proj₁ σ) (proj₁ τ) ,
                        k U-π ˢ indexed-type σ ˢ proj₂ τ)
              (t₂ : Γ ⊢ σ) (ρ : Sub V̌al ρ̂) →
-             eval (t₁ · t₂) ρ ≅-V̌alue eval t₁ ρ ε (eval t₂ ρ)
+             let υ = (k U-π ˢ proj₂ σ ˢ proj₂ τ) /̂I ⟦ ρ ⟧⇨ in
+             eval (t₁ · t₂) ρ ≅-V̌alue [ υ ] eval t₁ ρ ·̌ eval t₂ ρ
     eval-· {τ = τ} t₁ t₂ ρ =
       drop-subst-V̌alue (λ v → Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
                        (≅-Value-⇒-≡ $ P.sym $ eval-lemma t₂ ρ)
 
-  -- The evaluator is well-behaved.
+    -- The evaluator is well-behaved.
 
-  eval-lemma : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ σ) (ρ : Sub V̌al ρ̂) →
-               ⟦ t ⟧ /Val ρ ≅-Value ⟦̌ eval t ρ ⟧
-  eval-lemma (var x)               ρ = V̌al-subst./̂∋-⟦⟧⇨ x ρ
+    eval-lemma : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ σ) (ρ : Sub V̌al ρ̂) →
+                 ⟦ t ⟧ /Val ρ ≅-Value ⟦̌ eval t ρ ⟧
+    eval-lemma (var x)               ρ = V̌al-subst./̂∋-⟦⟧⇨ x ρ
 
-  eval-lemma (ƛ {σ = σ} {τ = τ} t) ρ =
-    let ρ↑ = V̌al-subst.wk-subst⁺ (ε ▻ σ / ρ) ρ ▻ v̌ar ⊙ zero
+    eval-lemma (ƛ {σ = σ} {τ = τ} t) ρ =
+      let ρ↑ = V̌al-subst.wk-subst⁺ (ε ▻ σ / ρ) ρ ▻ v̌ar ⊙ zero
 
-    in begin
-    [ c (⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ↑̂)      ]  ≡⟨ curry-cong (/̂Val-cong (P.refl {x = [ ⟦ t ⟧ ]}) (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _)) ⟩
-    [ c (⟦ t ⟧ /Val ρ↑)            ]  ≡⟨ curry-cong (eval-lemma t ρ↑) ⟩
-    [ c ⟦̌ eval t ρ↑ ⟧              ]  ≡⟨ P.refl ⟩
-    [ ⟦ ƛ (řeify _ (eval t ρ↑)) ⟧n ]  ≡⟨ ⟦⟧n-cong $ P.sym $ drop-subst-⊢n (λ υ → _ , υ)
-                                                                          (ifst-isnd-ŵk-ŝub-žero (proj₁ σ) {sp₂ = proj₁ τ} _) ⟩
-    [ ⟦̌ eval (ƛ t) ρ ⟧             ]  ∎
+      in begin
+      [ c (⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ↑̂)      ]  ≡⟨ curry-cong (/̂Val-cong (P.refl {x = [ ⟦ t ⟧ ]}) (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _)) ⟩
+      [ c (⟦ t ⟧ /Val ρ↑)            ]  ≡⟨ curry-cong (eval-lemma t ρ↑) ⟩
+      [ c ⟦̌ eval t ρ↑ ⟧              ]  ≡⟨ P.refl ⟩
+      [ ⟦ ƛ (řeify _ (eval t ρ↑)) ⟧n ]  ≡⟨ ⟦⟧n-cong $ P.sym $ drop-subst-⊢n (λ υ → _ , υ)
+                                                                            (ifst-isnd-ŵk-ŝub-žero (proj₁ σ) {sp₂ = proj₁ τ} _) ⟩
+      [ ⟦̌ eval (ƛ t) ρ ⟧             ]  ∎
 
-  eval-lemma (_·_ {σ = σ} {τ = τ} t₁ t₂) ρ =
-    let υ = (k U-π ˢ proj₂ σ ˢ proj₂ τ) /̂I ⟦ ρ ⟧⇨
+    eval-lemma (_·_ {σ = σ} {τ = τ} t₁ t₂) ρ =
+      let υ = (k U-π ˢ proj₂ σ ˢ proj₂ τ) /̂I ⟦ ρ ⟧⇨
 
-    in begin
-    [ ⟦ t₁ · t₂ ⟧ /Val ρ                                       ]  ≡⟨ P.refl ⟩
-    [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)                        ]  ≡⟨ ˢ-cong (P.refl {x = [ Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ ]})
-                                                                            (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
-    [ ⟦̌_⟧ {σ = , υ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧                ]  ≡⟨ ˢ-cong
-                                                                       (/̂-cong (P.refl {x = [ Prod.map id uc τ ]})
-                                                                               (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _))
-                                                                       (⟦⟧n-cong $
-                                                                          drop-subst-⊢n (λ σ → , σ)
-                                                                            (ifst-isnd-ŵk-ŝub-žero (proj₁ σ) {sp₂ = proj₁ τ} _))
-                                                                       (P.refl {x = [ ⟦̌ eval t₂ ρ ⟧ ]}) ⟩
-    [ c ⟦̌ eval t₁ ρ (ε ▻ fst υ) (v̌ar ⊙ zero) ⟧ ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ {!!} ⟩
-    [ ⟦̌ eval t₁ ρ ε (eval t₂ ρ) ⟧                              ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
-    [ ⟦̌ eval (t₁ · t₂) ρ ⟧                                     ]  ∎
+      in begin
+      [ ⟦ t₁ · t₂ ⟧ /Val ρ                      ]  ≡⟨ P.refl ⟩
+      [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)       ]  ≡⟨ ˢ-cong (P.refl {x = [ Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ ]})
+                                                             (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
+      [ ⟦̌_⟧ {σ = υ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ w̌ell-behaved {σ = υ} (eval t₁ ρ) ε (eval t₂ ρ) ⟩
+      [ ⟦̌ [ υ ] eval t₁ ρ ·̌ eval t₂ ρ ⟧         ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
+      [ ⟦̌ eval (t₁ · t₂) ρ ⟧                    ]  ∎
 
--- Goal: (λ γ → ⟦ řeify (proj₁ τ) (eval t₁ ρ (ε ▻ fst υ) (řeflect (proj₁ σ) (var zero))) ⟧n (γ , ⟦ řeify (proj₁ σ) (eval t₂ ρ) ⟧n γ))
---         ≅-Value
---       ⟦ řeify (proj₁ τ) (eval t₁ ρ ε (eval t₂ ρ)) ⟧n
+-- Normalisation.
 
--- -- Normalisation.
+normalise : ∀ {Γ σ} → Γ ⊢ σ → Γ ⊢ σ ⟨ no ⟩
+normalise t = řeify _ (eval t V̌al-subst.id)
 
--- normalise : ∀ {Γ σ} → Γ ⊢ σ → Γ ⊢ σ ⟨ no ⟩
--- normalise t = řeify _ (eval t V̌al-subst.id)
+-- Normalisation is semantics-preserving.
 
--- -- Normalisation is semantics-preserving.
-
--- normalise-lemma : ∀ {Γ σ} (t : Γ ⊢ σ) → ⟦ t ⟧ ≅-Value ⟦ normalise t ⟧n
--- normalise-lemma t = eval-lemma t V̌al-subst.id
+normalise-lemma : ∀ {Γ σ} (t : Γ ⊢ σ) → ⟦ t ⟧ ≅-Value ⟦ normalise t ⟧n
+normalise-lemma t = eval-lemma t V̌al-subst.id
 
 -- Can the following statements be proved?
 
