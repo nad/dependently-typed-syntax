@@ -172,10 +172,10 @@ mutual
   eval : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} →
          Γ ⊢ σ → Sub V̌al ρ̂ → V̌alue Δ (σ /̂ ρ̂)
   eval (var x)             ρ = x /∋ ρ
-  eval (_·_ {τ = τ} t₁ t₂) ρ = cast ([ υ ] eval t₁ ρ ·̌ eval t₂ ρ)
+  eval (_·_ {σ = σ} t₁ t₂) ρ =
+    cast ([ σ /̂I ⟦ ρ ⟧⇨ ] eval t₁ ρ ·̌ eval t₂ ρ)
     where
-    υ    = k U-π ˢ _ ˢ c (uc (proj₂ τ) /̂I ⟦ ρ ⟧⇨ ↑̂)
-    cast = P.subst (λ v → V̌alue _ (Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v))
+    cast = P.subst (λ v → V̌alue _ (snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v))
                    (≅-Value-⇒-≡ $ P.sym $ eval-lemma t₂ ρ)
   eval (ƛ t) ρ = (λ Γ⁺ v → eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v)) ,
                  eval-ƛ-well-behaved t ρ
@@ -209,15 +209,12 @@ mutual
 
     -- An unfolding lemma.
 
-    eval-· : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
-               {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
-             (t₁ : Γ ⊢ π (proj₁ σ) (proj₁ τ) ,
-                       k U-π ˢ indexed-type σ ˢ proj₂ τ)
-             (t₂ : Γ ⊢ σ) (ρ : Sub V̌al ρ̂) →
-             let υ = (k U-π ˢ proj₂ σ ˢ proj₂ τ) /̂I ⟦ ρ ⟧⇨ in
-             eval (t₁ · t₂) ρ ≅-V̌alue [ υ ] eval t₁ ρ ·̌ eval t₂ ρ
-    eval-· {τ = τ} t₁ t₂ ρ =
-      drop-subst-V̌alue (λ v → Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
+    eval-· :
+      ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
+      (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) (ρ : Sub V̌al ρ̂) →
+      eval (t₁ · t₂) ρ ≅-V̌alue [ σ /̂I ⟦ ρ ⟧⇨ ] eval t₁ ρ ·̌ eval t₂ ρ
+    eval-· {σ = σ} t₁ t₂ ρ =
+      drop-subst-V̌alue (λ v → snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
                        (≅-Value-⇒-≡ $ P.sym $ eval-lemma t₂ ρ)
 
     -- The evaluator is well-behaved.
@@ -237,15 +234,15 @@ mutual
                                                                             (ifst-isnd-ŵk-ŝub-žero (proj₁ σ) {sp₂ = proj₁ τ} _) ⟩
       [ ⟦̌ eval (ƛ t) ρ ⟧             ]  ∎
 
-    eval-lemma (_·_ {σ = σ} {τ = τ} t₁ t₂) ρ =
-      let υ = (k U-π ˢ proj₂ σ ˢ proj₂ τ) /̂I ⟦ ρ ⟧⇨
+    eval-lemma (_·_ {σ = σ} t₁ t₂) ρ =
+      let σρ = σ /̂I ⟦ ρ ⟧⇨
 
       in begin
-      [ ⟦ t₁ · t₂ ⟧ /Val ρ                      ]  ≡⟨ P.refl ⟩
-      [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)       ]  ≡⟨ ˢ-cong (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
-      [ ⟦̌_⟧ {σ = υ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ w̌ell-behaved {σ = υ} (eval t₁ ρ) ε (eval t₂ ρ) ⟩
-      [ ⟦̌ [ υ ] eval t₁ ρ ·̌ eval t₂ ρ ⟧         ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
-      [ ⟦̌ eval (t₁ · t₂) ρ ⟧                    ]  ∎
+      [ ⟦ t₁ · t₂ ⟧ /Val ρ                       ]  ≡⟨ P.refl ⟩
+      [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)        ]  ≡⟨ ˢ-cong (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
+      [ ⟦̌_⟧ {σ = σρ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ w̌ell-behaved {σ = σρ} (eval t₁ ρ) ε (eval t₂ ρ) ⟩
+      [ ⟦̌ [ σρ ] eval t₁ ρ ·̌ eval t₂ ρ ⟧         ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
+      [ ⟦̌ eval (t₁ · t₂) ρ ⟧                     ]  ∎
 
 -- Normalisation.
 

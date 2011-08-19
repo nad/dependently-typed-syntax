@@ -38,8 +38,8 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
     _/⊢_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Γ ⊢ σ → Sub T ρ̂ → Δ ⊢ σ /̂ ρ̂
     var x             /⊢ ρ = trans ⊙ (x /∋ ρ)
     ƛ t               /⊢ ρ = ƛ (t /⊢ ρ ↑)
-    _·_ {τ = τ} t₁ t₂ /⊢ ρ =
-      P.subst (λ v → _ ⊢ Prod.map F.id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
+    _·_ {σ = σ} t₁ t₂ /⊢ ρ =
+      P.subst (λ v → _ ⊢ snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
               (≅-Value-⇒-≡ $ P.sym $ t₂ /⊢-lemma ρ)
               ((t₁ /⊢ ρ) · (t₂ /⊢ ρ))
 
@@ -47,13 +47,11 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
 
       -- An unfolding lemma.
 
-      ·-/⊢ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
-               {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
-             (t₁ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ) (t₂ : Γ ⊢ σ)
-             (ρ : Sub T ρ̂) →
+      ·-/⊢ : ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
+             (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) (ρ : Sub T ρ̂) →
              t₁ · t₂ /⊢ ρ ≅-⊢ (t₁ /⊢ ρ) · (t₂ /⊢ ρ)
-      ·-/⊢ {τ = τ} t₁ t₂ ρ =
-        drop-subst-⊢ (λ v → Prod.map F.id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
+      ·-/⊢ {σ = σ} t₁ t₂ ρ =
+        drop-subst-⊢ (λ v → snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
                      (≅-Value-⇒-≡ $ P.sym $ t₂ /⊢-lemma ρ)
 
       -- The application operation is well-behaved.
@@ -139,10 +137,8 @@ module Unfolding-lemmas
       [ ƛ (t /⊢⋆ ρs ↑⋆) /⊢ ρ  ]  ≡⟨ P.refl ⟩
       [ ƛ (t /⊢⋆ (ρs ▻ ρ) ↑⋆) ]  ∎
 
-    ·-/⊢⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} {σ}
-              {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
-            (t₁ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ)
-            (t₂ : Γ ⊢ σ) (ρs : Subs T ρ̂) →
+    ·-/⊢⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} {sp₁ sp₂ σ}
+            (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) (ρs : Subs T ρ̂) →
             t₁ · t₂ /⊢⋆ ρs ≅-⊢ (t₁ /⊢⋆ ρs) · (t₂ /⊢⋆ ρs)
     ·-/⊢⋆ t₁ t₂ ε        = P.refl
     ·-/⊢⋆ t₁ t₂ (ρs ▻ ρ) = begin

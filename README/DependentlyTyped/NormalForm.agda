@@ -41,10 +41,9 @@ mutual
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ ⟨ ne ⟩
     ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ ⟨ no ⟩) →
           Γ ⊢ , k U-π ˢ indexed-type σ ˢ c (indexed-type τ) ⟨ no ⟩
-    _·_ : ∀ {σ τ}
-          (t₁ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ ⟨ ne ⟩)
-          (t₂ : Γ ⊢ σ ⟨ no ⟩) →
-          Γ ⊢ Prod.map id uc τ /̂ ŝub ⟦ ⌊ t₂ ⌋ ⟧ ⟨ ne ⟩
+    _·_ : ∀ {sp₁ sp₂ σ}
+          (t₁ : Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩) (t₂ : Γ ⊢ fst σ ⟨ no ⟩) →
+          Γ ⊢ snd σ /̂ ŝub ⟦ ⌊ t₂ ⌋ ⟧ ⟨ ne ⟩
 
   -- Normal and neutral terms can be turned into ordinary terms.
 
@@ -93,8 +92,9 @@ var-n-cong P.refl = P.refl
 ƛn-cong P.refl = P.refl
 
 ·n-cong :
-  ∀ {Γ σ τ} {t₂₁ t₂₂ : Γ ⊢ σ ⟨ no ⟩}
-    {t₁₁ t₁₂ : Γ ⊢ , k U-π ˢ indexed-type σ
-                           ˢ c (indexed-type τ) ⟨ ne ⟩} →
-  t₁₁ ≅-⊢n t₁₂ → t₂₁ ≅-⊢n t₂₂ → t₁₁ · t₂₁ ≅-⊢n t₁₂ · t₂₂
+  ∀ {Γ₁ sp₁₁ sp₂₁ σ₁}
+    {t₁₁ : Γ₁ ⊢ π sp₁₁ sp₂₁ , σ₁ ⟨ ne ⟩} {t₂₁ : Γ₁ ⊢ fst σ₁ ⟨ no ⟩}
+    {Γ₂ sp₁₂ sp₂₂ σ₂}
+    {t₁₂ : Γ₂ ⊢ π sp₁₂ sp₂₂ , σ₂ ⟨ ne ⟩} {t₂₂ : Γ₂ ⊢ fst σ₂ ⟨ no ⟩} →
+    t₁₁ ≅-⊢n t₁₂ → t₂₁ ≅-⊢n t₂₂ → t₁₁ · t₂₁ ≅-⊢n t₁₂ · t₂₂
 ·n-cong P.refl P.refl = P.refl

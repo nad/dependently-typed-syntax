@@ -81,6 +81,30 @@ open deBruijn.Context Uni public
 open deBruijn.TermLike Uni hiding (_·_; ·-cong)
 
 ------------------------------------------------------------------------
+-- Projections
+
+-- Types with π-spines can be split up into a first and a second part.
+
+ifst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → IType Γ sp₁
+ifst σ γ = proj₁ (σ γ)
+
+fst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → Type Γ
+fst σ = , ifst σ
+
+isnd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
+       IType (Γ ▻ fst σ) sp₂
+isnd σ (γ , v) = proj₂ (σ γ) v
+
+snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) → Type (Γ ▻ fst σ)
+snd σ = , isnd σ
+
+-- The split is correct.
+
+π-fst-snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
+            σ ≡ k U-π ˢ ifst σ ˢ c (isnd σ)
+π-fst-snd σ = P.refl
+
+------------------------------------------------------------------------
 -- Well-typed terms
 
 mutual
@@ -103,9 +127,9 @@ mutual
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ
     ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ) →
           Γ ⊢ , k U-π ˢ indexed-type σ ˢ c (indexed-type τ)
-    _·_ : ∀ {σ τ}
-          (t₁ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ) (t₂ : Γ ⊢ σ) →
-          Γ ⊢ Prod.map id uc τ /̂ ŝub ⟦ t₂ ⟧
+    _·_ : ∀ {sp₁ sp₂ σ}
+          (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) →
+          Γ ⊢ snd σ /̂ ŝub ⟦ t₂ ⟧
 
   -- Semantics of terms.
 
@@ -183,31 +207,10 @@ no-type u ⟦t⟧≢u σ′ = helper σ′ P.refl
 -- V̌alue).
 
 ------------------------------------------------------------------------
--- Projections
+-- More projections
 
--- Types with π-spines can be split up into a first and a second part.
-
-ifst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → IType Γ sp₁
-ifst σ γ = proj₁ (σ γ)
-
-fst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → Type Γ
-fst σ = , ifst σ
-
-isnd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
-       IType (Γ ▻ fst σ) sp₂
-isnd σ (γ , v) = proj₂ (σ γ) v
-
-snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) → Type (Γ ▻ fst σ)
-snd σ = , isnd σ
-
--- The split is correct.
-
-π-fst-snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
-            σ ≡ k U-π ˢ ifst σ ˢ c (isnd σ)
-π-fst-snd σ = P.refl
-
--- We can also project out the first and second components of a
--- syntactic Π-type.
+-- We can project out the first and second components of a syntactic
+-- Π-type.
 
 fst′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
        Γ ⊢ , σ type → Γ ⊢ fst σ type
@@ -294,14 +297,9 @@ var-cong P.refl = P.refl
          t₁ ≅-⊢ t₂ → ƛ t₁ ≅-⊢ ƛ t₂
 ƛ-cong P.refl = P.refl
 
--- Previously the following lemma was more general, with heterogeneous
--- input equalities, at the cost of an extra input equality of type
--- τ₁ ≅-Curried-Type τ₂. (_≅-Curried-Type_ has been removed.)
-
-·-cong :
-  ∀ {Γ σ}
-    {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
-    {t₂₁ t₂₂ : Γ ⊢ σ}
-    {t₁₁ t₁₂ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ} →
-  t₁₁ ≅-⊢ t₁₂ → t₂₁ ≅-⊢ t₂₂ → t₁₁ · t₂₁ ≅-⊢ t₁₂ · t₂₂
+·-cong : ∀ {Γ₁ sp₁₁ sp₂₁ σ₁}
+           {t₁₁ : Γ₁ ⊢ π sp₁₁ sp₂₁ , σ₁} {t₂₁ : Γ₁ ⊢ fst σ₁}
+           {Γ₂ sp₁₂ sp₂₂ σ₂}
+           {t₁₂ : Γ₂ ⊢ π sp₁₂ sp₂₂ , σ₂} {t₂₂ : Γ₂ ⊢ fst σ₂} →
+           t₁₁ ≅-⊢ t₁₂ → t₂₁ ≅-⊢ t₂₂ → t₁₁ · t₂₁ ≅-⊢ t₁₂ · t₂₂
 ·-cong P.refl P.refl = P.refl

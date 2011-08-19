@@ -56,8 +56,8 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
     ne σ′ t           /⊢n ρ = ne (σ′ /⊢a ρ) (t /⊢n ρ)
     var x             /⊢n ρ = trans ⊙ (x /∋ ρ)
     ƛ t               /⊢n ρ = ƛ (t /⊢n ρ ↑)
-    _·_ {τ = τ} t₁ t₂ /⊢n ρ =
-      P.subst (λ v → _ ⊢ Prod.map F.id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v ⟨ ne ⟩)
+    _·_ {σ = σ} t₁ t₂ /⊢n ρ =
+      P.subst (λ v → _ ⊢ snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v ⟨ ne ⟩)
               (≅-Value-⇒-≡ $ P.sym (t₂ /⊢n-lemma ρ))
               ((t₁ /⊢n ρ) · (t₂ /⊢n ρ))
 
@@ -66,13 +66,12 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
       -- An unfolding lemma.
 
       ·-/⊢n :
-        ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ}
-          {τ : ∃ λ sp → (γ : Env Γ) → El (indexed-type σ γ) → U sp}
-        (t₁ : Γ ⊢ , k U-π ˢ indexed-type σ ˢ proj₂ τ ⟨ ne ⟩)
-        (t₂ : Γ ⊢ σ ⟨ no ⟩) (ρ : Sub T ρ̂) →
+        ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
+        (t₁ : Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩) (t₂ : Γ ⊢ fst σ ⟨ no ⟩)
+        (ρ : Sub T ρ̂) →
         t₁ · t₂ /⊢n ρ ≅-⊢n (t₁ /⊢n ρ) · (t₂ /⊢n ρ)
-      ·-/⊢n {τ = τ} t₁ t₂ ρ =
-        drop-subst-⊢n (λ v → Prod.map F.id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
+      ·-/⊢n {σ = σ} t₁ t₂ ρ =
+        drop-subst-⊢n (λ v → snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
                       (≅-Value-⇒-≡ $ P.sym $ t₂ /⊢n-lemma ρ)
 
       -- The application operation is well-behaved.
