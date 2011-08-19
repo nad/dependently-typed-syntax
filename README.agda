@@ -96,7 +96,5 @@ import README.DependentlyTyped.Kripke-model
 -- TODO: Do something about the following modules:
 --
 -- README.DependentlyTyped
--- README.DependentlyTyped.NBE3
--- README.DependentlyTyped.NBE4
 
 -- TODO: Add an untyped example.
