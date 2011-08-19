@@ -121,7 +121,7 @@ mutual
             [ ⟦ t /⊢n Renaming.wk⁺ Γ⁺ ⟧n         ]  ∎
 
       in begin
-      [ (⟦ čast sp₁ σ (ƛ t′) ⟧n /̂Val ŵk⁺ Γ⁺) ˢ ⟦ v′ ⟧n            ]  ≡⟨ ˢ-cong (P.refl {x = [ snd σ /̂ ŵk⁺ Γ⁺ ↑̂ ]}) lemma′ P.refl ⟩
+      [ (⟦ čast sp₁ σ (ƛ t′) ⟧n /̂Val ŵk⁺ Γ⁺) ˢ ⟦ v′ ⟧n            ]  ≡⟨ ˢ-cong lemma′ P.refl ⟩
       [ ⟦ t /⊢n Renaming.wk⁺ Γ⁺ ⟧n           ˢ ⟦ v′ ⟧n            ]  ≡⟨ P.refl ⟩
       [ ⟦ (t /⊢n Renaming.wk⁺ Γ⁺) · v′ ⟧n                         ]  ≡⟨ P.sym $ ňeutral-to-normal-identity sp₂ _ ⟩
       [ ⟦ ňeutral-to-normal sp₂ ((t /⊢n Renaming.wk⁺ Γ⁺) · v′) ⟧n ]  ∎
@@ -170,8 +170,7 @@ mutual
           lemma = begin
             [ ⟦ ňeutral-to-normal sp₂ t′ ⟧n                   ]  ≡⟨ ňeutral-to-normal-identity sp₂ t′ ⟩
             [ ⟦ t′ ⟧n                                         ]  ≡⟨ P.refl ⟩
-            [ ⟦ t /⊢n Renaming.wk ⟧n ˢ ⟦ žero sp₁ (ifst σ) ⟧n ]  ≡⟨ ˢ-cong (P.refl {x = [ snd σ /̂ ŵk ↑̂ ]})
-                                                                           (P.sym $ t /⊢n-lemma Renaming.wk)
+            [ ⟦ t /⊢n Renaming.wk ⟧n ˢ ⟦ žero sp₁ (ifst σ) ⟧n ]  ≡⟨ ˢ-cong (P.sym $ t /⊢n-lemma Renaming.wk)
                                                                            (ňeutral-to-normal-identity sp₁ (var zero)) ⟩
             [ (⟦ t ⟧n /̂Val ŵk)       ˢ lookup zero            ]  ≡⟨ P.refl ⟩
             [ uc ⟦ t ⟧n                                       ]  ∎

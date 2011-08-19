@@ -65,10 +65,9 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
         [ c ⟦ t ⟧ /Val ρ     ]  ≡⟨ P.refl ⟩
         [ c (⟦ t ⟧ /Val ρ ↑) ]  ≡⟨ curry-cong (t /⊢-lemma (ρ ↑)) ⟩
         [ c ⟦ t /⊢ ρ ↑ ⟧     ]  ∎
-      _·_ {τ = τ} t₁ t₂ /⊢-lemma ρ = begin
+      t₁ · t₂ /⊢-lemma ρ = begin
         [ ⟦ t₁ · t₂ ⟧ /Val ρ                ]  ≡⟨ P.refl ⟩
-        [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ) ]  ≡⟨ ˢ-cong (P.refl {x = [ Prod.map F.id uc τ / ρ ↑ ]})
-                                                         (t₁ /⊢-lemma ρ) (t₂ /⊢-lemma ρ) ⟩
+        [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ) ]  ≡⟨ ˢ-cong (t₁ /⊢-lemma ρ) (t₂ /⊢-lemma ρ) ⟩
         [ ⟦ t₁ /⊢ ρ ⟧ ˢ ⟦ t₂ /⊢ ρ ⟧         ]  ≡⟨ P.refl ⟩
         [ ⟦ (t₁ /⊢ ρ) · (t₂ /⊢ ρ) ⟧         ]  ≡⟨ ⟦⟧-cong (P.sym $ ·-/⊢ t₁ t₂ ρ) ⟩
         [ ⟦ t₁ · t₂ /⊢ ρ ⟧                  ]  ∎

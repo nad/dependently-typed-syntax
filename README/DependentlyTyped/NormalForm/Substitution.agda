@@ -88,10 +88,9 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
         [ c ⟦ t ⟧n /Val ρ     ]  ≡⟨ P.refl ⟩
         [ c (⟦ t ⟧n /Val ρ ↑) ]  ≡⟨ curry-cong (t /⊢n-lemma (ρ ↑)) ⟩
         [ c ⟦ t /⊢n ρ ↑ ⟧n    ]  ∎
-      _·_ {τ = τ} t₁ t₂ /⊢n-lemma ρ = begin
+      t₁ · t₂ /⊢n-lemma ρ = begin
         [ ⟦ t₁ · t₂ ⟧n /Val ρ                 ]  ≡⟨ P.refl ⟩
-        [ (⟦ t₁ ⟧n /Val ρ) ˢ (⟦ t₂ ⟧n /Val ρ) ]  ≡⟨ ˢ-cong (P.refl {x = [ Prod.map F.id uc τ / ρ ↑ ]})
-                                                           (t₁ /⊢n-lemma ρ) (t₂ /⊢n-lemma ρ) ⟩
+        [ (⟦ t₁ ⟧n /Val ρ) ˢ (⟦ t₂ ⟧n /Val ρ) ]  ≡⟨ ˢ-cong (t₁ /⊢n-lemma ρ) (t₂ /⊢n-lemma ρ) ⟩
         [ ⟦ t₁ /⊢n ρ ⟧n ˢ ⟦ t₂ /⊢n ρ ⟧n       ]  ≡⟨ P.refl ⟩
         [ ⟦ (t₁ /⊢n ρ) · (t₂ /⊢n ρ) ⟧n        ]  ≡⟨ ⟦⟧n-cong (P.sym $ ·-/⊢n t₁ t₂ ρ) ⟩
         [ ⟦ t₁ · t₂ /⊢n ρ ⟧n                  ]  ∎

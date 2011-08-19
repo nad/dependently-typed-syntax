@@ -257,13 +257,12 @@ drop-subst-⊢-type f P.refl = P.refl
 -- application and abstraction.
 
 ˢ-cong :
-  ∀ {Γ₁ σ₁ τ₁} {v₁ : Value Γ₁ σ₁}
-    {f₁ : Value Γ₁ (, k U-π ˢ indexed-type σ₁ ˢ c (indexed-type τ₁))}
-    {Γ₂ σ₂ τ₂} {v₂ : Value Γ₂ σ₂}
-    {f₂ : Value Γ₂ (, k U-π ˢ indexed-type σ₂ ˢ c (indexed-type τ₂))} →
-  τ₁ ≅-Type τ₂ → f₁ ≅-Value f₂ → v₁ ≅-Value v₂ →
-  f₁ ˢ v₁ ≅-Value f₂ ˢ v₂
-ˢ-cong P.refl P.refl P.refl = P.refl
+  ∀ {Γ₁ sp₁₁ sp₂₁ σ₁} {v₁ : Value Γ₁ (fst σ₁)}
+    {f₁ : Value Γ₁ (π sp₁₁ sp₂₁ , σ₁)}
+    {Γ₂ sp₁₂ sp₂₂ σ₂} {v₂ : Value Γ₂ (fst σ₂)}
+    {f₂ : Value Γ₂ (π sp₁₂ sp₂₂ , σ₂)} →
+  f₁ ≅-Value f₂ → v₁ ≅-Value v₂ → f₁ ˢ v₁ ≅-Value f₂ ˢ v₂
+ˢ-cong P.refl P.refl = P.refl
 
 curry-cong :
   ∀ {Γ₁ σ₁ τ₁} {v₁ : Value (Γ₁ ▻ σ₁) τ₁}

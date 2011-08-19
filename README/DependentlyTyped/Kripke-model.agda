@@ -202,8 +202,7 @@ mutual
             [ c ⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨     ]  ∎
 
       in begin
-      [ (⟦ řeify-π _ _ υ f ⟧n /̂Val ŵk⁺ Γ⁺) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong (P.refl {x = [ τ /̂ (⟦ ρ ⟧⇨ ∘̂ ŵk⁺ Γ⁺) ↑̂ ]})
-                                                                (/̂Val-cong lemma P.refl) P.refl ⟩
+      [ (⟦ řeify-π _ _ υ f ⟧n /̂Val ŵk⁺ Γ⁺) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong (/̂Val-cong lemma P.refl) P.refl ⟩
       [ (c ⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ∘̂ ŵk⁺ Γ⁺) ˢ ⟦̌ v ⟧     ]  ≡⟨ P.refl ⟩
       [ ⟦ t ⟧ /̂Val (⟦ ρ ⟧⇨ ∘̂ ŵk⁺ Γ⁺ ▻̂ ⟦̌ v ⟧)       ]  ≡⟨ eval-lemma t _ ⟩
       [ ⟦̌ eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v) ⟧  ]  ∎
@@ -243,8 +242,7 @@ mutual
 
       in begin
       [ ⟦ t₁ · t₂ ⟧ /Val ρ                      ]  ≡⟨ P.refl ⟩
-      [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)       ]  ≡⟨ ˢ-cong (P.refl {x = [ Prod.map id uc τ /̂ ⟦ ρ ⟧⇨ ↑̂ ]})
-                                                             (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
+      [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)       ]  ≡⟨ ˢ-cong (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
       [ ⟦̌_⟧ {σ = υ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ w̌ell-behaved {σ = υ} (eval t₁ ρ) ε (eval t₂ ρ) ⟩
       [ ⟦̌ [ υ ] eval t₁ ρ ·̌ eval t₂ ρ ⟧         ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
       [ ⟦̌ eval (t₁ · t₂) ρ ⟧                    ]  ∎
