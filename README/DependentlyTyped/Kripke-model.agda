@@ -173,7 +173,7 @@ mutual
          Γ ⊢ σ → Sub V̌al ρ̂ → V̌alue Δ (σ /̂ ρ̂)
   eval (var x)             ρ = x /∋ ρ
   eval (_·_ {σ = σ} t₁ t₂) ρ =
-    cast ([ σ /̂I ⟦ ρ ⟧⇨ ] eval t₁ ρ ·̌ eval t₂ ρ)
+    cast ([ σ /I ρ ] eval t₁ ρ ·̌ eval t₂ ρ)
     where
     cast = P.subst (λ v → V̌alue _ (snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v))
                    (≅-Value-⇒-≡ $ P.sym $ eval-lemma t₂ ρ)
@@ -184,12 +184,12 @@ mutual
 
     eval-ƛ-well-behaved :
       ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ▻ σ ⊢ τ) (ρ : Sub V̌al ρ̂) Γ⁺ v →
-      let υ = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /̂I ρ̂
+      let υ = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /I ρ
           f = λ Γ⁺ v → eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v) in
       ⟦ řeify-π _ _ υ f ⟧n /̂Val ŵk⁺ Γ⁺ ˢ ⟦̌ v ⟧ ≅-Value
       ⟦̌ eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v) ⟧
     eval-ƛ-well-behaved {σ = σ} {τ = τ} t ρ Γ⁺ v =
-      let υ  = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /̂I ⟦ ρ ⟧⇨
+      let υ  = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /I ρ
           f  = λ Γ⁺ v → eval t (V̌al-subst.wk-subst⁺ Γ⁺ ρ ▻ v)
           ρ↑ = V̌al-subst.wk-subst⁺ (ε ▻ fst υ) ρ ▻ řeflect _ (var zero)
           ρ̂↑̂ = ⟦ ρ ⟧⇨ ∘̂ ŵk ▻̂ ⟦̌ řeflect _ (var zero) ⟧
@@ -212,7 +212,7 @@ mutual
     eval-· :
       ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
       (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) (ρ : Sub V̌al ρ̂) →
-      eval (t₁ · t₂) ρ ≅-V̌alue [ σ /̂I ⟦ ρ ⟧⇨ ] eval t₁ ρ ·̌ eval t₂ ρ
+      eval (t₁ · t₂) ρ ≅-V̌alue [ σ /I ρ ] eval t₁ ρ ·̌ eval t₂ ρ
     eval-· {σ = σ} t₁ t₂ ρ =
       drop-subst-V̌alue (λ v → snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
                        (≅-Value-⇒-≡ $ P.sym $ eval-lemma t₂ ρ)
@@ -234,15 +234,12 @@ mutual
                                                                             (ifst-isnd-ŵk-ŝub-žero (proj₁ σ) {sp₂ = proj₁ τ} _) ⟩
       [ ⟦̌ eval (ƛ t) ρ ⟧             ]  ∎
 
-    eval-lemma (_·_ {σ = σ} t₁ t₂) ρ =
-      let σρ = σ /̂I ⟦ ρ ⟧⇨
-
-      in begin
-      [ ⟦ t₁ · t₂ ⟧ /Val ρ                       ]  ≡⟨ P.refl ⟩
-      [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)        ]  ≡⟨ ˢ-cong (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
-      [ ⟦̌_⟧ {σ = σρ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ w̌ell-behaved {σ = σρ} (eval t₁ ρ) ε (eval t₂ ρ) ⟩
-      [ ⟦̌ [ σρ ] eval t₁ ρ ·̌ eval t₂ ρ ⟧         ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
-      [ ⟦̌ eval (t₁ · t₂) ρ ⟧                     ]  ∎
+    eval-lemma (_·_ {σ = σ} t₁ t₂) ρ = begin
+      [ ⟦ t₁ · t₂ ⟧ /Val ρ                           ]  ≡⟨ P.refl ⟩
+      [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)            ]  ≡⟨ ˢ-cong (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
+      [ ⟦̌_⟧ {σ = σ /I ρ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ w̌ell-behaved {σ = σ /I ρ} (eval t₁ ρ) ε (eval t₂ ρ) ⟩
+      [ ⟦̌ [ σ /I ρ ] eval t₁ ρ ·̌ eval t₂ ρ ⟧         ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
+      [ ⟦̌ eval (t₁ · t₂) ρ ⟧                         ]  ∎
 
 -- Normalisation.
 

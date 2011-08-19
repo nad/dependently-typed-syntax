@@ -169,7 +169,10 @@ private
 
   -- Application of substitutions to types.
 
-  infixl 8 _/_ _/⋆_
+  infixl 8 _/I_ _/_ _/⋆_
+
+  _/I_ : ∀ {Γ Δ i} {ρ̂ : Γ ⇨̂ Δ} → IType Γ i → Sub T ρ̂ → IType Δ i
+  σ /I ρ = σ /̂I ⟦ ρ ⟧⇨
 
   _/_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Type Γ → Sub T ρ̂ → Type Δ
   σ / ρ = σ /̂ ⟦ ρ ⟧⇨
