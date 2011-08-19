@@ -135,13 +135,13 @@ lift {Γ} {Δ} {ρ̂} f (Γ⁺ ▻ σ) = record
   ; corresponds = corr
   }
   where
-  function : ∀ τ → Γ ++ Γ⁺ ▻ σ ∋ τ →
-             Δ ++ (Γ⁺ ▻ σ) /̂⁺ ρ̂ ∋ τ /̂ ρ̂ ↑̂⁺ (Γ⁺ ▻ σ)
+  function : ∀ τ → Γ ++⁺ Γ⁺ ▻ σ ∋ τ →
+             Δ ++⁺ (Γ⁺ ▻ σ) /̂⁺ ρ̂ ∋ τ /̂ ρ̂ ↑̂⁺ (Γ⁺ ▻ σ)
   function ._ zero    = zero
   function ._ (suc x) = suc (lift f Γ⁺ · x)
 
   abstract
-    corr : ∀ τ (x : Γ ++ Γ⁺ ▻ σ ∋ τ) →
+    corr : ∀ τ (x : Γ ++⁺ Γ⁺ ▻ σ ∋ τ) →
            lookup x /̂Val ρ̂ ↑̂⁺ (Γ⁺ ▻ σ) ≅-Value lookup (function _ x)
     corr ._ zero    = P.refl
     corr ._ (suc x) = begin
@@ -281,7 +281,7 @@ abstract
   -- lift ∘ weaken∋ sort of commutes with a lifted version of itself.
 
   lift-weaken∋-lift-lift-weaken∋ :
-    ∀ {Γ} σ Γ⁺ τ Γ⁺⁺ {υ} (x : Γ ++ Γ⁺ ++ Γ⁺⁺ ∋ υ) →
+    ∀ {Γ} σ Γ⁺ τ Γ⁺⁺ {υ} (x : Γ ++⁺ Γ⁺ ++⁺ Γ⁺⁺ ∋ υ) →
     lift weaken∋[ τ /̂ ŵk ↑̂⁺ Γ⁺ ] (Γ⁺⁺ /̂⁺ ŵk ↑̂⁺ Γ⁺) ·
          (lift (lift weaken∋[ σ ] Γ⁺) Γ⁺⁺ · x) ≅-∋
     lift (lift weaken∋[ σ ] (Γ⁺ ▻ τ)) (Γ⁺⁺ /̂⁺ ŵk) ·

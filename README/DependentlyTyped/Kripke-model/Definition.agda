@@ -47,8 +47,8 @@ mutual
   V̌alue-π : ∀ Γ sp₁ sp₂ → IType Γ (π sp₁ sp₂) → Set
   V̌alue-π Γ sp₁ sp₂ σ =
     (Γ⁺ : Ctxt⁺ Γ)
-    (v : V̌alue′ (Γ ++ Γ⁺) sp₁ (ifst σ /̂I ŵk⁺ Γ⁺)) →
-    V̌alue′ (Γ ++ Γ⁺) sp₂ (isnd σ /̂I ŵk⁺ Γ⁺ ↑̂ ∘̂ ŝub ⟦̌ v ⟧)
+    (v : V̌alue′ (Γ ++⁺ Γ⁺) sp₁ (ifst σ /̂I ŵk⁺ Γ⁺)) →
+    V̌alue′ (Γ ++⁺ Γ⁺) sp₂ (isnd σ /̂I ŵk⁺ Γ⁺ ↑̂ ∘̂ ŝub ⟦̌ v ⟧)
 
   Well-behaved :
     ∀ {Γ} sp₁ sp₂ σ → V̌alue-π Γ sp₁ sp₂ σ → Set

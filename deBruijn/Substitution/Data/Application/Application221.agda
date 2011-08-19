@@ -65,9 +65,9 @@ record Application₂₂₁
     -- arbitrary terms.
     var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ :
       ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρs₁ : Subs T₁ ρ̂) (ρs₂ : Subs T₁ ρ̂) →
-      (∀ Γ⁺ {σ} (x : Γ ++ Γ⁺ ∋ σ) →
+      (∀ Γ⁺ {σ} (x : Γ ++⁺ Γ⁺ ∋ σ) →
          var₂ · x /⊢⋆ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢₂ var₂ · x /⊢⋆ ρs₂ ↑⁺⋆₁ Γ⁺) →
-      ∀ Γ⁺ {σ} (t : Γ ++ Γ⁺ ⊢₂ σ) →
+      ∀ Γ⁺ {σ} (t : Γ ++⁺ Γ⁺ ⊢₂ σ) →
       t /⊢⋆ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢₂ t /⊢⋆ ρs₂ ↑⁺⋆₁ Γ⁺
 
     -- The wk substitution and the weaken function are equivalent.
@@ -135,7 +135,7 @@ record Application₂₂₁
       -- using, among other things, this lemma.
 
       /⊢-wk-↑⁺-/⊢-wk :
-        ∀ {Γ} σ Γ⁺ τ {υ} (t : Γ ++ Γ⁺ ⊢₂ υ) →
+        ∀ {Γ} σ Γ⁺ τ {υ} (t : Γ ++⁺ Γ⁺ ⊢₂ υ) →
         let wk-σ = wk₁[ σ ] ↑⁺₁ Γ⁺ in
         t /⊢ wk-σ /⊢ wk₁[ τ / wk-σ ] ≅-⊢₂
         t /⊢ wk₁ /⊢ wk₁[ σ ] ↑⁺₁ (Γ⁺ ▻ τ)
@@ -166,7 +166,7 @@ record Application₂₂₁
       -- Another lemma used in the proof of /⊢-/⊢-wk.
 
       var-/⊢-↑⁺-/⊢-wk-↑⁺ :
-        ∀ {Γ Δ} σ {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T₁ ρ̂) Γ⁺ {υ} (x : Γ ++ Γ⁺ ∋ υ) →
+        ∀ {Γ Δ} σ {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T₁ ρ̂) Γ⁺ {υ} (x : Γ ++⁺ Γ⁺ ∋ υ) →
         var₂ · x /⊢ ρ ↑⁺₁ Γ⁺ /⊢ wk₁[ σ / ρ ] ↑⁺₁ (Γ⁺ /⁺ ρ) ≅-⊢₂
         var₂ · (lift weaken∋[ σ ] Γ⁺ · x) /⊢ ρ ↑₁ ↑⁺₁ (Γ⁺ /⁺ wk₁)
       var-/⊢-↑⁺-/⊢-wk-↑⁺ σ ρ ε        x    = P.sym $ var-suc-/⊢-↑ σ x ρ

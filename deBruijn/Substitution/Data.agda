@@ -225,9 +225,9 @@ record Substitution₂ (T : Term-like (i ⊔ u ⊔ e))
             using () renaming (_↑⁺⋆_ to _↑⁺⋆₂_; _/⊢⋆_ to _/⊢⋆₂_) in
 
       ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρs₁ : Subs T₁ ρ̂) (ρs₂ : Subs T₂ ρ̂) →
-      (∀ Γ⁺ {σ} (x : Γ ++ Γ⁺ ∋ σ) →
+      (∀ Γ⁺ {σ} (x : Γ ++⁺ Γ⁺ ∋ σ) →
          var · x /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢ var · x /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺) →
-      ∀ Γ⁺ {σ} (t : Γ ++ Γ⁺ ⊢ σ) →
+      ∀ Γ⁺ {σ} (t : Γ ++⁺ Γ⁺ ⊢ σ) →
       t /⊢⋆₁ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢ t /⊢⋆₂ ρs₂ ↑⁺⋆₂ Γ⁺
 
   -- Given a well-behaved translation from something with simple

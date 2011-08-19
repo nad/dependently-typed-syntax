@@ -57,9 +57,9 @@ record Application₂₂
     -- arbitrary terms.
     var-/⊢⋆-↑⁺⋆-⇒-/⊢⋆-↑⁺⋆ :
       ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρs₁ : Subs T₁ ρ̂) (ρs₂ : Subs T₁ ρ̂) →
-      (∀ Γ⁺ {σ} (x : Γ ++ Γ⁺ ∋ σ) →
+      (∀ Γ⁺ {σ} (x : Γ ++⁺ Γ⁺ ∋ σ) →
          var₂ · x /⊢⋆ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢₂ var₂ · x /⊢⋆ ρs₂ ↑⁺⋆₁ Γ⁺) →
-      ∀ Γ⁺ {σ} (t : Γ ++ Γ⁺ ⊢₂ σ) →
+      ∀ Γ⁺ {σ} (t : Γ ++⁺ Γ⁺ ⊢₂ σ) →
       t /⊢⋆ ρs₁ ↑⁺⋆₁ Γ⁺ ≅-⊢₂ t /⊢⋆ ρs₂ ↑⁺⋆₁ Γ⁺
 
     -- The wk substitution and the weaken function are equivalent.

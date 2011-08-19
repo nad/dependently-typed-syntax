@@ -87,31 +87,31 @@ v̌ar = record
 postulate
   w̌k : ∀ {Γ σ} τ → V̌alue Γ τ → V̌alue (Γ ▻ σ) (τ /̂ ŵk)
 
--- w̌k⁺ : ∀ {Γ} σ → V̌alue Γ σ → ∀ Γ⁺ → V̌alue (Γ ++ Γ⁺) (σ /̂ ŵk⁺ Γ⁺)
+-- w̌k⁺ : ∀ {Γ} σ → V̌alue Γ σ → ∀ Γ⁺ → V̌alue (Γ ++⁺ Γ⁺) (σ /̂ ŵk⁺ Γ⁺)
 -- w̌k⁺     (⋆         , σ) t     Γ⁺ =   t /⊢n Renaming.wk⁺ Γ⁺
 -- w̌k⁺     (el        , σ) [ t ] Γ⁺ = [ t /⊢n Renaming.wk⁺ Γ⁺ ]
 -- w̌k⁺ {Γ} (π sp₁ sp₂ , σ) f     Γ⁺ = λ Γ⁺⁺ v →
---   let cast₁ : V̌alue (Γ ++ Γ⁺ ++ Γ⁺⁺) (sp₁ , ifst (σ /̂I ŵk⁺ Γ⁺) /̂I ŵk⁺ Γ⁺⁺) →
---               V̌alue (Γ ++ (Γ⁺ ++⁺ Γ⁺⁺)) (sp₁ , ifst σ /̂I ŵk⁺ (Γ⁺ ++⁺ Γ⁺⁺))
+--   let cast₁ : V̌alue (Γ ++⁺ Γ⁺ ++⁺ Γ⁺⁺) (sp₁ , ifst (σ /̂I ŵk⁺ Γ⁺) /̂I ŵk⁺ Γ⁺⁺) →
+--               V̌alue (Γ ++⁺ (Γ⁺ ⁺++⁺ Γ⁺⁺)) (sp₁ , ifst σ /̂I ŵk⁺ (Γ⁺ ⁺++⁺ Γ⁺⁺))
 --       cast₁ = {!!}
 
---       cast₂ : V̌alue (Γ ++ (Γ⁺ ++⁺ Γ⁺⁺)) (sp₂ , isnd σ /̂I ŵk⁺ (Γ⁺ ++⁺ Γ⁺⁺) ↑̂ ∘̂ ŝub ⟦̌ cast₁ v ⟧n) →
---               V̌alue (Γ ++ Γ⁺ ++ Γ⁺⁺) (sp₂ , isnd (σ /̂I ŵk⁺ Γ⁺) /̂I ŵk⁺ Γ⁺⁺ ↑̂ ∘̂ ŝub ⟦̌ v ⟧n)
+--       cast₂ : V̌alue (Γ ++⁺ (Γ⁺ ⁺++⁺ Γ⁺⁺)) (sp₂ , isnd σ /̂I ŵk⁺ (Γ⁺ ⁺++⁺ Γ⁺⁺) ↑̂ ∘̂ ŝub ⟦̌ cast₁ v ⟧n) →
+--               V̌alue (Γ ++⁺ Γ⁺ ++⁺ Γ⁺⁺) (sp₂ , isnd (σ /̂I ŵk⁺ Γ⁺) /̂I ŵk⁺ Γ⁺⁺ ↑̂ ∘̂ ŝub ⟦̌ v ⟧n)
 --       cast₂ = {!!}
---   in cast₂ $ f (Γ⁺ ++⁺ Γ⁺⁺) $ cast₁ v
+--   in cast₂ $ f (Γ⁺ ⁺++⁺ Γ⁺⁺) $ cast₁ v
 
 -- w̌k : ∀ {Γ σ} τ → V̌alue Γ τ → V̌alue (Γ ▻ σ) (τ /̂ ŵk)
 -- w̌k         (⋆         , τ) t     =   t /⊢n Renaming.wk
 -- w̌k         (el        , τ) [ t ] = [ t /⊢n Renaming.wk ]
 -- w̌k {Γ} {σ} (π sp₁ sp₂ , τ) f     = λ Γ⁺ v →
---   let cast₁ : V̌alue (Γ ▻ σ ++ Γ⁺) (sp₁ , ifst (τ /̂I ŵk) /̂I ŵk⁺ Γ⁺) →
---               V̌alue (Γ ++ (ε ▻ σ ++⁺ Γ⁺)) (sp₁ , ifst τ /̂I ŵk⁺ (ε ▻ σ ++⁺ Γ⁺))
+--   let cast₁ : V̌alue (Γ ▻ σ ++⁺ Γ⁺) (sp₁ , ifst (τ /̂I ŵk) /̂I ŵk⁺ Γ⁺) →
+--               V̌alue (Γ ++⁺ (ε ▻ σ ⁺++⁺ Γ⁺)) (sp₁ , ifst τ /̂I ŵk⁺ (ε ▻ σ ⁺++⁺ Γ⁺))
 --       cast₁ = {!!}
 
---       cast₂ : V̌alue (Γ ++ (ε ▻ σ ++⁺ Γ⁺)) (sp₂ , isnd τ /̂I ŵk⁺ (ε ▻ σ ++⁺ Γ⁺) ↑̂ ∘̂ ŝub ⟦̌ cast₁ v ⟧n) →
---               V̌alue (Γ ▻ σ ++ Γ⁺) (sp₂ , isnd (τ /̂I ŵk) /̂I ŵk⁺ Γ⁺ ↑̂ ∘̂ ŝub ⟦̌ v ⟧n)
+--       cast₂ : V̌alue (Γ ++⁺ (ε ▻ σ ⁺++⁺ Γ⁺)) (sp₂ , isnd τ /̂I ŵk⁺ (ε ▻ σ ⁺++⁺ Γ⁺) ↑̂ ∘̂ ŝub ⟦̌ cast₁ v ⟧n) →
+--               V̌alue (Γ ▻ σ ++⁺ Γ⁺) (sp₂ , isnd (τ /̂I ŵk) /̂I ŵk⁺ Γ⁺ ↑̂ ∘̂ ŝub ⟦̌ v ⟧n)
 --       cast₂ = {!!}
---   in cast₂ $ f (ε ▻ σ ++⁺ Γ⁺) $ cast₁ v
+--   in cast₂ $ f (ε ▻ σ ⁺++⁺ Γ⁺) $ cast₁ v
 
 w̌k[_] : ∀ {Γ} σ τ → V̌alue Γ τ → V̌alue (Γ ▻ σ) (τ /̂ ŵk)
 w̌k[ σ ] τ v = w̌k {σ = σ} τ v
@@ -283,7 +283,7 @@ normalise-lemma t = eval-lemma t V̌al-subst.id
 
 --   w̌k⁺-w̌k⁺ : ∀ {Γ σ} (σ′ : Γ ⊢ σ type) (v : V̌alue Γ σ′) Γ⁺ Γ⁺⁺ →
 --             w̌k⁺ (σ′ /⊢t wk⁺ Γ⁺) Γ⁺⁺ (w̌k⁺ σ′ Γ⁺ v) ≅-V̌alue
---             w̌k⁺ σ′ (Γ⁺ ++⁺ Γ⁺⁺) v
+--             w̌k⁺ σ′ (Γ⁺ ⁺++⁺ Γ⁺⁺) v
 --   w̌k⁺-w̌k⁺ σ′ v Γ⁺ Γ⁺⁺ = ?
 
 --   -- Naturality.

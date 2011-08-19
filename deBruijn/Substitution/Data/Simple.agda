@@ -279,13 +279,13 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
     -- The n-ary lifting of the identity substitution is the identity
     -- substitution.
 
-    id-↑⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → id ↑⁺ Γ⁺ ≅-⇨ id[ Γ ++ Γ⁺ ]
+    id-↑⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → id ↑⁺ Γ⁺ ≅-⇨ id[ Γ ++⁺ Γ⁺ ]
     id-↑⁺ ε        = P.refl
     id-↑⁺ (Γ⁺ ▻ σ) = begin
       [ (id ↑⁺ Γ⁺) ↑ ]  ≡⟨ ↑-cong (id-↑⁺ Γ⁺) P.refl ⟩
       [ id ↑         ]  ∎
 
-    ε-↑⁺⋆ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → ε ↑⁺⋆ Γ⁺ ≅-⇨⋆ ε⇨⋆[ Γ ++ Γ⁺ ]
+    ε-↑⁺⋆ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → ε ↑⁺⋆ Γ⁺ ≅-⇨⋆ ε⇨⋆[ Γ ++⁺ Γ⁺ ]
     ε-↑⁺⋆ ε        = P.refl
     ε-↑⁺⋆ (Γ⁺ ▻ σ) = begin
       [ (ε ↑⁺⋆ Γ⁺) ↑⋆ ]  ≡⟨ ↑⋆-cong (ε-↑⁺⋆ Γ⁺) P.refl ⟩
@@ -294,7 +294,7 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
 
     -- The identity substitution has no effect even if lifted.
 
-    /∋-id-↑⁺ : ∀ {Γ} Γ⁺ {σ} (x : Γ ++ Γ⁺ ∋ σ) →
+    /∋-id-↑⁺ : ∀ {Γ} Γ⁺ {σ} (x : Γ ++⁺ Γ⁺ ∋ σ) →
                x /∋ id ↑⁺ Γ⁺ ≅-⊢ var · x
     /∋-id-↑⁺ Γ⁺ x = begin
       [ x /∋ id ↑⁺ Γ⁺ ]  ≡⟨ /∋-cong (P.refl {x = [ x ]}) (id-↑⁺ Γ⁺) ⟩
@@ -318,7 +318,7 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
     /∋-↑⁺ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ}
             (ρ : Sub T ρ̂) (f : [ Var ⟶ Var ] ρ̂) →
             (∀ {σ} (x : Γ ∋ σ) → x /∋ ρ ≅-⊢ var · (f · x)) →
-            ∀ Γ⁺ {σ} (x : Γ ++ Γ⁺ ∋ σ) →
+            ∀ Γ⁺ {σ} (x : Γ ++⁺ Γ⁺ ∋ σ) →
             x /∋ ρ ↑⁺ Γ⁺ ≅-⊢ var · (lift f Γ⁺ · x)
     /∋-↑⁺ ρ f hyp ε        x    = hyp x
     /∋-↑⁺ ρ f hyp (Γ⁺ ▻ σ) zero = begin
@@ -334,22 +334,22 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
     -- "Deep weakening" of a variable can be expressed without
     -- reference to the weaken function.
 
-    /∋-wk-↑⁺ : ∀ {Γ σ} Γ⁺ {τ} (x : Γ ++ Γ⁺ ∋ τ) →
+    /∋-wk-↑⁺ : ∀ {Γ σ} Γ⁺ {τ} (x : Γ ++⁺ Γ⁺ ∋ τ) →
                x /∋ wk[ σ ] ↑⁺ Γ⁺ ≅-⊢
                var · (lift weaken∋[ σ ] Γ⁺ · x)
     /∋-wk-↑⁺ = /∋-↑⁺ wk weaken∋ /∋-wk
 
-    /∋-wk-↑⁺-↑⁺ : ∀ {Γ σ} Γ⁺ Γ⁺⁺ {τ} (x : Γ ++ Γ⁺ ++ Γ⁺⁺ ∋ τ) →
+    /∋-wk-↑⁺-↑⁺ : ∀ {Γ σ} Γ⁺ Γ⁺⁺ {τ} (x : Γ ++⁺ Γ⁺ ++⁺ Γ⁺⁺ ∋ τ) →
                   x /∋ wk[ σ ] ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺ ≅-⊢
                   var · (lift (lift weaken∋[ σ ] Γ⁺) Γ⁺⁺ · x)
     /∋-wk-↑⁺-↑⁺ Γ⁺ = /∋-↑⁺ (wk ↑⁺ Γ⁺) (lift weaken∋ Γ⁺) (/∋-wk-↑⁺ Γ⁺)
 
     -- Two n-ary liftings can be merged into one.
 
-    ↑⁺-++⁺ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T ρ̂) Γ⁺ Γ⁺⁺ →
-             ρ ↑⁺ (Γ⁺ ++⁺ Γ⁺⁺) ≅-⇨ ρ ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺
-    ↑⁺-++⁺ ρ Γ⁺ ε         = P.refl
-    ↑⁺-++⁺ ρ Γ⁺ (Γ⁺⁺ ▻ σ) = begin
-      [ (ρ ↑⁺ (Γ⁺ ++⁺ Γ⁺⁺)) ↑ ]  ≡⟨ ↑-cong (↑⁺-++⁺ ρ Γ⁺ Γ⁺⁺)
-                                           (drop-subst-Type F.id (++-++ Γ⁺ Γ⁺⁺)) ⟩
-      [ (ρ ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺) ↑    ]  ∎
+    ↑⁺-⁺++⁺ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T ρ̂) Γ⁺ Γ⁺⁺ →
+              ρ ↑⁺ (Γ⁺ ⁺++⁺ Γ⁺⁺) ≅-⇨ ρ ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺
+    ↑⁺-⁺++⁺ ρ Γ⁺ ε         = P.refl
+    ↑⁺-⁺++⁺ ρ Γ⁺ (Γ⁺⁺ ▻ σ) = begin
+      [ (ρ ↑⁺ (Γ⁺ ⁺++⁺ Γ⁺⁺)) ↑ ]  ≡⟨ ↑-cong (↑⁺-⁺++⁺ ρ Γ⁺ Γ⁺⁺)
+                                            (drop-subst-Type F.id (++⁺-++⁺ Γ⁺ Γ⁺⁺)) ⟩
+      [ (ρ ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺) ↑     ]  ∎
