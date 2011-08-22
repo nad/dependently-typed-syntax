@@ -10,19 +10,16 @@ open import Universe
 module deBruijn.Substitution.Isomorphic
   {i u e} {Uni : Indexed-universe i u e} where
 
-import deBruijn.Context as Context
+import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Basics as D using (ε; _▻_; [_])
 open import deBruijn.Substitution.Function.Basics as F
   using (ε⇨; _▻⇨_) renaming (_▻⇨[_]_ to _▻⇨[_]F_)
-import deBruijn.TermLike as TermLike
 open import Function using (_$_)
 open import Function.Inverse using (Inverse)
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
 
-open Context Uni
 open P.≡-Reasoning
-open TermLike Uni
 
 isomorphic :
   ∀ {t} {T : Term-like t} →

@@ -6,16 +6,19 @@
 
 open import Universe
 
-module deBruijn.TermLike {i u e} (Uni : Indexed-universe i u e) where
+module deBruijn.Context.Term-like
+  {i u e} (Uni : Indexed-universe i u e) where
 
 open import Data.Product
-import deBruijn.Context as Context
+import deBruijn.Context.Basics          as Basics
+import deBruijn.Context.Extension.Right as Right
 open import Function
 open import Level using (_⊔_)
 open import Relation.Binary using (Setoid)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
-open Context Uni
+open Basics Uni
+open Right  Uni
 open P.≡-Reasoning
 
 ------------------------------------------------------------------------

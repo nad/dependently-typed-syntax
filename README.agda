@@ -17,13 +17,9 @@ module README where
 ------------------------------------------------------------------------
 -- The library
 
--- Contexts, variables, context morphisms, etc.
+-- Contexts, variables, context morphisms, context extensions, etc.
 
 import deBruijn.Context
-
--- An abstraction: term-like things.
-
-import deBruijn.TermLike
 
 -- Parallel substitutions (defined using an inductive family).
 

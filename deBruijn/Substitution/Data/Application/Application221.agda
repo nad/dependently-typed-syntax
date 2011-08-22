@@ -10,19 +10,16 @@ module deBruijn.Substitution.Data.Application.Application221
   {i u e} {Uni : Indexed-universe i u e}
   where
 
-import deBruijn.Context as Context
+import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Application.Application21
 open import deBruijn.Substitution.Data.Basics
 open import deBruijn.Substitution.Data.Map
 open import deBruijn.Substitution.Data.Simple
-import deBruijn.TermLike as TermLike
 open import Function using (_$_)
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
 
-open Context Uni
 open P.≡-Reasoning
-open TermLike Uni
 
 -- Lemmas related to application.
 

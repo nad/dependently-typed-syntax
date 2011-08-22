@@ -14,19 +14,16 @@ open import Universe
 module deBruijn.Substitution.Data.Application.Application21
   {i u e} {Uni : Indexed-universe i u e} where
 
-import deBruijn.Context as Context
+import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Application.Application
 open import deBruijn.Substitution.Data.Basics
 open import deBruijn.Substitution.Data.Map
 open import deBruijn.Substitution.Data.Simple
-import deBruijn.TermLike as TermLike
 open import Function using (_$_)
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
 
-open Context Uni
 open P.≡-Reasoning
-open TermLike Uni
 
 -- Lemmas and definitions related to application.
 
@@ -51,8 +48,8 @@ record Application₂₁
     renaming ( id to id₁; sub to sub₁; var to var₁
              ; weaken[_] to weaken₁[_]; wk to wk₁
              ; wk-subst to wk-subst₁; wk-subst[_] to wk-subst₁[_]
-             ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_
-             ; _↑⋆_ to _↑⋆₁_; _↑⁺⋆_ to _↑⁺⋆₁_
+             ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_; _↑₊_ to _↑₊₁_
+             ; _↑⋆_ to _↑⋆₁_; _↑⁺⋆_ to _↑⁺⋆₁_; _↑₊⋆_ to _↑₊⋆₁_
              )
   open Simple simple₂
     using ()
@@ -206,7 +203,7 @@ record Application₂₁
       [ var₂ · zero /⊢ ρ ↑₁ (σ /⋆ ρs)    ]  ≡⟨ zero-/⊢-↑ (σ /⋆ ρs) ρ ⟩
       [ var₂ · zero                      ]  ∎
 
-    -- A corollary of ε-↑⁺⋆.
+    -- Corollaries of ε-↑⁺⋆ and ε-↑₊⋆.
 
     /⊢⋆-ε-↑⁺⋆ : ∀ {Γ} Γ⁺ {σ} (t : Γ ++⁺ Γ⁺ ⊢₂ σ) →
                 t /⊢⋆ ε ↑⁺⋆₁ Γ⁺ ≅-⊢₂ t
@@ -215,7 +212,14 @@ record Application₂₁
       [ t /⊢⋆ ε         ]  ≡⟨ P.refl ⟩
       [ t               ]  ∎
 
-    -- A corollary of ▻-↑⁺⋆.
+    /⊢⋆-ε-↑₊⋆ : ∀ {Γ} Γ₊ {σ} (t : Γ ++₊ Γ₊ ⊢₂ σ) →
+                t /⊢⋆ ε ↑₊⋆₁ Γ₊ ≅-⊢₂ t
+    /⊢⋆-ε-↑₊⋆ Γ₊ t = begin
+      [ t /⊢⋆ ε ↑₊⋆₁ Γ₊ ]  ≡⟨ /⊢⋆-cong (P.refl {x = [ t ]}) (Simple.ε-↑₊⋆ simple₁ Γ₊) ⟩
+      [ t /⊢⋆ ε         ]  ≡⟨ P.refl ⟩
+      [ t               ]  ∎
+
+    -- Corollaries of ▻-↑⁺⋆ and ▻-↑₊⋆.
 
     /⊢⋆-▻-↑⁺⋆ :
       ∀ {Γ Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} Γ⁺ {σ}
@@ -224,7 +228,14 @@ record Application₂₁
     /⊢⋆-▻-↑⁺⋆ Γ⁺ t ρs ρ =
       /⊢⋆-cong (P.refl {x = [ t ]}) (Simple.▻-↑⁺⋆ simple₁ ρs ρ Γ⁺)
 
-    -- A corollary of ε-↑⁺⋆ and ▻-↑⁺⋆.
+    /⊢⋆-▻-↑₊⋆ :
+      ∀ {Γ Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} Γ₊ {σ}
+      (t : Γ ++₊ Γ₊ ⊢₂ σ) (ρs : Subs T₁ ρ̂₁) (ρ : Sub T₁ ρ̂₂) →
+      t /⊢⋆ (ρs ▻ ρ) ↑₊⋆₁ Γ₊ ≅-⊢₂ t /⊢⋆ ρs ↑₊⋆₁ Γ₊ /⊢ ρ ↑₊₁ (Γ₊ /₊⋆ ρs)
+    /⊢⋆-▻-↑₊⋆ Γ₊ t ρs ρ =
+      /⊢⋆-cong (P.refl {x = [ t ]}) (Simple.▻-↑₊⋆ simple₁ ρs ρ Γ₊)
+
+    -- Corollaries of ε-↑⁺⋆/ε-↑₊⋆ and ▻-↑⁺⋆/▻-↑₊⋆.
 
     /⊢⋆-ε-▻-↑⁺⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} Γ⁺ {σ}
                   (t : Γ ++⁺ Γ⁺ ⊢₂ σ) (ρ : Sub T₁ ρ̂) →
@@ -233,8 +244,6 @@ record Application₂₁
       [ t /⊢⋆ (ε ▻ ρ) ↑⁺⋆₁ Γ⁺               ]  ≡⟨ /⊢⋆-cong (P.refl {x = [ t ]}) (Simple.▻-↑⁺⋆ simple₁ ε ρ Γ⁺) ⟩
       [ t /⊢⋆ ε ↑⁺⋆₁ Γ⁺ /⊢ ρ ↑⁺₁ (Γ⁺ /̂⁺ îd) ]  ≡⟨ /⊢-cong (/⊢⋆-ε-↑⁺⋆ Γ⁺ t) (Simple.↑⁺-cong simple₁ P.refl (/̂⁺-îd Γ⁺)) ⟩
       [ t               /⊢ ρ ↑⁺₁ Γ⁺         ]  ∎
-
-    -- Another corollary of ε-↑⁺⋆ and ▻-↑⁺⋆.
 
     /⊢⋆-ε-▻-▻-↑⁺⋆ :
       ∀ {Γ Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} Γ⁺ {σ}
@@ -245,6 +254,24 @@ record Application₂₁
       [ t /⊢⋆ (ε ▻ ρ₁ ▻ ρ₂) ↑⁺⋆₁ Γ⁺                 ]  ≡⟨ /⊢⋆-cong (P.refl {x = [ t ]}) (Simple.▻-↑⁺⋆ simple₁ (ε ▻ ρ₁) ρ₂ Γ⁺) ⟩
       [ t /⊢⋆ (ε ▻ ρ₁) ↑⁺⋆₁ Γ⁺ /⊢ ρ₂ ↑⁺₁ (Γ⁺ /⁺ ρ₁) ]  ≡⟨ /⊢-cong (/⊢⋆-ε-▻-↑⁺⋆ Γ⁺ t ρ₁) P.refl ⟩
       [ t /⊢ ρ₁ ↑⁺₁ Γ⁺ /⊢ ρ₂ ↑⁺₁ (Γ⁺ /⁺ ρ₁)         ]  ∎
+
+    /⊢⋆-ε-▻-↑₊⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} Γ₊ {σ}
+                  (t : Γ ++₊ Γ₊ ⊢₂ σ) (ρ : Sub T₁ ρ̂) →
+                  t /⊢⋆ (ε ▻ ρ) ↑₊⋆₁ Γ₊ ≅-⊢₂ t /⊢ ρ ↑₊₁ Γ₊
+    /⊢⋆-ε-▻-↑₊⋆ Γ₊ t ρ = begin
+      [ t /⊢⋆ (ε ▻ ρ) ↑₊⋆₁ Γ₊               ]  ≡⟨ /⊢⋆-cong (P.refl {x = [ t ]}) (Simple.▻-↑₊⋆ simple₁ ε ρ Γ₊) ⟩
+      [ t /⊢⋆ ε ↑₊⋆₁ Γ₊ /⊢ ρ ↑₊₁ (Γ₊ /̂₊ îd) ]  ≡⟨ /⊢-cong (/⊢⋆-ε-↑₊⋆ Γ₊ t) (Simple.↑₊-cong simple₁ P.refl (/̂₊-îd Γ₊)) ⟩
+      [ t               /⊢ ρ ↑₊₁ Γ₊         ]  ∎
+
+    /⊢⋆-ε-▻-▻-↑₊⋆ :
+      ∀ {Γ Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} Γ₊ {σ}
+      (t : Γ ++₊ Γ₊ ⊢₂ σ) (ρ₁ : Sub T₁ ρ̂₁) (ρ₂ : Sub T₁ ρ̂₂) →
+      t /⊢⋆ (ε ▻ ρ₁ ▻ ρ₂) ↑₊⋆₁ Γ₊ ≅-⊢₂
+      t /⊢ ρ₁ ↑₊₁ Γ₊ /⊢ ρ₂ ↑₊₁ (Γ₊ /₊ ρ₁)
+    /⊢⋆-ε-▻-▻-↑₊⋆ Γ₊ t ρ₁ ρ₂ = begin
+      [ t /⊢⋆ (ε ▻ ρ₁ ▻ ρ₂) ↑₊⋆₁ Γ₊                 ]  ≡⟨ /⊢⋆-cong (P.refl {x = [ t ]}) (Simple.▻-↑₊⋆ simple₁ (ε ▻ ρ₁) ρ₂ Γ₊) ⟩
+      [ t /⊢⋆ (ε ▻ ρ₁) ↑₊⋆₁ Γ₊ /⊢ ρ₂ ↑₊₁ (Γ₊ /₊ ρ₁) ]  ≡⟨ /⊢-cong (/⊢⋆-ε-▻-↑₊⋆ Γ₊ t ρ₁) P.refl ⟩
+      [ t /⊢ ρ₁ ↑₊₁ Γ₊ /⊢ ρ₂ ↑₊₁ (Γ₊ /₊ ρ₁)         ]  ∎
 
     -- Application of sub cancels one occurrence of suc.
 

@@ -12,12 +12,10 @@ import README.DependentlyTyped.Term as Term; open Term Uni₀
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 open import deBruijn.Substitution.Data
-import deBruijn.TermLike as TermLike
 open import Function as F using (_$_; _ˢ_) renaming (const to k)
 import Relation.Binary.PropositionalEquality as P
 
 open P.≡-Reasoning
-open TermLike Uni hiding (·-cong) renaming (_·_ to _⊙_)
 
 -- Code for applying substitutions.
 --

@@ -4,20 +4,16 @@
 
 {-# OPTIONS --universe-polymorphism #-}
 
-import deBruijn.TermLike as TermLike
 open import Universe
 
 module deBruijn.Substitution.Function.Map
   {i u e} {Uni : Indexed-universe i u e} where
 
-import deBruijn.Context as Context
+import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Function.Basics
 open import Function using (_$_)
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
-
-open Context Uni
-open TermLike Uni
 
 private
  module Dummy

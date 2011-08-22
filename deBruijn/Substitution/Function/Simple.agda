@@ -13,17 +13,14 @@ open import Universe
 module deBruijn.Substitution.Function.Simple
   {i u e} {Uni : Indexed-universe i u e} where
 
-import deBruijn.Context as Context
+import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Function.Basics
 open import deBruijn.Substitution.Function.Map
-import deBruijn.TermLike as TermLike
 open import Function as F using (_$_)
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
 
-open Context Uni
 open P.≡-Reasoning
-open TermLike Uni
 
 -- Simple substitutions.
 
@@ -67,6 +64,13 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
   wk-subst⁺ : ∀ {Γ Δ} Γ⁺ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk⁺ Γ⁺)
   wk-subst⁺ Γ⁺ ρ = map (weaken⁺ Γ⁺) ρ
 
+  weaken₊ : ∀ {Γ} (Γ₊ : Ctxt₊ Γ) → [ T ⟶ T ] (ŵk₊ Γ₊)
+  weaken₊ ε        = [id]
+  weaken₊ (σ ◅ Γ₊) = weaken₊ Γ₊ [∘] weaken
+
+  wk-subst₊ : ∀ {Γ Δ} Γ₊ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk₊ Γ₊)
+  wk-subst₊ Γ₊ ρ = map (weaken₊ Γ₊) ρ
+
   -- Lifting.
 
   infixl 10 _↑_
@@ -84,11 +88,15 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
 
   -- N-ary lifting.
 
-  infixl 10 _↑⁺_
+  infixl 10 _↑⁺_ _↑₊_
 
   _↑⁺_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → ∀ Γ⁺ → Sub T (ρ̂ ↑̂⁺ Γ⁺)
   ρ ↑⁺ ε        = ρ
   ρ ↑⁺ (Γ⁺ ▻ σ) = (ρ ↑⁺ Γ⁺) ↑
+
+  _↑₊_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → ∀ Γ₊ → Sub T (ρ̂ ↑̂₊ Γ₊)
+  ρ ↑₊ ε        = ρ
+  ρ ↑₊ (σ ◅ Γ₊) = ρ ↑ ↑₊ Γ₊
 
   -- The identity substitution.
 
@@ -104,6 +112,9 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
   wk⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → Sub T (ŵk⁺ Γ⁺)
   wk⁺ ε        = id
   wk⁺ (Γ⁺ ▻ σ) = wk-subst (wk⁺ Γ⁺)
+
+  wk₊ : ∀ {Γ} (Γ₊ : Ctxt₊ Γ) → Sub T (ŵk₊ Γ₊)
+  wk₊ Γ₊ = wk-subst₊ Γ₊ id
 
   -- Weakening.
 
@@ -161,6 +172,19 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
   wk-subst⁺-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
     [ P.refl ]
 
+  weaken₊-cong : ∀ {Γ₁ Γ₊₁ τ₁} {t₁ : Γ₁ ⊢ τ₁}
+                   {Γ₂ Γ₊₂ τ₂} {t₂ : Γ₂ ⊢ τ₂} →
+                 Γ₊₁ ≅-Ctxt₊ Γ₊₂ → t₁ ≅-⊢ t₂ →
+                 weaken₊ Γ₊₁ · t₁ ≅-⊢ weaken₊ Γ₊₂ · t₂
+  weaken₊-cong P.refl P.refl = P.refl
+
+  wk-subst₊-cong : ∀ {Γ₁ Δ₁ Γ₊₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
+                     {Γ₂ Δ₂ Γ₊₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
+                   Γ₊₁ ≅-Ctxt₊ Γ₊₂ → ρ₁ ≅-⇨ ρ₂ →
+                   wk-subst₊ Γ₊₁ ρ₁ ≅-⇨ wk-subst₊ Γ₊₂ ρ₂
+  wk-subst₊-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
+    [ P.refl ]
+
   abstract
 
     ↑-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁} {σ₁}
@@ -181,12 +205,24 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
     ↑⁺-cong {Γ⁺₁ = Γ⁺ ▻ σ} ρ₁≅ρ₂ P.refl =
       ↑-cong (↑⁺-cong ρ₁≅ρ₂ (P.refl {x = [ Γ⁺ ]})) P.refl
 
+    ↑₊-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁} {Γ₊₁}
+                {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} {Γ₊₂} →
+              ρ₁ ≅-⇨ ρ₂ → Γ₊₁ ≅-Ctxt₊ Γ₊₂ → ρ₁ ↑₊ Γ₊₁ ≅-⇨ ρ₂ ↑₊ Γ₊₂
+    ↑₊-cong {ρ₁ = _ , _} {Γ₊₁ = ε} {ρ₂ = ._ , _} [ P.refl ] P.refl =
+      [ P.refl ]
+    ↑₊-cong {Γ₊₁ = σ ◅ Γ₊} ρ₁≅ρ₂ P.refl =
+      ↑₊-cong (↑-cong ρ₁≅ρ₂ P.refl) (P.refl {x = [ Γ₊ ]})
+
   id-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≅-Ctxt Γ₂ → id[ Γ₁ ] ≅-⇨ id[ Γ₂ ]
   id-cong P.refl = [ P.refl ]
 
   wk⁺-cong : ∀ {Γ₁} {Γ⁺₁ : Ctxt⁺ Γ₁} {Γ₂} {Γ⁺₂ : Ctxt⁺ Γ₂} →
              Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → wk⁺ Γ⁺₁ ≅-⇨ wk⁺ Γ⁺₂
   wk⁺-cong P.refl = [ P.refl ]
+
+  wk₊-cong : ∀ {Γ₁} {Γ₊₁ : Ctxt₊ Γ₁} {Γ₂} {Γ₊₂ : Ctxt₊ Γ₂} →
+             Γ₊₁ ≅-Ctxt₊ Γ₊₂ → wk₊ Γ₊₁ ≅-⇨ wk₊ Γ₊₂
+  wk₊-cong P.refl = [ P.refl ]
 
   wk-cong : ∀ {Γ₁} {σ₁ : Type Γ₁} {Γ₂} {σ₂ : Type Γ₂} →
             σ₁ ≅-Type σ₂ → wk[ σ₁ ] ≅-⇨ wk[ σ₂ ]
@@ -252,6 +288,12 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
       [ Γ⁺ /̂⁺ îd ]  ≡⟨ /̂⁺-îd Γ⁺ ⟩
       [ Γ⁺       ]  ∎
 
+    /₊-id : ∀ {Γ} (Γ₊ : Ctxt₊ Γ) → Γ₊ /₊ id ≅-Ctxt₊ Γ₊
+    /₊-id Γ₊ = begin
+      [ Γ₊ /₊ id ]  ≡⟨ P.refl ⟩
+      [ Γ₊ /̂₊ îd ]  ≡⟨ /̂₊-îd Γ₊ ⟩
+      [ Γ₊       ]  ∎
+
     mutual
 
       /∋-id : ∀ {Γ σ} (x : Γ ∋ σ) → x /∋ id ≅-⊢ var · x
@@ -281,12 +323,26 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
       (id ↑⁺ Γ⁺) ↑  ≅-⟶⟨ ↑-cong (id-↑⁺ Γ⁺) P.refl ⟩
       id ↑          ∎-⟶
 
+    id-↑₊ : ∀ {Γ} (Γ₊ : Ctxt₊ Γ) → id ↑₊ Γ₊ ≅-⇨ id[ Γ ++₊ Γ₊ ]
+    id-↑₊ ε        = id ∎-⟶
+    id-↑₊ (σ ◅ Γ₊) =
+      id ↑ ↑₊ Γ₊  ≅-⟶⟨ [ P.refl ] ⟩
+      id   ↑₊ Γ₊  ≅-⟶⟨ id-↑₊ Γ₊ ⟩
+      id          ∎-⟶
+
     -- The identity substitution has no effect even if lifted.
 
     /∋-id-↑⁺ : ∀ {Γ} Γ⁺ {σ} (x : Γ ++⁺ Γ⁺ ∋ σ) →
                x /∋ id ↑⁺ Γ⁺ ≅-⊢ var · x
     /∋-id-↑⁺ Γ⁺ x = begin
       [ x /∋ id ↑⁺ Γ⁺ ]  ≡⟨ /∋-cong (P.refl {x = [ x ]}) (id-↑⁺ Γ⁺) ⟩
+      [ x /∋ id       ]  ≡⟨ /∋-id x ⟩
+      [ var · x       ]  ∎
+
+    /∋-id-↑₊ : ∀ {Γ} Γ₊ {σ} (x : Γ ++₊ Γ₊ ∋ σ) →
+               x /∋ id ↑₊ Γ₊ ≅-⊢ var · x
+    /∋-id-↑₊ Γ₊ x = begin
+      [ x /∋ id ↑₊ Γ₊ ]  ≡⟨ /∋-cong (P.refl {x = [ x ]}) (id-↑₊ Γ₊) ⟩
       [ x /∋ id       ]  ≡⟨ /∋-id x ⟩
       [ var · x       ]  ∎
 
@@ -331,3 +387,10 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
       (ρ ↑⁺ (Γ⁺ ⁺++⁺ Γ⁺⁺)) ↑  ≅-⟶⟨ ↑-cong (↑⁺-⁺++⁺ ρ Γ⁺ Γ⁺⁺)
                                           (drop-subst-Type F.id (++⁺-++⁺ Γ⁺ Γ⁺⁺)) ⟩
       (ρ ↑⁺ Γ⁺ ↑⁺ Γ⁺⁺) ↑      ∎-⟶
+
+    ↑₊-₊++₊ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T ρ̂) Γ₊ Γ₊₊ →
+              ρ ↑₊ (Γ₊ ₊++₊ Γ₊₊) ≅-⇨ ρ ↑₊ Γ₊ ↑₊ Γ₊₊
+    ↑₊-₊++₊ ρ ε        Γ₊₊ = ρ ↑₊ Γ₊₊ ∎-⟶
+    ↑₊-₊++₊ ρ (σ ◅ Γ₊) Γ₊₊ =
+      ρ ↑ ↑₊ (Γ₊ ₊++₊ Γ₊₊)  ≅-⟶⟨ ↑₊-₊++₊ (ρ ↑) Γ₊ Γ₊₊ ⟩
+      ρ ↑ ↑₊ Γ₊ ↑₊ Γ₊₊      ∎-⟶

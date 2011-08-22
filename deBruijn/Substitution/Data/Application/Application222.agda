@@ -10,19 +10,16 @@ module deBruijn.Substitution.Data.Application.Application222
   {i u e} {Uni : Indexed-universe i u e}
   where
 
-import deBruijn.Context as Context
+import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Application.Application221
 open import deBruijn.Substitution.Data.Basics
 open import deBruijn.Substitution.Data.Map
 open import deBruijn.Substitution.Data.Simple
-import deBruijn.TermLike as TermLike
 open import Function using (_$_)
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
 
-open Context Uni
 open P.≡-Reasoning
-open TermLike Uni
 
 -- Lemmas related to application.
 
@@ -46,7 +43,7 @@ record Application₂₂₂
     using ()
     renaming ( id to id₁; sub to sub₁; var to var₁
              ; wk to wk₁; wk[_] to wk₁[_]
-             ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_
+             ; _↑ to _↑₁; _↑_ to _↑₁_; _↑⁺_ to _↑⁺₁_; _↑₊_ to _↑₊₁_
              ; _↑⋆ to _↑⋆₁; _↑⁺⋆_ to _↑⁺⋆₁_
              )
   open Simple simple₂
@@ -54,7 +51,7 @@ record Application₂₂₂
     renaming ( var to var₂
              ; weaken to weaken₂; weaken[_] to weaken₂[_]
              ; wk-subst to wk-subst₂; wk-subst[_] to wk-subst₂[_]
-             ; _↑ to _↑₂; _↑_ to _↑₂_; _↑⁺_ to _↑⁺₂_
+             ; _↑ to _↑₂; _↑_ to _↑₂_; _↑⁺_ to _↑⁺₂_; _↑₊_ to _↑₊₂_
              )
 
   field
@@ -174,6 +171,15 @@ record Application₂₂₂
       [ ((ρ₁ ∘ ρ₂) ↑⁺₂ Γ⁺) ↑₂                   ]  ≡⟨ Simple.↑-cong simple₂ (∘-↑⁺ ρ₁ ρ₂ Γ⁺) P.refl ⟩
       [ (ρ₁ ↑⁺₂ Γ⁺ ∘ ρ₂ ↑⁺₁ (Γ⁺ /⁺ ρ₁)) ↑₂      ]  ≡⟨ ∘-↑ σ (ρ₁ ↑⁺₂ Γ⁺) (ρ₂ ↑⁺₁ (Γ⁺ /⁺ ρ₁)) ⟩
       [ (ρ₁ ↑⁺₂ Γ⁺) ↑₂ ∘ (ρ₂ ↑⁺₁ (Γ⁺ /⁺ ρ₁)) ↑₁ ]  ∎
+
+    ∘-↑₊ : ∀ {Γ Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε}
+           (ρ₁ : Sub T₂ ρ̂₁) (ρ₂ : Sub T₁ ρ̂₂) Γ₊ →
+           (ρ₁ ∘ ρ₂) ↑₊₂ Γ₊ ≅-⇨ ρ₁ ↑₊₂ Γ₊ ∘ ρ₂ ↑₊₁ (Γ₊ /₊ ρ₁)
+    ∘-↑₊ ρ₁ ρ₂ ε        = P.refl
+    ∘-↑₊ ρ₁ ρ₂ (σ ◅ Γ₊) = begin
+      [ (ρ₁             ∘ ρ₂   ) ↑₂ σ ↑₊₂ Γ₊      ]  ≡⟨ Simple.↑₊-cong simple₂ (∘-↑ σ ρ₁ ρ₂) (P.refl {x = [ Γ₊ ]}) ⟩
+      [ (ρ₁ ↑₂ σ        ∘ ρ₂ ↑₁)      ↑₊₂ Γ₊      ]  ≡⟨ ∘-↑₊ (ρ₁ ↑₂ σ) (ρ₂ ↑₁) Γ₊ ⟩
+      [ ρ₁ ↑₊₂ (σ ◅ Γ₊) ∘ ρ₂ ↑₊₁ ((σ ◅ Γ₊) /₊ ρ₁) ]  ∎
 
     -- First weakening and then substituting something for the first
     -- variable is equivalent to doing nothing.

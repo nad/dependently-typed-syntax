@@ -9,12 +9,9 @@ module README.DependentlyTyped.NormalForm
   {Uni₀ : Universe zero zero} where
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
-import deBruijn.TermLike as TermLike
 open import Function renaming (const to k; _∘_ to _⊚_)
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 import Relation.Binary.PropositionalEquality as P
-
-open TermLike Uni hiding (_·_)
 
 -- Atomic types (types for which the normaliser does not do
 -- η-expansion).

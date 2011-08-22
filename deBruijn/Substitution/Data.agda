@@ -9,15 +9,12 @@ open import Universe
 module deBruijn.Substitution.Data
   {i u e} {Uni : Indexed-universe i u e} where
 
-import deBruijn.Context as Context
-import deBruijn.TermLike as TermLike
+import deBruijn.Context; open deBruijn.Context Uni
 open import Function as F using (_$_)
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
 
-open Context Uni
 open P.≡-Reasoning
-open TermLike Uni
 
 -- This module reexports some other modules.
 

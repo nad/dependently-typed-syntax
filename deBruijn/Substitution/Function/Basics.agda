@@ -4,20 +4,17 @@
 
 {-# OPTIONS --universe-polymorphism #-}
 
-import deBruijn.TermLike as TermLike
 open import Universe
 
 module deBruijn.Substitution.Function.Basics
   {i u e} {Uni : Indexed-universe i u e} where
 
-import deBruijn.Context as Context
+import deBruijn.Context; open deBruijn.Context Uni
 open import Function using (id; _∘_; _$_)
 open import Level using (_⊔_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
-open Context Uni
 open P.≡-Reasoning
-open TermLike Uni
 
 -- Substitutions, represented as functions from variables to terms.
 
@@ -54,10 +51,13 @@ private
 
   -- Application of substitutions to context extensions.
 
-  infixl 8 _/⁺_
+  infixl 8 _/⁺_ _/₊_
 
   _/⁺_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Ctxt⁺ Γ → Sub T ρ̂ → Ctxt⁺ Δ
   Γ⁺ /⁺ ρ = Γ⁺ /̂⁺ ⟦ ρ ⟧⇨
+
+  _/₊_ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} → Ctxt₊ Γ → Sub T ρ̂ → Ctxt₊ Δ
+  Γ₊ /₊ ρ = Γ₊ /̂₊ ⟦ ρ ⟧⇨
 
   -- Application of substitutions to variables.
 
@@ -173,6 +173,11 @@ private
               {Γ₂ Δ₂ Γ⁺₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
             Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → ρ₁ ≅-⇨ ρ₂ → Γ⁺₁ /⁺ ρ₁ ≅-Ctxt⁺ Γ⁺₂ /⁺ ρ₂
   /⁺-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] = P.refl
+
+  /₊-cong : ∀ {Γ₁ Δ₁ Γ₊₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
+              {Γ₂ Δ₂ Γ₊₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
+            Γ₊₁ ≅-Ctxt₊ Γ₊₂ → ρ₁ ≅-⇨ ρ₂ → Γ₊₁ /₊ ρ₁ ≅-Ctxt₊ Γ₊₂ /₊ ρ₂
+  /₊-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] = P.refl
 
   /∋-cong : ∀ {Γ₁ Δ₁ σ₁} {x₁ : Γ₁ ∋ σ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
               {Γ₂ Δ₂ σ₂} {x₂ : Γ₂ ∋ σ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →

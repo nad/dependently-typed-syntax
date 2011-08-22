@@ -10,7 +10,6 @@ module README.DependentlyTyped.NormalForm.Substitution
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 open import deBruijn.Substitution.Data
-import deBruijn.TermLike as TermLike
 open import Function as F renaming (const to k)
 open import README.DependentlyTyped.NormalForm
 open import README.DependentlyTyped.Term.Substitution
@@ -19,7 +18,6 @@ import README.DependentlyTyped.Term as Term; open Term Uni₀
 import Relation.Binary.PropositionalEquality as P
 
 open P.≡-Reasoning
-open TermLike Uni renaming (_·_ to _⊙_)
 
 -- Code for applying substitutions containing terms which can be
 -- transformed into /neutral/ terms.

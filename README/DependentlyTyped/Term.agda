@@ -17,7 +17,6 @@ module README.DependentlyTyped.Term
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 open import Data.Unit
 import deBruijn.Context
-import deBruijn.TermLike
 open import Function renaming (const to k)
 open import Relation.Binary.PropositionalEquality as P using (_≡_; _≢_)
 open import Relation.Nullary
@@ -78,7 +77,7 @@ U-π = _,_
 -- We get these for free.
 
 open deBruijn.Context Uni public
-open deBruijn.TermLike Uni hiding (_·_; ·-cong)
+  renaming (_·_ to _⊙_; ·-cong to ⊙-cong)
 
 ------------------------------------------------------------------------
 -- Projections

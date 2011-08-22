@@ -9,19 +9,16 @@ open import Universe
 module deBruijn.Substitution.Data.Application.Application1
   {i u e} {Uni : Indexed-universe i u e} where
 
-import deBruijn.Context as Context
+import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Application.Application22
 open import deBruijn.Substitution.Data.Basics
 open import deBruijn.Substitution.Data.Map
 open import deBruijn.Substitution.Data.Simple
-import deBruijn.TermLike as TermLike
 open import Function using (_$_)
 open import Level using (_⊔_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
-open Context Uni
 open P.≡-Reasoning
-open TermLike Uni
 
 -- More operations and lemmas related to application. In this module
 -- the application operator is assumed to be homogeneous, so some
