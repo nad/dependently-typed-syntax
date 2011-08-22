@@ -1,14 +1,11 @@
 ------------------------------------------------------------------------
--- Definition of a family of types which forms a Kripke model
+-- The values that are used by the NBE algorithm
 ------------------------------------------------------------------------
-
--- This file does not contain a proof showing that this family
--- actually forms a Kripke model.
 
 import Level
 open import Universe
 
-module README.DependentlyTyped.Kripke-model.Definition
+module README.DependentlyTyped.NBE.Value
   {Uni₀ : Universe Level.zero Level.zero}
   where
 
@@ -33,7 +30,7 @@ record _⊢_⟨ne⟩ (Γ : Ctxt) (σ : Type Γ) : Set where
 
 mutual
 
-  -- The Kripke model.
+  -- The values.
 
   V̌alue′ : ∀ Γ sp (σ : IType Γ sp) → Set
   V̌alue′ Γ ⋆           σ = Γ ⊢ ⋆  , σ ⟨ ne ⟩

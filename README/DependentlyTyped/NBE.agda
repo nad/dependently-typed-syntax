@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- A Kripke model
+-- Normalisation by evaluation
 ------------------------------------------------------------------------
 
 import Level
@@ -9,7 +9,7 @@ open import Universe
 -- The code makes use of the assumption that propositional equality of
 -- functions is extensional.
 
-module README.DependentlyTyped.Kripke-model
+module README.DependentlyTyped.NBE
   {Uni₀ : Universe Level.zero Level.zero}
   (ext : P.Extensionality Level.zero Level.zero)
   where
@@ -22,14 +22,14 @@ import README.DependentlyTyped.Term as Term; open Term Uni₀
 
 open P.≡-Reasoning
 
--- The family of types which forms a Kripke model.
+-- The values that are used by the NBE algorithm.
 
-import README.DependentlyTyped.Kripke-model.Definition as Definition
-open Definition {Uni₀} public
+import README.DependentlyTyped.NBE.Value as Value
+open Value {Uni₀} public
 
--- Weakening.
+-- Weakening for the values.
 
-import README.DependentlyTyped.Kripke-model.Weakening as Weakening
+import README.DependentlyTyped.NBE.Weakening as Weakening
 open Weakening {Uni₀} ext public
 
 -- Application.
@@ -159,49 +159,16 @@ normalise-cong :
   t₁ ≅-⊢ t₂ → normalise t₁ ≅-⊢n normalise t₂
 normalise-cong P.refl = P.refl
 
--- Can the following statements be proved?
+-- TODO: Can the following statements be proved?
 
--- open P using (_≡_)
+-- eval-complete :
+--   ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
+--   ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ →
+--   ∀ {Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub V̌al ρ̂) → eval t₁ ρ ≡ eval t₂ ρ
+-- eval-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ ρ = {!!}
 
--- goal : ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
---        ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ →
---        ∀ {Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub V̌al ρ̂) → eval t₁ ρ ≡ eval t₂ ρ
--- goal t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ ρ = {!!}
-
--- corollary : ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
---             ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ → normalise t₁ ≡ normalise t₂
--- corollary t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ =
---   P.cong (řeify _) (goal t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ V̌al-subst.id)
-
--- abstract
-
---   -- Properties required of a Kripke model (taken from Mitchell and
---   -- Moggi's "Kripke-style models for typed lambda calculus" and
---   -- adapted to the present setting).
-
---   -- No weakening amounts to nothing.
-
---   w̌k₊-ε : ∀ {Γ σ} (σ′ : Γ ⊢ σ type) (v : V̌alue Γ σ′) →
---           w̌k₊ σ′ ε v ≅-V̌alue v
---   w̌k₊-ε σ′ v = ?
-
---   -- Repeated weakening can be consolidated into one.
---   --
---   -- TODO: State in a pointfree way?
-
---   w̌k₊-w̌k₊ : ∀ {Γ σ} (σ′ : Γ ⊢ σ type) (v : V̌alue Γ σ′) Γ₊ Γ₊₊ →
---             w̌k₊ (σ′ /⊢t wk₊ Γ₊) Γ₊₊ (w̌k₊ σ′ Γ₊ v) ≅-V̌alue
---             w̌k₊ σ′ (Γ₊ ₊++₊ Γ₊₊) v
---   w̌k₊-w̌k₊ σ′ v Γ₊ Γ₊₊ = ?
-
---   -- Naturality.
-
---   w̌k₊-·̌ : ∀ {Γ σ τ} {σ′ : Γ ⊢ σ type} {τ′ : Γ ▻ σ ⊢ τ type} →
---           (f : V̌alue Γ (π σ′ τ′)) (v : V̌alue Γ σ′) Γ₊ →
---           w̌k₊ (τ′ /⊢t sub ⌊ řeify σ′ v ⌋) Γ₊ (f ·̌ v) ≅-V̌alue
---           w̌k₊ (π σ′ τ′) Γ₊ f ·̌ w̌k₊ σ′ Γ₊ v
---   w̌k₊-·̌ f v Γ₊ = ?
-
---   -- Extensionality.
-
---   -- Enough elements.
+-- normalise-complete :
+--   ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
+--   ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ → normalise t₁ ≡ normalise t₂
+-- normalise-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ =
+--   P.cong (řeify _) (eval-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ V̌al-subst.id)

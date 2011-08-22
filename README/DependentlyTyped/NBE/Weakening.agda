@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Weakening for the Kripke model
+-- Weakening for the NBE values
 ------------------------------------------------------------------------
 
 import Level
@@ -9,7 +9,7 @@ open import Universe
 -- The code makes use of the assumption that propositional equality of
 -- functions is extensional.
 
-module README.DependentlyTyped.Kripke-model.Weakening
+module README.DependentlyTyped.NBE.Weakening
   {Uni₀ : Universe Level.zero Level.zero}
   (ext : P.Extensionality Level.zero Level.zero)
   where
@@ -17,7 +17,7 @@ module README.DependentlyTyped.Kripke-model.Weakening
 open import Data.Product renaming (curry to c)
 open import deBruijn.Substitution.Data
 open import Function
-open import README.DependentlyTyped.Kripke-model.Definition
+open import README.DependentlyTyped.NBE.Value
 open import README.DependentlyTyped.NormalForm
   renaming ([_] to [_]n)
 open import README.DependentlyTyped.NormalForm.Substitution

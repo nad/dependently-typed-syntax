@@ -214,10 +214,9 @@ no-type u ⟦t⟧≢u σ′ = helper σ′ P.refl
 -- One could avoid this situation by annotating lambdas with the
 -- (syntactic) type of their domain. I tried this, and found it to be
 -- awkward. One case of the function
--- README.DependentlyTyped.Kripke-model.Definition.řeify returns a
--- lambda, and I didn't find a way to synthesise the annotation
--- without supplying a syntactic type to řeify (and hence also to
--- V̌alue).
+-- README.DependentlyTyped.NBE.Value.řeify returns a lambda, and I
+-- didn't find a way to synthesise the annotation without supplying a
+-- syntactic type to řeify (and hence also to V̌alue).
 
 ------------------------------------------------------------------------
 -- Equality

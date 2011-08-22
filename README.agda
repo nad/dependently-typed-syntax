@@ -85,12 +85,9 @@ import README.DependentlyTyped.Term.Substitution
 
 import README.DependentlyTyped.NormalForm.Substitution
 
--- A Kripke model (unfinished).
+-- Normalisation by evaluation (one key property remains to be
+-- proved).
 
-import README.DependentlyTyped.Kripke-model
-
--- TODO: Do something about the following modules:
---
--- README.DependentlyTyped
+import README.DependentlyTyped.NBE
 
 -- TODO: Add an untyped example.
