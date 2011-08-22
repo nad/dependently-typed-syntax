@@ -110,16 +110,7 @@ snd σ = , isnd σ
 mutual
 
   infixl 9 _·_
-  infix  4 _⊢_type _⊢_
-
-  -- Types.
-
-  data _⊢_type (Γ : Ctxt) : Type Γ → Set where
-    ⋆  : Γ ⊢ , k U-⋆ type
-    el : (t : Γ ⊢ , k U-⋆) → Γ ⊢ , k U-el ˢ ⟦ t ⟧ type
-    π  : ∀ {sp₁ sp₂ σ τ}
-         (σ′ : Γ ⊢ sp₁ , σ type) (τ′ : Γ ▻ (, σ) ⊢ sp₂ , τ type) →
-         Γ ⊢ , k U-π ˢ σ ˢ c τ type
+  infix  4 _⊢_
 
   -- Terms.
 
@@ -138,17 +129,40 @@ mutual
   ⟦ ƛ t     ⟧ γ = λ v → ⟦ t ⟧ (γ , v)
   ⟦ t₁ · t₂ ⟧ γ = (⟦ t₁ ⟧ γ) (⟦ t₂ ⟧ γ)
 
--- Semantics of types.
-
-⟦_⟧type : ∀ {Γ σ} → Γ ⊢ σ type → Type Γ
-⟦_⟧type {σ = σ} _ = σ
-
 -- Terms are "term-like".
 
 Tm : Term-like _
 Tm = record { _⊢_ = _⊢_; ⟦_⟧ = ⟦_⟧ }
 
 open Term-like Tm public hiding (_⊢_; ⟦_⟧)
+
+------------------------------------------------------------------------
+-- Syntactic types
+
+infix 4 _⊢_type
+
+data _⊢_type (Γ : Ctxt) : Type Γ → Set where
+  ⋆  : Γ ⊢ , k U-⋆ type
+  el : (t : Γ ⊢ , k U-⋆) → Γ ⊢ , k U-el ˢ ⟦ t ⟧ type
+  π  : ∀ {sp₁ sp₂ σ τ}
+       (σ′ : Γ ⊢ sp₁ , σ type) (τ′ : Γ ▻ (, σ) ⊢ sp₂ , τ type) →
+       Γ ⊢ , k U-π ˢ σ ˢ c τ type
+
+-- Semantics of types.
+
+⟦_⟧type : ∀ {Γ σ} → Γ ⊢ σ type → Type Γ
+⟦_⟧type {σ = σ} _ = σ
+
+-- We can project out the first and second components of a syntactic
+-- Π-type.
+
+fst′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
+       Γ ⊢ , σ type → Γ ⊢ fst σ type
+fst′ (π σ′ τ′) = σ′
+
+snd′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
+       Γ ⊢ , σ type → Γ ▻ fst σ ⊢ snd σ type
+snd′ (π σ′ τ′) = τ′
 
 ------------------------------------------------------------------------
 -- Examples
@@ -205,20 +219,6 @@ no-type u ⟦t⟧≢u σ′ = helper σ′ P.refl
 -- lambda, and I didn't find a way to synthesise the annotation
 -- without supplying a syntactic type to řeify (and hence also to
 -- V̌alue).
-
-------------------------------------------------------------------------
--- More projections
-
--- We can project out the first and second components of a syntactic
--- Π-type.
-
-fst′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
-       Γ ⊢ , σ type → Γ ⊢ fst σ type
-fst′ (π σ′ τ′) = σ′
-
-snd′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
-       Γ ⊢ , σ type → Γ ▻ fst σ ⊢ snd σ type
-snd′ (π σ′ τ′) = τ′
 
 ------------------------------------------------------------------------
 -- Equality
