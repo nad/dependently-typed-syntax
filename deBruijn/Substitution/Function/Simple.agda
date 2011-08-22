@@ -18,7 +18,7 @@ open import deBruijn.Substitution.Function.Basics
 open import deBruijn.Substitution.Function.Map
 open import Function as F using (_$_)
 open import Level using (_⊔_)
-import Relation.Binary.PropositionalEquality as P
+open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
 open P.≡-Reasoning
 
@@ -57,19 +57,13 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
 
   -- N-ary weakening of substitutions.
 
-  weaken⁺ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) → [ T ⟶ T ] (ŵk⁺ Γ⁺)
-  weaken⁺ ε        = [id]
-  weaken⁺ (Γ⁺ ▻ σ) = weaken [∘] weaken⁺ Γ⁺
+  wk-subst⁺ : ∀ {Γ Δ} Δ⁺ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk⁺ Δ⁺)
+  wk-subst⁺ ε        ρ = ρ
+  wk-subst⁺ (Δ⁺ ▻ σ) ρ = wk-subst (wk-subst⁺ Δ⁺ ρ)
 
-  wk-subst⁺ : ∀ {Γ Δ} Γ⁺ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk⁺ Γ⁺)
-  wk-subst⁺ Γ⁺ ρ = map (weaken⁺ Γ⁺) ρ
-
-  weaken₊ : ∀ {Γ} (Γ₊ : Ctxt₊ Γ) → [ T ⟶ T ] (ŵk₊ Γ₊)
-  weaken₊ ε        = [id]
-  weaken₊ (σ ◅ Γ₊) = weaken₊ Γ₊ [∘] weaken
-
-  wk-subst₊ : ∀ {Γ Δ} Γ₊ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk₊ Γ₊)
-  wk-subst₊ Γ₊ ρ = map (weaken₊ Γ₊) ρ
+  wk-subst₊ : ∀ {Γ Δ} Δ₊ {ρ̂ : Γ ⇨̂ Δ} → Sub T ρ̂ → Sub T (ρ̂ ∘̂ ŵk₊ Δ₊)
+  wk-subst₊ ε        ρ = ρ
+  wk-subst₊ (σ ◅ Δ₊) ρ = wk-subst₊ Δ₊ (wk-subst ρ)
 
   -- Lifting.
 
@@ -124,6 +118,16 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
   wk : ∀ {Γ} {σ : Type Γ} → Sub T ŵk[ σ ]
   wk = wk[ _ ]
 
+  private
+
+    -- Three possible definitions of wk coincide definitionally.
+
+    coincide₁ : ∀ {Γ} {σ : Type Γ} → wk⁺ (ε ▻ σ) ≡ wk₊ (σ ◅ ε)
+    coincide₁ = P.refl
+
+    coincide₂ : ∀ {Γ} {σ : Type Γ} → wk⁺ (ε ▻ σ) ≡ wk-subst id
+    coincide₂ = P.refl
+
   -- A substitution which only replaces the first variable.
 
   sub : ∀ {Γ σ} (t : Γ ⊢ σ) → Sub T (ŝub ⟦ t ⟧)
@@ -159,33 +163,26 @@ record Simple {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
   wk-subst-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
     [ P.refl ]
 
-  weaken⁺-cong : ∀ {Γ₁ Γ⁺₁ τ₁} {t₁ : Γ₁ ⊢ τ₁}
-                   {Γ₂ Γ⁺₂ τ₂} {t₂ : Γ₂ ⊢ τ₂} →
-                 Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → t₁ ≅-⊢ t₂ →
-                 weaken⁺ Γ⁺₁ · t₁ ≅-⊢ weaken⁺ Γ⁺₂ · t₂
-  weaken⁺-cong P.refl P.refl = P.refl
-
-  wk-subst⁺-cong : ∀ {Γ₁ Δ₁ Γ⁺₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
-                     {Γ₂ Δ₂ Γ⁺₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
-                   Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → ρ₁ ≅-⇨ ρ₂ →
-                   wk-subst⁺ Γ⁺₁ ρ₁ ≅-⇨ wk-subst⁺ Γ⁺₂ ρ₂
-  wk-subst⁺-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
-    [ P.refl ]
-
-  weaken₊-cong : ∀ {Γ₁ Γ₊₁ τ₁} {t₁ : Γ₁ ⊢ τ₁}
-                   {Γ₂ Γ₊₂ τ₂} {t₂ : Γ₂ ⊢ τ₂} →
-                 Γ₊₁ ≅-Ctxt₊ Γ₊₂ → t₁ ≅-⊢ t₂ →
-                 weaken₊ Γ₊₁ · t₁ ≅-⊢ weaken₊ Γ₊₂ · t₂
-  weaken₊-cong P.refl P.refl = P.refl
-
-  wk-subst₊-cong : ∀ {Γ₁ Δ₁ Γ₊₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
-                     {Γ₂ Δ₂ Γ₊₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
-                   Γ₊₁ ≅-Ctxt₊ Γ₊₂ → ρ₁ ≅-⇨ ρ₂ →
-                   wk-subst₊ Γ₊₁ ρ₁ ≅-⇨ wk-subst₊ Γ₊₂ ρ₂
-  wk-subst₊-cong {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
-    [ P.refl ]
-
   abstract
+
+    wk-subst⁺-cong : ∀ {Γ₁ Δ₁ Γ⁺₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
+                       {Γ₂ Δ₂ Γ⁺₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
+                     Γ⁺₁ ≅-Ctxt⁺ Γ⁺₂ → ρ₁ ≅-⇨ ρ₂ →
+                     wk-subst⁺ Γ⁺₁ ρ₁ ≅-⇨ wk-subst⁺ Γ⁺₂ ρ₂
+    wk-subst⁺-cong {Γ⁺₁ = ε} {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
+      [ P.refl ]
+    wk-subst⁺-cong {Γ⁺₁ = Γ⁺₁ ▻ σ} P.refl ρ₁≅ρ₂ =
+      wk-subst-cong (P.refl {x = [ σ ]})
+                    (wk-subst⁺-cong (P.refl {x = [ Γ⁺₁ ]}) ρ₁≅ρ₂)
+
+    wk-subst₊-cong : ∀ {Γ₁ Δ₁ Γ₊₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
+                       {Γ₂ Δ₂ Γ₊₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
+                     Γ₊₁ ≅-Ctxt₊ Γ₊₂ → ρ₁ ≅-⇨ ρ₂ →
+                     wk-subst₊ Γ₊₁ ρ₁ ≅-⇨ wk-subst₊ Γ₊₂ ρ₂
+    wk-subst₊-cong {Γ₊₁ = ε} {ρ₁ = _ , _} {ρ₂ = ._ , _} P.refl [ P.refl ] =
+      [ P.refl ]
+    wk-subst₊-cong {Γ₊₁ = σ ◅ Γ₊₁} P.refl ρ₁≅ρ₂ =
+      wk-subst₊-cong (P.refl {x = [ Γ₊₁ ]}) (wk-subst-cong P.refl ρ₁≅ρ₂)
 
     ↑-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁} {σ₁}
                {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} {σ₂} →
