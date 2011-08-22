@@ -62,6 +62,16 @@ module Renaming where
 
   open Application₁ application₁ public hiding (simple; application)
 
+  ≅-∋-⇒-≅-⊢ : ∀ {Γ₁ σ₁} {x₁ : Γ₁ ∋ σ₁}
+                {Γ₂ σ₂} {x₂ : Γ₂ ∋ σ₂} →
+              x₁ ≅-∋ x₂ → Term-like._≅-⊢_ Var x₁ x₂
+  ≅-∋-⇒-≅-⊢ P.refl = P.refl
+
+  ≅-⊢-⇒-≅-∋ : ∀ {Γ₁ σ₁} {x₁ : Γ₁ ∋ σ₁}
+                {Γ₂ σ₂} {x₂ : Γ₂ ∋ σ₂} →
+              Term-like._≅-⊢_ Var x₁ x₂ → x₁ ≅-∋ x₂
+  ≅-⊢-⇒-≅-∋ P.refl = P.refl
+
 -- A translation of T₁'s to T₂'s, plus a bit more.
 
 record _↦_ {t₁} (T₁ : Term-like t₁)
