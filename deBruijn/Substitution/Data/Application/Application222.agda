@@ -49,7 +49,7 @@ record Application₂₂₂
   open Simple simple₂
     using ()
     renaming ( var to var₂
-             ; weaken to weaken₂; weaken[_] to weaken₂[_]
+             ; weaken to weaken₂; weaken[_] to weaken₂[_]; wk⁺ to wk⁺₂
              ; wk-subst to wk-subst₂; wk-subst[_] to wk-subst₂[_]
              ; _↑ to _↑₂; _↑_ to _↑₂_; _↑⁺_ to _↑⁺₂_; _↑₊_ to _↑₊₂_
              )
@@ -206,3 +206,12 @@ record Application₂₂₂
         [ x /∋ wk-subst₂ ρ /⊢ sub₁ t   ]  ≡⟨ /⊢-cong lemma P.refl ⟩
         [ x /∋ ρ /⊢ wk₁ /⊢ sub₁ t      ]  ≡⟨ /⊢-wk-/⊢-sub (x /∋ ρ) t ⟩
         [ x /∋ ρ                       ]  ∎
+
+    -- Unfolding lemma for wk⁺.
+
+    wk⁺-▻ : ∀ {Γ} (Γ⁺ : Ctxt⁺ Γ) {σ} →
+            wk⁺₂ (Γ⁺ ▻ σ) ≅-⇨ wk⁺₂ Γ⁺ ∘ wk₁[ σ ]
+    wk⁺-▻ Γ⁺ {σ = σ} = begin
+      [ wk⁺₂ (Γ⁺ ▻ σ)       ]  ≡⟨ P.refl ⟩
+      [ wk-subst₂ (wk⁺₂ Γ⁺) ]  ≡⟨ P.sym $ ∘-wk (wk⁺₂ Γ⁺) ⟩
+      [ wk⁺₂ Γ⁺ ∘ wk₁       ]  ∎

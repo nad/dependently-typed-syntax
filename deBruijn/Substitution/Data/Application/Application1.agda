@@ -152,3 +152,59 @@ record Application₁ {t} (T : Term-like t) : Set (i ⊔ u ⊔ e ⊔ t) where
         [ wk-subst ρ ∘ sub (t /⊢ ρ) ▻ var · zero /⊢ sub (t /⊢ ρ) ]  ≡⟨ P.sym $ ▻-∘ (wk-subst ρ) (var · zero) (sub (t /⊢ ρ)) ⟩
         [ (wk-subst ρ ▻ var · zero) ∘ sub (t /⊢ ρ)               ]  ≡⟨ ∘-cong (P.sym $ unfold-↑ ρ) P.refl ⟩
         [ ρ ↑ ∘ sub (t /⊢ ρ)                                     ]  ∎
+
+  -- wk-subst⁺ can be expressed using composition and wk⁺.
+
+  ∘-wk⁺ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T ρ̂) (Δ⁺ : Ctxt⁺ Δ) →
+          ρ ∘ wk⁺ Δ⁺ ≅-⇨ wk-subst⁺ Δ⁺ ρ
+  ∘-wk⁺ ρ ε = begin
+    [ ρ ∘ wk⁺ ε     ]  ≡⟨ P.refl ⟩
+    [ ρ ∘ id        ]  ≡⟨ ∘-id ρ ⟩
+    [ ρ             ]  ≡⟨ P.refl ⟩
+    [ wk-subst⁺ ε ρ ]  ∎
+  ∘-wk⁺ ρ (Δ⁺ ▻ σ) = begin
+    [ ρ ∘ wk⁺ (Δ⁺ ▻ σ)          ]  ≡⟨ ∘-cong (P.refl {x = [ ρ ]}) (wk⁺-▻ Δ⁺) ⟩
+    [ ρ ∘ (wk⁺ Δ⁺ ∘ wk)         ]  ≡⟨ ∘-∘ ρ (wk⁺ Δ⁺) wk ⟩
+    [ (ρ ∘ wk⁺ Δ⁺) ∘ wk         ]  ≡⟨ ∘-cong (∘-wk⁺ ρ Δ⁺) P.refl ⟩
+    [ wk-subst⁺ Δ⁺ ρ ∘ wk       ]  ≡⟨ ∘-wk (wk-subst⁺ Δ⁺ ρ) ⟩
+    [ wk-subst (wk-subst⁺ Δ⁺ ρ) ]  ≡⟨ P.refl ⟩
+    [ wk-subst⁺ (Δ⁺ ▻ σ) ρ      ]  ∎
+
+  mutual
+
+    -- wk-subst₊ can be expressed using composition and wk₊.
+
+    ∘-wk₊ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub T ρ̂) (Δ₊ : Ctxt₊ Δ) →
+            ρ ∘ wk₊ Δ₊ ≅-⇨ wk-subst₊ Δ₊ ρ
+    ∘-wk₊ ρ ε = begin
+      [ ρ ∘ wk₊ ε     ]  ≡⟨ P.refl ⟩
+      [ ρ ∘ id        ]  ≡⟨ ∘-id ρ ⟩
+      [ ρ             ]  ≡⟨ P.refl ⟩
+      [ wk-subst₊ ε ρ ]  ∎
+    ∘-wk₊ ρ (σ ◅ Δ₊) = begin
+      [ ρ ∘ wk₊ (σ ◅ Δ₊)          ]  ≡⟨ ∘-cong (P.refl {x = [ ρ ]}) (wk₊-◅ Δ₊) ⟩
+      [ ρ ∘ (wk ∘ wk₊ Δ₊)         ]  ≡⟨ ∘-∘ ρ wk (wk₊ Δ₊) ⟩
+      [ (ρ ∘ wk) ∘ wk₊ Δ₊         ]  ≡⟨ ∘-cong (∘-wk ρ) P.refl ⟩
+      [ wk-subst ρ ∘ wk₊ Δ₊       ]  ≡⟨ ∘-wk₊ (wk-subst ρ) Δ₊ ⟩
+      [ wk-subst₊ Δ₊ (wk-subst ρ) ]  ≡⟨ P.refl ⟩
+      [ wk-subst₊ (σ ◅ Δ₊) ρ      ]  ∎
+
+    -- Unfolding lemma for wk₊.
+
+    wk₊-◅ : ∀ {Γ σ} (Γ₊ : Ctxt₊ (Γ ▻ σ)) →
+            wk₊ (σ ◅ Γ₊) ≅-⇨ wk ∘ wk₊ Γ₊
+    wk₊-◅ {σ = σ} Γ₊ = begin
+      [ wk₊ (σ ◅ Γ₊)    ]  ≡⟨ P.refl ⟩
+      [ wk-subst₊ Γ₊ wk ]  ≡⟨ P.sym $ ∘-wk₊ wk Γ₊ ⟩
+      [ wk ∘ wk₊ Γ₊     ]  ∎
+
+  -- A consequence of wk₊-◅.
+
+  /∋-wk₊-◅ : ∀ {Γ τ σ} (x : Γ ∋ τ) (Γ₊ : Ctxt₊ (Γ ▻ σ)) →
+             x /∋ wk₊ (σ ◅ Γ₊) ≅-⊢ suc x /∋ wk₊ Γ₊
+  /∋-wk₊-◅ {σ = σ} x Γ₊ = begin
+    [ x /∋ wk₊ (σ ◅ Γ₊)     ]  ≡⟨ /∋-cong (P.refl {x = [ x ]}) (wk₊-◅ Γ₊) ⟩
+    [ x /∋ wk ∘ wk₊ Γ₊      ]  ≡⟨ /∋-∘ x wk (wk₊ Γ₊) ⟩
+    [ x /∋ wk /⊢ wk₊ Γ₊     ]  ≡⟨ /⊢-cong (/∋-wk x) P.refl ⟩
+    [ var · suc x /⊢ wk₊ Γ₊ ]  ≡⟨ var-/⊢ (suc x) (wk₊ Γ₊) ⟩
+    [ suc x /∋ wk₊ Γ₊       ]  ∎
