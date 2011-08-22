@@ -39,22 +39,25 @@ mutual
   V̌alue′ Γ ⋆           σ = Γ ⊢ ⋆  , σ ⟨ ne ⟩
   V̌alue′ Γ el          σ = Γ ⊢ el , σ ⟨ne⟩
   V̌alue′ Γ (π sp₁ sp₂) σ =
-    Σ (V̌alue-π Γ sp₁ sp₂ σ) (Well-behaved sp₁ sp₂ σ)
+    Σ (V̌alue-π Γ sp₁ sp₂ σ) (W̌ell-behaved sp₁ sp₂ σ)
 
   V̌alue : (Γ : Ctxt) (σ : Type Γ) → Set
   V̌alue Γ (sp , σ) = V̌alue′ Γ sp σ
 
   V̌alue-π : ∀ Γ sp₁ sp₂ → IType Γ (π sp₁ sp₂) → Set
   V̌alue-π Γ sp₁ sp₂ σ =
-    (Γ⁺ : Ctxt⁺ Γ)
-    (v : V̌alue′ (Γ ++⁺ Γ⁺) sp₁ (ifst σ /̂I ŵk⁺ Γ⁺)) →
-    V̌alue′ (Γ ++⁺ Γ⁺) sp₂ (isnd σ /̂I ŵk⁺ Γ⁺ ↑̂ ∘̂ ŝub ⟦̌ v ⟧)
+    (Γ₊ : Ctxt₊ Γ)
+    (v : V̌alue′ (Γ ++₊ Γ₊) sp₁ (ifst σ /̂I ŵk₊ Γ₊)) →
+    V̌alue′ (Γ ++₊ Γ₊) sp₂ (isnd σ /̂I ŵk₊ Γ₊ ↑̂ ∘̂ ŝub ⟦̌ v ⟧)
 
-  Well-behaved :
+    -- The use of Ctxt₊ rather than Ctxt⁺ in V̌alue-π is important: it
+    -- seems to make it much easier to define weakening for V̌alue.
+
+  W̌ell-behaved :
     ∀ {Γ} sp₁ sp₂ σ → V̌alue-π Γ sp₁ sp₂ σ → Set
-  Well-behaved {Γ} sp₁ sp₂ σ f =
-    ∀ Γ⁺ v → (⟦ řeify-π sp₁ sp₂ σ f ⟧n /̂Val ŵk⁺ Γ⁺) ˢ ⟦̌ v ⟧ ≅-Value
-             ⟦̌ f Γ⁺ v ⟧
+  W̌ell-behaved {Γ} sp₁ sp₂ σ f =
+    ∀ Γ₊ v → (⟦ řeify-π sp₁ sp₂ σ f ⟧n /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧ ≅-Value
+             ⟦̌ f Γ₊ v ⟧
 
   -- The semantics of a value.
 
@@ -83,7 +86,7 @@ mutual
   řeify-π : ∀ {Γ} sp₁ sp₂ σ →
             V̌alue-π Γ sp₁ sp₂ σ → Γ ⊢ π sp₁ sp₂ , σ ⟨ no ⟩
   řeify-π {Γ} sp₁ sp₂ σ f = čast sp₁ σ $
-    ƛ (řeify sp₂ (f (ε ▻ fst σ) (řeflect sp₁ (var zero))))
+    ƛ (řeify sp₂ (f (fst σ ◅ ε) (řeflect sp₁ (var zero))))
 
   čast : ∀ {Γ} sp₁ {sp₂} (σ : IType Γ (π sp₁ sp₂)) →
          let ρ̂ = ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n in
@@ -98,33 +101,33 @@ mutual
   řeflect     ⋆               t = t
   řeflect     el              t = [ t ]
   řeflect {Γ} (π sp₁ sp₂) {σ} t =
-    (λ Γ⁺ v → řeflect sp₂ ((t /⊢n Renaming.wk⁺ Γ⁺) · řeify sp₁ v)) ,
+    (λ Γ₊ v → řeflect sp₂ ((t /⊢n Renaming.wk₊ Γ₊) · řeify sp₁ v)) ,
     řeflect-π-well-behaved sp₁ sp₂ t
 
   abstract
 
     řeflect-π-well-behaved :
-      ∀ {Γ} sp₁ sp₂ {σ} (t : Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩) Γ⁺ v →
+      ∀ {Γ} sp₁ sp₂ {σ} (t : Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩) Γ₊ v →
       let t′ = ňeutral-to-normal sp₂
                  ((t /⊢n Renaming.wk) · žero sp₁ (ifst σ)) in
-      (⟦ čast sp₁ σ (ƛ t′) ⟧n /̂Val ŵk⁺ Γ⁺) ˢ ⟦̌ v ⟧
+      (⟦ čast sp₁ σ (ƛ t′) ⟧n /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧
         ≅-Value
-      ⟦ ňeutral-to-normal sp₂ ((t /⊢n Renaming.wk⁺ Γ⁺) · řeify sp₁ v) ⟧n
-    řeflect-π-well-behaved sp₁ sp₂ {σ} t Γ⁺ v =
+      ⟦ ňeutral-to-normal sp₂ ((t /⊢n Renaming.wk₊ Γ₊) · řeify sp₁ v) ⟧n
+    řeflect-π-well-behaved sp₁ sp₂ {σ} t Γ₊ v =
       let t′ = ňeutral-to-normal sp₂
                  ((t /⊢n Renaming.wk) · žero sp₁ (ifst σ))
           v′ = řeify sp₁ v
 
           lemma′ = begin
-            [ ⟦ čast sp₁ σ (ƛ t′) ⟧n /̂Val ŵk⁺ Γ⁺ ]  ≡⟨ /̂Val-cong (ňeutral-to-normal-identity-π sp₁ sp₂ t) P.refl ⟩
-            [ ⟦ t ⟧n                 /̂Val ŵk⁺ Γ⁺ ]  ≡⟨ t /⊢n-lemma Renaming.wk⁺ Γ⁺ ⟩
-            [ ⟦ t /⊢n Renaming.wk⁺ Γ⁺ ⟧n         ]  ∎
+            [ ⟦ čast sp₁ σ (ƛ t′) ⟧n /̂Val ŵk₊ Γ₊ ]  ≡⟨ /̂Val-cong (ňeutral-to-normal-identity-π sp₁ sp₂ t) P.refl ⟩
+            [ ⟦ t ⟧n                 /̂Val ŵk₊ Γ₊ ]  ≡⟨ t /⊢n-lemma Renaming.wk₊ Γ₊ ⟩
+            [ ⟦ t /⊢n Renaming.wk₊ Γ₊ ⟧n         ]  ∎
 
       in begin
-      [ (⟦ čast sp₁ σ (ƛ t′) ⟧n /̂Val ŵk⁺ Γ⁺) ˢ ⟦ v′ ⟧n            ]  ≡⟨ ˢ-cong lemma′ P.refl ⟩
-      [ ⟦ t /⊢n Renaming.wk⁺ Γ⁺ ⟧n           ˢ ⟦ v′ ⟧n            ]  ≡⟨ P.refl ⟩
-      [ ⟦ (t /⊢n Renaming.wk⁺ Γ⁺) · v′ ⟧n                         ]  ≡⟨ P.sym $ ňeutral-to-normal-identity sp₂ _ ⟩
-      [ ⟦ ňeutral-to-normal sp₂ ((t /⊢n Renaming.wk⁺ Γ⁺) · v′) ⟧n ]  ∎
+      [ (⟦ čast sp₁ σ (ƛ t′) ⟧n /̂Val ŵk₊ Γ₊) ˢ ⟦ v′ ⟧n            ]  ≡⟨ ˢ-cong lemma′ P.refl ⟩
+      [ ⟦ t /⊢n Renaming.wk₊ Γ₊ ⟧n           ˢ ⟦ v′ ⟧n            ]  ≡⟨ P.refl ⟩
+      [ ⟦ (t /⊢n Renaming.wk₊ Γ₊) · v′ ⟧n                         ]  ≡⟨ P.sym $ ňeutral-to-normal-identity sp₂ _ ⟩
+      [ ⟦ ňeutral-to-normal sp₂ ((t /⊢n Renaming.wk₊ Γ₊) · v′) ⟧n ]  ∎
 
     -- A given context morphism is equal to the identity.
 
@@ -186,5 +189,79 @@ mutual
 
 w̌ell-behaved :
   ∀ {Γ sp₁ sp₂ σ} (f : V̌alue Γ (π sp₁ sp₂ , σ)) →
-  ∀ Γ⁺ v → (⟦̌_⟧ {σ = σ} f /̂Val ŵk⁺ Γ⁺) ˢ ⟦̌ v ⟧ ≅-Value ⟦̌ proj₁ f Γ⁺ v ⟧
+  ∀ Γ₊ v → (⟦̌_⟧ {σ = σ} f /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧ ≅-Value ⟦̌ proj₁ f Γ₊ v ⟧
 w̌ell-behaved = proj₂
+
+-- Values are term-like.
+
+V̌al : Term-like _
+V̌al = record
+  { _⊢_ = V̌alue
+  ; ⟦_⟧ = ⟦̌_⟧
+  }
+
+open Term-like V̌al public
+  using ([_])
+  renaming ( _≅-⊢_ to _≅-V̌alue_
+           ; drop-subst-⊢ to drop-subst-V̌alue; ⟦⟧-cong to ⟦̌⟧-cong
+           )
+
+abstract
+
+  -- Unfolding lemma for řeify-π.
+
+  unfold-řeify-π : ∀ {Γ sp₁ sp₂} σ (f : V̌alue-π Γ sp₁ sp₂ σ) →
+                   ⟦ řeify-π sp₁ sp₂ σ f ⟧n ≅-Value
+                   c ⟦̌ f (fst σ ◅ ε) (řeflect sp₁ (var zero)) ⟧
+  unfold-řeify-π σ _ = ⟦⟧n-cong $
+    drop-subst-⊢n (λ σ → , σ) (ifst-isnd-ŵk-ŝub-žero _ σ)
+
+-- Some congruence/conversion lemmas.
+
+≅-⊢n-⇒-≅-Value-⋆ : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ ⋆ , σ₁ ⟨ ne ⟩}
+                     {Γ₂ σ₂} {t₂ : Γ₂ ⊢ ⋆ , σ₂ ⟨ ne ⟩} →
+                   t₁ ≅-⊢n t₂ → t₁ ≅-V̌alue t₂
+≅-⊢n-⇒-≅-Value-⋆ P.refl = P.refl
+
+≅-⊢n-⇒-≅-Value-el : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ el , σ₁ ⟨ ne ⟩}
+                      {Γ₂ σ₂} {t₂ : Γ₂ ⊢ el , σ₂ ⟨ ne ⟩} →
+                    t₁ ≅-⊢n t₂ → _⊢_⟨ne⟩.[_] t₁ ≅-V̌alue _⊢_⟨ne⟩.[_] t₂
+≅-⊢n-⇒-≅-Value-el P.refl = P.refl
+
+abstract
+
+  ,-cong : P.Extensionality Level.zero Level.zero →
+           ∀ {Γ sp₁ sp₂ σ} {f₁ f₂ : V̌alue Γ (π sp₁ sp₂ , σ)} →
+           (∀ Γ₊ v → proj₁ f₁ Γ₊ v ≅-V̌alue proj₁ f₂ Γ₊ v) →
+           _≅-V̌alue_ {σ₁ = (π sp₁ sp₂ , σ)} f₁
+                     {σ₂ = (π sp₁ sp₂ , σ)} f₂
+  ,-cong ext hyp = P.cong (Term-like.[_] {_} {V̌al}) $
+    ,-cong′ (ext λ Γ₊ → ext λ v → Term-like.≅-⊢-⇒-≡ V̌al $ hyp Γ₊ v)
+            (ext λ _  → ext λ _ → P.proof-irrelevance _ _)
+    where
+    ,-cong′ : {A : Set} {B : A → Set}
+              {x₁ x₂ : A} {y₁ : B x₁} {y₂ : B x₂} →
+              (eq : x₁ ≡ x₂) → P.subst B eq y₁ ≡ y₂ →
+              _≡_ {A = Σ A B} (x₁ , y₁) (x₂ , y₂)
+    ,-cong′ P.refl P.refl = P.refl
+
+ňeutral-to-normal-cong :
+  ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ σ₁ ⟨ ne ⟩}
+    {Γ₂ σ₂} {t₂ : Γ₂ ⊢ σ₂ ⟨ ne ⟩} →
+  t₁ ≅-⊢n t₂ → ňeutral-to-normal _ t₁ ≅-⊢n ňeutral-to-normal _ t₂
+ňeutral-to-normal-cong P.refl = P.refl
+
+žero-cong : ∀ {Γ₁} {σ₁ : Type Γ₁}
+              {Γ₂} {σ₂ : Type Γ₂} →
+            σ₁ ≅-Type σ₂ → žero _ (proj₂ σ₁) ≅-⊢n žero _ (proj₂ σ₂)
+žero-cong P.refl = P.refl
+
+řeify-cong : ∀ {Γ₁ σ₁} {v₁ : V̌alue Γ₁ σ₁}
+               {Γ₂ σ₂} {v₂ : V̌alue Γ₂ σ₂} →
+             v₁ ≅-V̌alue v₂ → řeify _ v₁ ≅-⊢n řeify _ v₂
+řeify-cong P.refl = P.refl
+
+řeflect-cong : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ σ₁ ⟨ ne ⟩}
+                 {Γ₂ σ₂} {t₂ : Γ₂ ⊢ σ₂ ⟨ ne ⟩} →
+               t₁ ≅-⊢n t₂ → řeflect _ t₁ ≅-V̌alue řeflect _ t₂
+řeflect-cong P.refl = P.refl
