@@ -5,7 +5,7 @@
 
 -- This library is leaning heavily on two of Conor McBride's papers:
 --
--- * Type-preserving renaming and substitution.
+-- * Type-Preserving Renaming and Substitution.
 --
 -- * Outrageous but Meaningful Coincidences: Dependent type-safe
 --   syntax and evaluation.

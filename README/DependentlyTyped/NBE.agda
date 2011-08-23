@@ -164,11 +164,11 @@ normalise-cong P.refl = P.refl
 -- eval-complete :
 --   ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
 --   ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ →
---   ∀ {Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub V̌al ρ̂) → eval t₁ ρ ≡ eval t₂ ρ
+--   ∀ {Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub V̌al ρ̂) → eval t₁ ρ ≅-V̌alue eval t₂ ρ
 -- eval-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ ρ = {!!}
 
 -- normalise-complete :
 --   ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
---   ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ → normalise t₁ ≡ normalise t₂
+--   ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ → normalise t₁ ≅-⊢n normalise t₂
 -- normalise-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ =
---   P.cong (řeify _) (eval-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ V̌al-subst.id)
+--   řeify-cong $ eval-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ V̌al-subst.id
