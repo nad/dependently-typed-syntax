@@ -30,7 +30,8 @@ mutual
   -- Γ ⊢ σ ⟨ no ⟩ represents η-long, β-normal terms, Γ ⊢ σ ⟨ ne ⟩
   -- represents neutral terms.
 
-  infix 4 _⊢_⟨_⟩
+  infixl 9 _·_
+  infix  4 _⊢_⟨_⟩
 
   data _⊢_⟨_⟩ (Γ : Ctxt) : Type Γ → Kind → Set where
     ne  : ∀ {σ} (σ′ : Γ ⊢ σ atomic-type) (t : Γ ⊢ σ ⟨ ne ⟩) →
