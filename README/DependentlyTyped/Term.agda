@@ -79,6 +79,15 @@ U-π = _,_
 open deBruijn.Context Uni public
   renaming (_·_ to _⊙_; ·-cong to ⊙-cong)
 
+-- Some abbreviations.
+
+IType-π : ∀ {Γ} (σ : Type Γ) (τ : Type (Γ ▻ σ)) →
+          IType Γ (π (index σ) (index τ))
+IType-π σ τ = k U-π ˢ indexed-type σ ˢ c (indexed-type τ)
+
+Type-π : ∀ {Γ} (σ : Type Γ) → Type (Γ ▻ σ) → Type Γ
+Type-π σ τ = , IType-π σ τ
+
 ------------------------------------------------------------------------
 -- Projections
 
@@ -100,7 +109,7 @@ snd σ = , isnd σ
 -- The split is correct.
 
 π-fst-snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
-            σ ≡ k U-π ˢ ifst σ ˢ c (isnd σ)
+            σ ≡ IType-π (fst σ) (snd σ)
 π-fst-snd σ = P.refl
 
 ------------------------------------------------------------------------
@@ -115,8 +124,7 @@ mutual
 
   data _⊢_ (Γ : Ctxt) : Type Γ → Set where
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ
-    ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ) →
-          Γ ⊢ , k U-π ˢ indexed-type σ ˢ c (indexed-type τ)
+    ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ) → Γ ⊢ Type-π σ τ
     _·_ : ∀ {sp₁ sp₂ σ}
           (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) →
           Γ ⊢ snd σ /̂ ŝub ⟦ t₂ ⟧
@@ -253,6 +261,16 @@ drop-subst-⊢-type :
 drop-subst-⊢-type f P.refl = P.refl
 
 -- Some congruence lemmas.
+
+IType-π-cong : ∀ {Γ₁ σ₁} {τ₁ : Type (Γ₁ ▻ σ₁)}
+                 {Γ₂ σ₂} {τ₂ : Type (Γ₂ ▻ σ₂)} →
+               τ₁ ≅-Type τ₂ → IType-π σ₁ τ₁ ≅-IType IType-π σ₂ τ₂
+IType-π-cong P.refl = P.refl
+
+Type-π-cong : ∀ {Γ₁ σ₁} {τ₁ : Type (Γ₁ ▻ σ₁)}
+                {Γ₂ σ₂} {τ₂ : Type (Γ₂ ▻ σ₂)} →
+              τ₁ ≅-Type τ₂ → Type-π σ₁ τ₁ ≅-Type Type-π σ₂ τ₂
+Type-π-cong P.refl = P.refl
 
 -- Note that _ˢ_ and curry are the semantic counterparts of
 -- application and abstraction.

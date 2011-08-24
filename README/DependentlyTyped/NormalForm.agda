@@ -37,8 +37,7 @@ mutual
     ne  : ∀ {σ} (σ′ : Γ ⊢ σ atomic-type) (t : Γ ⊢ σ ⟨ ne ⟩) →
           Γ ⊢ σ ⟨ no ⟩
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ ⟨ ne ⟩
-    ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ ⟨ no ⟩) →
-          Γ ⊢ , k U-π ˢ indexed-type σ ˢ c (indexed-type τ) ⟨ no ⟩
+    ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ ⟨ no ⟩) → Γ ⊢ Type-π σ τ ⟨ no ⟩
     _·_ : ∀ {sp₁ sp₂ σ}
           (t₁ : Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩) (t₂ : Γ ⊢ fst σ ⟨ no ⟩) →
           Γ ⊢ snd σ /̂ ŝub ⟦ ⌊ t₂ ⌋ ⟧ ⟨ ne ⟩

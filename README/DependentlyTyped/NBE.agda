@@ -71,11 +71,10 @@ mutual
 
     eval-ƛ-well-behaved :
       ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ▻ σ ⊢ τ) (ρ : Sub V̌al ρ̂) →
-      W̌ell-behaved _ _
-        ((k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /I ρ)
+      W̌ell-behaved _ _ (IType-π σ τ /I ρ)
         (λ Γ₊ v → eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v))
     eval-ƛ-well-behaved {σ = σ} {τ = τ} t ρ Γ₊ v =
-      let υ  = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /I ρ
+      let υ  = IType-π σ τ /I ρ
           f  = λ Γ₊ v → eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v)
 
       in begin
@@ -111,10 +110,10 @@ mutual
 
       eval-lemma-ƛ :
         ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ▻ σ ⊢ τ) (ρ : Sub V̌al ρ̂) →
-        let υ = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /I ρ in
+        let υ = IType-π σ τ /I ρ in
         ⟦ ƛ t ⟧ /Val ρ ≅-Value ⟦̌_⟧ {σ = υ} (eval (ƛ t) ρ)
       eval-lemma-ƛ {σ = σ} {τ = τ} t ρ =
-        let υ  = (k U-π ˢ indexed-type σ ˢ c (indexed-type τ)) /I ρ
+        let υ  = IType-π σ τ /I ρ
             f  = λ Γ₊ v → eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v)
             ρ↑ = V̌al-subst.wk-subst₊ (σ / ρ ◅ ε) ρ ▻ v̌ar ⊙ zero
 

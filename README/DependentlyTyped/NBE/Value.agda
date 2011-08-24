@@ -11,7 +11,7 @@ module README.DependentlyTyped.NBE.Value
 
 open import Data.Product renaming (curry to c; uncurry to uc)
 open import deBruijn.Substitution.Data
-open import Function as F using (_ˢ_; _$_) renaming (const to k)
+open import Function using (id; _ˢ_; _$_) renaming (const to k)
 open import README.DependentlyTyped.NormalForm
 open import README.DependentlyTyped.NormalForm.Substitution
 import README.DependentlyTyped.Term as Term; open Term Uni₀
@@ -87,10 +87,11 @@ mutual
 
   čast : ∀ {Γ} sp₁ {sp₂} (σ : IType Γ (π sp₁ sp₂)) →
          let ρ̂ = ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n in
-         Γ ⊢ , k U-π ˢ ifst σ ˢ c (isnd σ /̂I ρ̂) ⟨ no ⟩ →
+         Γ ⊢ Type-π (fst σ) (snd σ /̂ ρ̂) ⟨ no ⟩ →
          Γ ⊢ , σ ⟨ no ⟩
   čast {Γ} sp₁ σ =
-    P.subst (λ σ → Γ ⊢ , σ ⟨ no ⟩) (ifst-isnd-ŵk-ŝub-žero sp₁ σ)
+    P.subst (λ σ → Γ ⊢ σ ⟨ no ⟩)
+            (≅-Type-⇒-≡ $ π-fst-snd-ŵk-ŝub-žero sp₁ σ)
 
   -- Reflection.
 
@@ -139,15 +140,15 @@ mutual
 
     -- A corollary of the lemma above.
 
-    ifst-isnd-ŵk-ŝub-žero :
+    π-fst-snd-ŵk-ŝub-žero :
       ∀ {Γ} sp₁ {sp₂} (σ : IType Γ (π sp₁ sp₂)) →
-      k U-π ˢ ifst σ ˢ c (isnd σ /̂I ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n) ≡
-      σ
-    ifst-isnd-ŵk-ŝub-žero sp₁ σ = begin
-      k U-π ˢ ifst σ ˢ c (isnd σ /̂I ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n)  ≡⟨ P.cong (λ ρ → k U-π ˢ ifst σ ˢ c (isnd σ /̂I ρ))
-                                                                                  (≅-⇨̂-⇒-≡ $ ŵk-ŝub-žero sp₁ σ) ⟩
-      k U-π ˢ ifst σ ˢ c (isnd σ)                                       ≡⟨ P.refl ⟩
-      σ                                                                 ∎
+      Type-π (fst σ) (snd σ /̂ ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n) ≅-Type
+      (, σ)
+    π-fst-snd-ŵk-ŝub-žero sp₁ σ = begin
+      [ Type-π (fst σ) (snd σ /̂ ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n) ]  ≡⟨ Type-π-cong $ /̂-cong (P.refl {x = [ snd σ ]})
+                                                                                              (ŵk-ŝub-žero sp₁ σ) ⟩
+      [ Type-π (fst σ) (snd σ)                                     ]  ≡⟨ P.refl ⟩
+      [ , σ                                                        ]  ∎
 
     -- In the semantics řeify is a left inverse of řeflect.
 
@@ -176,7 +177,7 @@ mutual
             [ uc ⟦ t ⟧n                                       ]  ∎
 
       in begin
-      [ ⟦ čast sp₁ σ (ƛ (ňeutral-to-normal sp₂ t′)) ⟧n ]  ≡⟨ ⟦⟧n-cong $ drop-subst-⊢n (λ σ → , σ) (ifst-isnd-ŵk-ŝub-žero sp₁ σ) ⟩
+      [ ⟦ čast sp₁ σ (ƛ (ňeutral-to-normal sp₂ t′)) ⟧n ]  ≡⟨ ⟦⟧n-cong $ drop-subst-⊢n id (≅-Type-⇒-≡ $ π-fst-snd-ŵk-ŝub-žero sp₁ σ) ⟩
       [ c ⟦ ňeutral-to-normal sp₂ t′ ⟧n                ]  ≡⟨ curry-cong lemma ⟩
       [ c {C = k El ˢ isnd σ} (uc ⟦ t ⟧n)              ]  ≡⟨ P.refl ⟩
       [ ⟦ t ⟧n                                         ]  ∎
@@ -211,7 +212,7 @@ abstract
                    ⟦ řeify-π sp₁ sp₂ σ f ⟧n ≅-Value
                    c ⟦̌ f (fst σ ◅ ε) (řeflect sp₁ (var zero)) ⟧
   unfold-řeify-π σ _ = ⟦⟧n-cong $
-    drop-subst-⊢n (λ σ → , σ) (ifst-isnd-ŵk-ŝub-žero _ σ)
+    drop-subst-⊢n id (≅-Type-⇒-≡ $ π-fst-snd-ŵk-ŝub-žero _ σ)
 
 -- Some congruence/conversion lemmas.
 
