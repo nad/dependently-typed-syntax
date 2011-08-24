@@ -195,7 +195,7 @@ identity′ = ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (va
 identity· : ∀ {Γ} → Γ ▻ ⟦ ⋆ ⟧type ▻ ⟦ el (var zero) ⟧type ⊢
                     ⟦ el (var (suc zero)) ⟧type
 identity· =
-  ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (var zero)) ·
+  ƛ {σ = (⋆ , _)} (ƛ {σ = (el , ⟦ var zero ⟧)} (var zero)) ·
   var (suc zero) · var zero
 
 ------------------------------------------------------------------------
