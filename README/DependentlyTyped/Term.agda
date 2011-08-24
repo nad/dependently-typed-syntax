@@ -43,6 +43,13 @@ data Spine : Set where
 
 -- The universe contains the universe above and is closed under
 -- Π-types.
+--
+-- The universe could be defined using induction-recursion, but the
+-- following recursive definition has the advantage that more things
+-- are definitionally equal. Previously I used induction-recursion,
+-- and then I proved π-fst-snd (below) using the assumption of
+-- extensionality of functions, and I used a cast in the definition of
+-- README.DependentlyTyped.NBE.Value.řeflect.
 
 mutual
 
