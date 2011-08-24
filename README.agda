@@ -90,4 +90,9 @@ import README.DependentlyTyped.NormalForm.Substitution
 
 import README.DependentlyTyped.NBE
 
+-- An observation: There is a term without a corresponding syntactic
+-- type (given some assumptions).
+
+import README.DependentlyTyped.Term-without-type
+
 -- TODO: Add an untyped example.

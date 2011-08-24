@@ -18,8 +18,7 @@ open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 open import Data.Unit
 import deBruijn.Context
 open import Function renaming (const to k)
-open import Relation.Binary.PropositionalEquality as P using (_≡_; _≢_)
-open import Relation.Nullary
+open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
 ------------------------------------------------------------------------
 -- Wrapper types
@@ -197,34 +196,6 @@ identity· : ∀ {Γ} → Γ ▻ ⟦ ⋆ ⟧type ▻ ⟦ el (var zero) ⟧type �
 identity· =
   ƛ {σ = (⋆ , _)} (ƛ {σ = (el , ⟦ var zero ⟧)} (var zero)) ·
   var (suc zero) · var zero
-
-------------------------------------------------------------------------
--- An observation
-
--- There are terms without syntactic types, assuming that U₀ is
--- inhabited and that no closed term computes to the given inhabitant.
--- (TODO: Is it possible to drop the last assumption? Can we prove
--- that no term in the empty context has type , U-⋆?)
-
-term-without-type : (u : U₀) → ε ⊢ , k (U-π (U-el u) (k (U-el u)))
-term-without-type u = ƛ (var zero)
-
-no-type : (u : U₀) → ∄ (λ (t : ε ⊢ , k U-⋆) → ⟦ t ⟧ _ ≡ u) →
-          ¬ ε ⊢ , k (U-π (U-el u) (k (U-el u))) type
-no-type u ⟦t⟧≢u σ′ = helper σ′ P.refl
-  where
-  helper : ∀ {σ} → ε ⊢ , σ type → σ ≢ k (U-π (U-el u) (k (U-el u)))
-  helper (π (el t) (el t′)) eq = ⟦t⟧≢u (t , ⟦t⟧≡u)
-    where
-    ⟦t⟧≡u : ⟦ t ⟧ _ ≡ u
-    ⟦t⟧≡u = P.cong (λ f → proj₁ (f _)) eq
-
--- One could avoid this situation by annotating lambdas with the
--- (syntactic) type of their domain. I tried this, and found it to be
--- awkward. One case of the function
--- README.DependentlyTyped.NBE.Value.řeify returns a lambda, and I
--- didn't find a way to synthesise the annotation without supplying a
--- syntactic type to řeify (and hence also to V̌alue).
 
 ------------------------------------------------------------------------
 -- Equality
