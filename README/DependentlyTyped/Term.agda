@@ -250,6 +250,26 @@ Type-π-cong : ∀ {Γ₁ σ₁} {τ₁ : Type (Γ₁ ▻ σ₁)}
               τ₁ ≅-Type τ₂ → Type-π σ₁ τ₁ ≅-Type Type-π σ₂ τ₂
 Type-π-cong P.refl = P.refl
 
+ifst-cong : ∀ {Γ₁ sp₁₁ sp₂₁} {σ₁ : IType Γ₁ (π sp₁₁ sp₂₁)}
+              {Γ₂ sp₁₂ sp₂₂} {σ₂ : IType Γ₂ (π sp₁₂ sp₂₂)} →
+            σ₁ ≅-IType σ₂ → ifst σ₁ ≅-IType ifst σ₂
+ifst-cong P.refl = P.refl
+
+fst-cong : ∀ {Γ₁ sp₁₁ sp₂₁} {σ₁ : IType Γ₁ (π sp₁₁ sp₂₁)}
+             {Γ₂ sp₁₂ sp₂₂} {σ₂ : IType Γ₂ (π sp₁₂ sp₂₂)} →
+           σ₁ ≅-IType σ₂ → fst σ₁ ≅-Type fst σ₂
+fst-cong P.refl = P.refl
+
+isnd-cong : ∀ {Γ₁ sp₁₁ sp₂₁} {σ₁ : IType Γ₁ (π sp₁₁ sp₂₁)}
+              {Γ₂ sp₁₂ sp₂₂} {σ₂ : IType Γ₂ (π sp₁₂ sp₂₂)} →
+            σ₁ ≅-IType σ₂ → isnd σ₁ ≅-IType isnd σ₂
+isnd-cong P.refl = P.refl
+
+snd-cong : ∀ {Γ₁ sp₁₁ sp₂₁} {σ₁ : IType Γ₁ (π sp₁₁ sp₂₁)}
+             {Γ₂ sp₁₂ sp₂₂} {σ₂ : IType Γ₂ (π sp₁₂ sp₂₂)} →
+           σ₁ ≅-IType σ₂ → snd σ₁ ≅-Type snd σ₂
+snd-cong P.refl = P.refl
+
 -- Note that _ˢ_ and curry are the semantic counterparts of
 -- application and abstraction.
 
