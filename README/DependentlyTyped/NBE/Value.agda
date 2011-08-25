@@ -96,9 +96,9 @@ mutual
   -- Reflection.
 
   řeflect : ∀ {Γ} sp {σ} → Γ ⊢ sp , σ ⟨ ne ⟩ → V̌alue Γ (sp , σ)
-  řeflect     ⋆               t = t
-  řeflect     el              t = [ t ]
-  řeflect {Γ} (π sp₁ sp₂) {σ} t =
+  řeflect ⋆           t = t
+  řeflect el          t = [ t ]
+  řeflect (π sp₁ sp₂) t =
     (λ Γ₊ v → řeflect sp₂ ((t /⊢n Renaming.wk₊ Γ₊) · řeify sp₁ v)) ,
     řeflect-π-well-behaved sp₁ sp₂ t
 
