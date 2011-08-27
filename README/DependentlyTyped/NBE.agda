@@ -52,48 +52,57 @@ abstract
     [ ρ̂ ∘̂ ŵk ▻̂ ⟦ var zero ⟧  ]  ≡⟨ P.refl ⟩
     [ ρ̂ ↑̂                    ]  ∎
 
--- Evaluation.
-
 mutual
+
+  -- Evaluation.
 
   eval : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} →
          Γ ⊢ σ → Sub V̌al ρ̂ → V̌alue Δ (σ /̂ ρ̂)
-  eval (var x)             ρ = x /∋ ρ
-  eval (_·_ {σ = σ} t₁ t₂) ρ =
+  eval (var x)   ρ = x /∋ ρ
+  eval (ƛ t)     ρ = (eval[ƛ t ] ρ) , eval[ƛ t ] ρ well-behaved
+  eval (t₁ · t₂) ρ = eval[ t₁ · t₂ ] ρ
+
+  -- Some abbreviations.
+
+  eval[ƛ_] : ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} →
+             Γ ▻ σ ⊢ τ → Sub V̌al ρ̂ → V̌alue-π Δ _ _ (IType-π σ τ /̂I ρ̂)
+  eval[ƛ t ] ρ Γ₊ v = eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v)
+
+  eval[_·_] : ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ} →
+              Γ ⊢ (π sp₁ sp₂ , σ) → (t₂ : Γ ⊢ fst σ) → Sub V̌al ρ̂ →
+              V̌alue Δ (snd σ /̂ ŝub ⟦ t₂ ⟧ ∘̂ ρ̂)
+  eval[_·_] {σ = σ} t₁ t₂ ρ =
     cast ([ σ /I ρ ] eval t₁ ρ ·̌ eval t₂ ρ)
     where
     cast = P.subst (λ v → V̌alue _ (snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v))
                    (≅-Value-⇒-≡ $ P.sym $ eval-lemma t₂ ρ)
-  eval (ƛ t) ρ = (λ Γ₊ v → eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v)) ,
-                 eval-ƛ-well-behaved t ρ
 
   abstract
 
-    eval-ƛ-well-behaved :
-      ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ▻ σ ⊢ τ) (ρ : Sub V̌al ρ̂) →
-      W̌ell-behaved _ _ (IType-π σ τ /I ρ)
-        (λ Γ₊ v → eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v))
-    eval-ƛ-well-behaved {σ = σ} {τ = τ} t ρ Γ₊ v =
-      let υ  = IType-π σ τ /I ρ
-          f  = λ Γ₊ v → eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v)
+    -- The ƛ case is well-behaved.
 
-      in begin
-      [ (⟦ řeify-π _ _ υ f ⟧n /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong (/̂Val-cong (P.sym $ eval-lemma-ƛ t ρ) P.refl) P.refl ⟩
-      [ (c ⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ∘̂ ŵk₊ Γ₊) ˢ ⟦̌ v ⟧     ]  ≡⟨ P.refl ⟩
-      [ ⟦ t ⟧ /̂Val (⟦ ρ ⟧⇨ ∘̂ ŵk₊ Γ₊ ▻̂ ⟦̌ v ⟧)       ]  ≡⟨ eval-lemma t _ ⟩
-      [ ⟦̌ eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v) ⟧  ]  ∎
+    eval[ƛ_]_well-behaved :
+      ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ▻ σ ⊢ τ) (ρ : Sub V̌al ρ̂) →
+      W̌ell-behaved _ _ (IType-π σ τ /I ρ) (eval[ƛ t ] ρ)
+    eval[ƛ_]_well-behaved {σ = σ} {τ = τ} t ρ Γ₊ v =
+      let υ  = IType-π σ τ /I ρ in begin
+      [ (⟦ řeify-π _ _ υ (eval[ƛ t ] ρ) ⟧n /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong (/̂Val-cong (P.sym $ eval-lemma-ƛ t ρ) P.refl) P.refl ⟩
+      [ (c ⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ∘̂ ŵk₊ Γ₊) ˢ ⟦̌ v ⟧                  ]  ≡⟨ P.refl ⟩
+      [ ⟦ t ⟧ /̂Val (⟦ ρ ⟧⇨ ∘̂ ŵk₊ Γ₊ ▻̂ ⟦̌ v ⟧)                    ]  ≡⟨ eval-lemma t _ ⟩
+      [ ⟦̌ eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v) ⟧               ]  ∎
 
     -- An unfolding lemma.
 
     eval-· :
       ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
       (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) (ρ : Sub V̌al ρ̂) →
-      eval (t₁ · t₂) ρ ≅-V̌alue [ σ /I ρ ] eval t₁ ρ ·̌ eval t₂ ρ
+      eval[ t₁ · t₂ ] ρ ≅-V̌alue [ σ /I ρ ] eval t₁ ρ ·̌ eval t₂ ρ
     eval-· {σ = σ} t₁ t₂ ρ =
       drop-subst-V̌alue (λ v → snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
                        (≅-Value-⇒-≡ $ P.sym $ eval-lemma t₂ ρ)
 
-    -- The evaluator is well-behaved.
+    -- The evaluator is correct (with respect to the standard
+    -- semantics).
 
     eval-lemma : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ σ) (ρ : Sub V̌al ρ̂) →
                  ⟦ t ⟧ /Val ρ ≅-Value ⟦̌ eval t ρ ⟧
@@ -104,25 +113,25 @@ mutual
       [ (⟦ t₁ ⟧ /Val ρ) ˢ (⟦ t₂ ⟧ /Val ρ)            ]  ≡⟨ ˢ-cong (eval-lemma t₁ ρ) (eval-lemma t₂ ρ) ⟩
       [ ⟦̌_⟧ {σ = σ /I ρ} (eval t₁ ρ) ˢ ⟦̌ eval t₂ ρ ⟧ ]  ≡⟨ proj₂ (eval t₁ ρ) ε (eval t₂ ρ) ⟩
       [ ⟦̌ [ σ /I ρ ] eval t₁ ρ ·̌ eval t₂ ρ ⟧         ]  ≡⟨ ⟦̌⟧-cong (P.sym $ eval-· t₁ t₂ ρ) ⟩
-      [ ⟦̌ eval (t₁ · t₂) ρ ⟧                         ]  ∎
+      [ ⟦̌ eval[ t₁ · t₂ ] ρ ⟧                        ]  ∎
 
     private
 
       eval-lemma-ƛ :
         ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ▻ σ ⊢ τ) (ρ : Sub V̌al ρ̂) →
         let υ = IType-π σ τ /I ρ in
-        ⟦ ƛ t ⟧ /Val ρ ≅-Value ⟦̌_⟧ {σ = υ} (eval (ƛ t) ρ)
+        ⟦ ƛ t ⟧ /Val ρ ≅-Value ⟦ řeify-π _ _ υ (eval[ƛ t ] ρ) ⟧n
       eval-lemma-ƛ {σ = σ} {τ = τ} t ρ =
         let υ  = IType-π σ τ /I ρ
-            f  = λ Γ₊ v → eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v)
             ρ↑ = V̌al-subst.wk-subst₊ (σ / ρ ◅ ε) ρ ▻ v̌ar ⊙ zero
 
         in begin
-        [ c ⟦ t ⟧ /Val ρ          ]  ≡⟨ P.refl ⟩
-        [ c (⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ↑̂) ]  ≡⟨ curry-cong (/̂Val-cong (P.refl {x = [ ⟦ t ⟧ ]}) (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _)) ⟩
-        [ c (⟦ t ⟧ /Val ρ↑)       ]  ≡⟨ curry-cong (eval-lemma t ρ↑) ⟩
-        [ c ⟦̌ eval t ρ↑ ⟧         ]  ≡⟨ P.sym $ unfold-řeify-π υ f ⟩
-        [ ⟦ řeify-π _ _ υ f ⟧n    ]  ∎
+        [ c ⟦ t ⟧ /Val ρ                    ]  ≡⟨ P.refl ⟩
+        [ c (⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ↑̂)           ]  ≡⟨ curry-cong $ /̂Val-cong (P.refl {x = [ ⟦ t ⟧ ]})
+                                                                         (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _) ⟩
+        [ c (⟦ t ⟧ /Val ρ↑)                 ]  ≡⟨ curry-cong (eval-lemma t ρ↑) ⟩
+        [ c ⟦̌ eval t ρ↑ ⟧                   ]  ≡⟨ P.sym $ unfold-řeify-π υ (eval[ƛ t ] ρ) ⟩
+        [ ⟦ řeify-π _ _ υ (eval[ƛ t ] ρ) ⟧n ]  ∎
 
 -- Normalisation.
 
