@@ -53,13 +53,16 @@ mutual
   W̌ell-behaved :
     ∀ {Γ} sp₁ sp₂ σ → V̌alue-π Γ sp₁ sp₂ σ → Set
   W̌ell-behaved {Γ} sp₁ sp₂ σ f =
-    ∀ Γ₊ v → (⟦ řeify-π sp₁ sp₂ σ f ⟧n /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧ ≅-Value
-             ⟦̌ f Γ₊ v ⟧
+    ∀ Γ₊ v → (⟦̌ σ ∣ f ⟧-π /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧ ≅-Value ⟦̌ f Γ₊ v ⟧
 
   -- The semantics of a value.
 
   ⟦̌_⟧ : ∀ {Γ sp σ} → V̌alue Γ (sp , σ) → Value Γ (sp , σ)
   ⟦̌ v ⟧ = ⟦ řeify _ v ⟧n
+
+  ⟦̌_∣_⟧-π : ∀ {Γ sp₁ sp₂} σ →
+            V̌alue-π Γ sp₁ sp₂ σ → Value Γ (π sp₁ sp₂ , σ)
+  ⟦̌ _ ∣ f ⟧-π = ⟦ řeify-π _ _ _ f ⟧n
 
   -- Neutral terms can be turned into normal terms using reflection
   -- followed by reification.
@@ -206,12 +209,12 @@ open Term-like V̌al public
 
 abstract
 
-  -- Unfolding lemma for řeify-π.
+  -- Unfolding lemma for ⟦̌_∣_⟧-π.
 
-  unfold-řeify-π : ∀ {Γ sp₁ sp₂} σ (f : V̌alue-π Γ sp₁ sp₂ σ) →
-                   ⟦ řeify-π sp₁ sp₂ σ f ⟧n ≅-Value
-                   c ⟦̌ f (fst σ ◅ ε) (řeflect sp₁ (var zero)) ⟧
-  unfold-řeify-π σ _ = ⟦⟧n-cong $
+  unfold-⟦̌∣⟧-π :
+    ∀ {Γ sp₁ sp₂} σ (f : V̌alue-π Γ sp₁ sp₂ σ) →
+    ⟦̌ σ ∣ f ⟧-π ≅-Value c ⟦̌ f (fst σ ◅ ε) (řeflect sp₁ (var zero)) ⟧
+  unfold-⟦̌∣⟧-π σ _ = ⟦⟧n-cong $
     drop-subst-⊢n id (≅-Type-⇒-≡ $ π-fst-snd-ŵk-ŝub-žero _ σ)
 
 -- Some congruence/conversion lemmas.

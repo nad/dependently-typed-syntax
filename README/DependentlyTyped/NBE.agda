@@ -86,10 +86,10 @@ mutual
       W̌ell-behaved _ _ (IType-π σ τ /I ρ) (eval[ƛ t ] ρ)
     eval[ƛ_]_well-behaved {σ = σ} {τ = τ} t ρ Γ₊ v =
       let υ  = IType-π σ τ /I ρ in begin
-      [ (⟦ řeify-π _ _ υ (eval[ƛ t ] ρ) ⟧n /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong (/̂Val-cong (P.sym $ eval-lemma-ƛ t ρ) P.refl) P.refl ⟩
-      [ (c ⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ∘̂ ŵk₊ Γ₊) ˢ ⟦̌ v ⟧                  ]  ≡⟨ P.refl ⟩
-      [ ⟦ t ⟧ /̂Val (⟦ ρ ⟧⇨ ∘̂ ŵk₊ Γ₊ ▻̂ ⟦̌ v ⟧)                    ]  ≡⟨ eval-lemma t _ ⟩
-      [ ⟦̌ eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v) ⟧               ]  ∎
+      [ (⟦̌ υ ∣ eval[ƛ t ] ρ ⟧-π /̂Val ŵk₊ Γ₊) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong (/̂Val-cong (P.sym $ eval-lemma-ƛ t ρ) P.refl) P.refl ⟩
+      [ (c ⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ∘̂ ŵk₊ Γ₊) ˢ ⟦̌ v ⟧       ]  ≡⟨ P.refl ⟩
+      [ ⟦ t ⟧ /̂Val (⟦ ρ ⟧⇨ ∘̂ ŵk₊ Γ₊ ▻̂ ⟦̌ v ⟧)         ]  ≡⟨ eval-lemma t _ ⟩
+      [ ⟦̌ eval t (V̌al-subst.wk-subst₊ Γ₊ ρ ▻ v) ⟧    ]  ∎
 
     -- An unfolding lemma.
 
@@ -119,19 +119,18 @@ mutual
 
       eval-lemma-ƛ :
         ∀ {Γ Δ σ τ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ▻ σ ⊢ τ) (ρ : Sub V̌al ρ̂) →
-        let υ = IType-π σ τ /I ρ in
-        ⟦ ƛ t ⟧ /Val ρ ≅-Value ⟦ řeify-π _ _ υ (eval[ƛ t ] ρ) ⟧n
+        ⟦ ƛ t ⟧ /Val ρ ≅-Value ⟦̌ IType-π σ τ /I ρ ∣ eval[ƛ t ] ρ ⟧-π
       eval-lemma-ƛ {σ = σ} {τ = τ} t ρ =
         let υ  = IType-π σ τ /I ρ
             ρ↑ = V̌al-subst.wk-subst₊ (σ / ρ ◅ ε) ρ ▻ v̌ar ⊙ zero
 
         in begin
-        [ c ⟦ t ⟧ /Val ρ                    ]  ≡⟨ P.refl ⟩
-        [ c (⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ↑̂)           ]  ≡⟨ curry-cong $ /̂Val-cong (P.refl {x = [ ⟦ t ⟧ ]})
+        [ c ⟦ t ⟧ /Val ρ          ]  ≡⟨ P.refl ⟩
+        [ c (⟦ t ⟧ /̂Val ⟦ ρ ⟧⇨ ↑̂) ]  ≡⟨ curry-cong $ /̂Val-cong (P.refl {x = [ ⟦ t ⟧ ]})
                                                                          (P.sym $ ∘̂-ŵk-▻̂-žero ⟦ ρ ⟧⇨ _) ⟩
-        [ c (⟦ t ⟧ /Val ρ↑)                 ]  ≡⟨ curry-cong (eval-lemma t ρ↑) ⟩
-        [ c ⟦̌ eval t ρ↑ ⟧                   ]  ≡⟨ P.sym $ unfold-řeify-π υ (eval[ƛ t ] ρ) ⟩
-        [ ⟦ řeify-π _ _ υ (eval[ƛ t ] ρ) ⟧n ]  ∎
+        [ c (⟦ t ⟧ /Val ρ↑)       ]  ≡⟨ curry-cong (eval-lemma t ρ↑) ⟩
+        [ c ⟦̌ eval t ρ↑ ⟧         ]  ≡⟨ P.sym $ unfold-⟦̌∣⟧-π υ (eval[ƛ t ] ρ) ⟩
+        [ ⟦̌ υ ∣ eval[ƛ t ] ρ ⟧-π  ]  ∎
 
 -- Normalisation.
 

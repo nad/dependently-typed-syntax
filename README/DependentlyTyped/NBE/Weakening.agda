@@ -47,22 +47,21 @@ mutual
       W̌ell-behaved sp₁ sp₂ (τ /̂I ŵk) (λ Γ₊ → proj₁ f (σ ◅ Γ₊))
     w̌k-π-well-behaved {σ = σ} τ f Γ₊ v =
       let lemma = begin
-            [ ⟦ řeify-π _ _ (τ /̂I ŵk) (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟧n
-                /̂Val ŵk₊ Γ₊                                        ]  ≡⟨ /̂Val-cong (P.sym $ w̌eaken-corresponds-π τ f) P.refl ⟩
-            [ ⟦̌_⟧ {σ = τ} f /̂Val ŵk[ σ ] /̂Val ŵk₊ Γ₊               ]  ≡⟨ P.refl ⟩
-            [ ⟦ řeify-π _ _ τ (proj₁ f) ⟧n /̂Val ŵk₊ (σ ◅ Γ₊)       ]  ∎
+            [ ⟦̌ τ /̂I ŵk ∣ (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟧-π /̂Val ŵk₊ Γ₊ ]  ≡⟨ /̂Val-cong (P.sym $ w̌eaken-corresponds-π τ f) P.refl ⟩
+            [ ⟦̌_⟧ {σ = τ} f /̂Val ŵk[ σ ] /̂Val ŵk₊ Γ₊                ]  ≡⟨ P.refl ⟩
+            [ ⟦̌ τ ∣ proj₁ f ⟧-π /̂Val ŵk₊ (σ ◅ Γ₊)                   ]  ∎
 
       in begin
-      [ (⟦ řeify-π _ _ (τ /̂I ŵk) (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟧n /̂Val ŵk₊      Γ₊ ) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong lemma P.refl ⟩
-      [ (⟦ řeify-π _ _ τ         (       proj₁ f         ) ⟧n /̂Val ŵk₊ (σ ◅ Γ₊)) ˢ ⟦̌ v ⟧ ]  ≡⟨ proj₂ f (σ ◅ Γ₊) v ⟩
-      [ ⟦̌ proj₁ f (σ ◅ Γ₊) v ⟧                                                           ]  ∎
+      [ (⟦̌ τ /̂I ŵk ∣ (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟧-π /̂Val ŵk₊      Γ₊ ) ˢ ⟦̌ v ⟧ ]  ≡⟨ ˢ-cong lemma P.refl ⟩
+      [ (⟦̌ τ       ∣         proj₁ f           ⟧-π /̂Val ŵk₊ (σ ◅ Γ₊)) ˢ ⟦̌ v ⟧ ]  ≡⟨ proj₂ f (σ ◅ Γ₊) v ⟩
+      [ ⟦̌ proj₁ f (σ ◅ Γ₊) v ⟧                                                ]  ∎
 
     -- The Π case of weakening weakens.
 
     w̌eaken-corresponds-π :
       ∀ {Γ σ sp₁ sp₂} τ (f : V̌alue Γ (π sp₁ sp₂ , τ)) →
         ⟦̌_⟧ {σ = τ} f /̂Val ŵk[ σ ] ≅-Value
-        ⟦ řeify-π _ _ (τ /̂I ŵk) (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟧n
+        ⟦̌ τ /̂I ŵk ∣ (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟧-π
     w̌eaken-corresponds-π {σ = σ} τ f =
       let f̌ = ⟦̌_⟧ {σ = τ} f
 
@@ -72,8 +71,8 @@ mutual
                                                                           ˢ-cong (P.refl {x = [ f̌ /̂Val ŵk₊ (σ ◅ fst τ /̂ ŵk ◅ ε) ]})
                                                                                  (P.sym $ ňeutral-to-normal-identity _ _) ⟩
       [ c ((f̌ /̂Val ŵk₊ (σ ◅ fst τ /̂ ŵk ◅ ε)) ˢ ⟦ žero _ _ ⟧n)     ]  ≡⟨ curry-cong $ proj₂ f (σ ◅ fst τ /̂ ŵk ◅ ε) _ ⟩
-      [ c ⟦̌ proj₁ f (σ ◅ fst τ /̂ ŵk ◅ ε) (řeflect _ (var zero)) ⟧ ]  ≡⟨ P.sym $ unfold-řeify-π (τ /̂I ŵk) (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟩
-      [ ⟦ řeify-π _ _ (τ /̂I ŵk) (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟧n      ]  ∎
+      [ c ⟦̌ proj₁ f (σ ◅ fst τ /̂ ŵk ◅ ε) (řeflect _ (var zero)) ⟧ ]  ≡⟨ P.sym $ unfold-⟦̌∣⟧-π (τ /̂I ŵk) (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟩
+      [ ⟦̌ τ /̂I ŵk ∣ (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) ⟧-π                 ]  ∎
 
 -- Weakening.
 
