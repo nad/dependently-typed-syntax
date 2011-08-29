@@ -53,7 +53,7 @@ abstract
   -- be awkward. One case of the function
   -- README.DependentlyTyped.NBE.Value.řeify returns a lambda, and I
   -- didn't find a way to synthesise the annotation without supplying
-  -- a syntactic type to řeify (and hence also to V̌alue).
+  -- syntactic types to V̌alue, řeify, řeflect, etc.
 
   term-without-type :
     P.Extensionality Level.zero Level.zero → U₀ →
