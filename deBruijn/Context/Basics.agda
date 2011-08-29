@@ -339,6 +339,12 @@ x₁ ≅-∋ x₂ = [∋].[_] x₁ ≡ [ x₂ ]
 ▻-cong : ∀ {Γ₁ Γ₂ σ₁ σ₂} → σ₁ ≅-Type σ₂ → Γ₁ ▻ σ₁ ≅-Ctxt Γ₂ ▻ σ₂
 ▻-cong P.refl = P.refl
 
+indexed-type-cong :
+  ∀ {Γ₁} {σ₁ : Type Γ₁}
+    {Γ₂} {σ₂ : Type Γ₂} →
+  σ₁ ≅-Type σ₂ → indexed-type σ₁ ≅-IType indexed-type σ₂
+indexed-type-cong P.refl = P.refl
+
 îd-cong : ∀ {Γ₁ Γ₂} → Γ₁ ≅-Ctxt Γ₂ → îd[ Γ₁ ] ≅-⇨̂ îd[ Γ₂ ]
 îd-cong P.refl = P.refl
 
