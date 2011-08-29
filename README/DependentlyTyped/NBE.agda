@@ -14,11 +14,15 @@ module README.DependentlyTyped.NBE
   (ext : P.Extensionality Level.zero Level.zero)
   where
 
+open import Data.Empty
 open import Data.Product renaming (curry to c)
 open import deBruijn.Substitution.Data
 open import Function renaming (const to k)
 open import README.DependentlyTyped.NormalForm
+  renaming ([_] to [_]n)
 import README.DependentlyTyped.Term as Term; open Term Uni₀
+open import README.DependentlyTyped.Term.Substitution
+open import Relation.Nullary
 
 open P.≡-Reasoning
 
@@ -166,16 +170,47 @@ normalise-cong :
   t₁ ≅-⊢ t₂ → normalise t₁ ≅-⊢n normalise t₂
 normalise-cong P.refl = P.refl
 
--- TODO: Can the following statements be proved?
+abstract
 
--- eval-complete :
---   ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
---   ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ →
---   ∀ {Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : Sub V̌al ρ̂) → eval t₁ ρ ≅-V̌alue eval t₂ ρ
--- eval-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ ρ = {!!}
+  -- Note that we can /not/ prove that normalise takes semantically
+  -- equal terms to identical normal forms, assuming extensionality
+  -- and the existence of a universe code which decodes to an empty
+  -- type:
 
--- normalise-complete :
---   ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
---   ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ → normalise t₁ ≅-⊢n normalise t₂
--- normalise-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ =
---   řeify-cong $ eval-complete t₁ t₂ ⟦t₁⟧≅⟦t₂⟧ V̌al-subst.id
+  normal-forms-not-unique :
+    P.Extensionality Level.zero Level.zero →
+    (∃ λ (bot : U₀) → ¬ El₀ bot) →
+    ¬ (∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
+       ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ → normalise t₁ ≅-⊢n normalise t₂)
+  normal-forms-not-unique ext (bot , empty) hyp = ⊥-elim (x₁≇x₂ x₁≅x₂)
+    where
+    Γ : Ctxt
+    Γ = ε ▻ (⋆ , _) ▻ (⋆ , _) ▻ (el , k bot)
+
+    x₁ : Γ ∋ (⋆ , _)
+    x₁ = suc (suc zero)
+
+    x₂ : Γ ∋ (⋆ , _)
+    x₂ = suc zero
+
+    x₁≇x₂ : ¬ (ne ⋆ (var x₁) ≅-⊢n ne ⋆ (var x₂))
+    x₁≇x₂ ()
+
+    ⟦x₁⟧≡⟦x₂⟧ : ⟦ var x₁ ⟧ ≅-Value ⟦ var x₂ ⟧
+    ⟦x₁⟧≡⟦x₂⟧ = P.cong [_] (ext λ γ → ⊥-elim $ empty $ proj₂ γ)
+
+    norm-x₁≅norm-x₂ : normalise (var x₁) ≅-⊢n normalise (var x₂)
+    norm-x₁≅norm-x₂ = hyp (var x₁) (var x₂) ⟦x₁⟧≡⟦x₂⟧
+
+    lemma : (x : Γ ∋ (⋆ , _)) → normalise (var x) ≅-⊢n ne ⋆ (var x)
+    lemma x = begin
+      [ normalise (var x)        ]n  ≡⟨ P.refl ⟩
+      [ ne ⋆ (x /∋ V̌al-subst.id) ]n  ≡⟨ ne-cong $ ≅-Value-⋆-⇒-≅-⊢n $ V̌al-subst./∋-id x ⟩
+      [ ne ⋆ (var x)             ]n  ∎
+
+    x₁≅x₂ : ne ⋆ (var x₁) ≅-⊢n ne ⋆ (var x₂)
+    x₁≅x₂ = begin
+      [ ne ⋆ (var x₁)      ]n  ≡⟨ P.sym $ lemma x₁ ⟩
+      [ normalise (var x₁) ]n  ≡⟨ norm-x₁≅norm-x₂ ⟩
+      [ normalise (var x₂) ]n  ≡⟨ lemma x₂ ⟩
+      [ ne ⋆ (var x₂)      ]n  ∎

@@ -224,10 +224,20 @@ abstract
                    t₁ ≅-⊢n t₂ → t₁ ≅-V̌alue t₂
 ≅-⊢n-⇒-≅-Value-⋆ P.refl = P.refl
 
+≅-Value-⋆-⇒-≅-⊢n : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ ⋆ , σ₁ ⟨ ne ⟩}
+                     {Γ₂ σ₂} {t₂ : Γ₂ ⊢ ⋆ , σ₂ ⟨ ne ⟩} →
+                   t₁ ≅-V̌alue t₂ → t₁ ≅-⊢n t₂
+≅-Value-⋆-⇒-≅-⊢n P.refl = P.refl
+
 ≅-⊢n-⇒-≅-Value-el : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ el , σ₁ ⟨ ne ⟩}
                       {Γ₂ σ₂} {t₂ : Γ₂ ⊢ el , σ₂ ⟨ ne ⟩} →
                     t₁ ≅-⊢n t₂ → _⊢_⟨ne⟩.[_] t₁ ≅-V̌alue _⊢_⟨ne⟩.[_] t₂
 ≅-⊢n-⇒-≅-Value-el P.refl = P.refl
+
+≅-Value-el-⇒-≅-⊢n : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ el , σ₁ ⟨ ne ⟩}
+                      {Γ₂ σ₂} {t₂ : Γ₂ ⊢ el , σ₂ ⟨ ne ⟩} →
+                    _⊢_⟨ne⟩.[_] t₁ ≅-V̌alue _⊢_⟨ne⟩.[_] t₂ → t₁ ≅-⊢n t₂
+≅-Value-el-⇒-≅-⊢n P.refl = P.refl
 
 abstract
 
