@@ -118,11 +118,11 @@ record Application₂₂₁
       in begin
       [ var₂ · suc[ σ ] x /⊢ ρ ↑₁    ]  ≡⟨ var-/⊢ (suc[ σ ] x) (ρ ↑₁) ⟩
       [ trans · (suc[ σ ] x /∋ ρ ↑₁) ]  ≡⟨ trans-cong (Simple.suc-/∋-↑ simple₁ σ x ρ) ⟩
-      [ trans · (x /∋ wk-subst₁ ρ)      ]  ≡⟨ P.sym $ /∋-map x trans (wk-subst₁ ρ) ⟩
-      [ x /∋ map trans (wk-subst₁ ρ)    ]  ≡⟨ /∋-cong (P.refl {x = [ x ]}) lemma₂ ⟩
-      [ x /∋ map trans ρ ∘ wk₁          ]  ≡⟨ /∋-∘ x (map trans ρ) wk₁ ⟩
-      [ x /∋ map trans ρ /⊢ wk₁         ]  ≡⟨ /⊢-cong lemma₁ (P.refl {x = [ wk₁ ]}) ⟩
-      [ var₂ · x /⊢ ρ /⊢ wk₁            ]  ∎
+      [ trans · (x /∋ wk-subst₁ ρ)   ]  ≡⟨ P.sym $ /∋-map x trans (wk-subst₁ ρ) ⟩
+      [ x /∋ map trans (wk-subst₁ ρ) ]  ≡⟨ /∋-cong (P.refl {x = [ x ]}) lemma₂ ⟩
+      [ x /∋ map trans ρ ∘ wk₁       ]  ≡⟨ /∋-∘ x (map trans ρ) wk₁ ⟩
+      [ x /∋ map trans ρ /⊢ wk₁      ]  ≡⟨ /⊢-cong lemma₁ (P.refl {x = [ wk₁ ]}) ⟩
+      [ var₂ · x /⊢ ρ /⊢ wk₁         ]  ∎
 
     private
 
