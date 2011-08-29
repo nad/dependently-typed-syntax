@@ -287,6 +287,13 @@ curry-cong :
   v₁ ≅-Value v₂ → c v₁ ≅-Value c v₂
 curry-cong P.refl = P.refl
 
+uncurry-cong :
+  ∀ {Γ₁ sp₁₁ sp₂₁ σ₁} {v₁ : Value Γ₁ (π sp₁₁ sp₂₁ , σ₁)}
+    {Γ₂ sp₁₂ sp₂₂ σ₂} {v₂ : Value Γ₂ (π sp₁₂ sp₂₂ , σ₂)} →
+  v₁ ≅-Value v₂ →
+  _≅-Value_ {σ₁ = snd σ₁} (uc v₁) {σ₂ = snd σ₂} (uc v₂)
+uncurry-cong P.refl = P.refl
+
 ⋆-cong : {Γ₁ Γ₂ : Ctxt} →
          Γ₁ ≅-Ctxt Γ₂ → ⋆ {Γ = Γ₁} ≅-type ⋆ {Γ = Γ₂}
 ⋆-cong P.refl = P.refl
