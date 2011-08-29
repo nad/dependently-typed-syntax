@@ -85,8 +85,7 @@ import README.DependentlyTyped.Term.Substitution
 
 import README.DependentlyTyped.NormalForm.Substitution
 
--- Normalisation by evaluation (one key property remains to be
--- proved).
+-- Normalisation by evaluation.
 
 import README.DependentlyTyped.NBE
 
