@@ -76,6 +76,10 @@ import README.DependentlyTyped.Term
 
 import README.DependentlyTyped.NormalForm
 
+-- Raw terms.
+
+import README.DependentlyTyped.Raw-term
+
 -- Instantiation of deBruijn.Substitution.Data for terms.
 
 import README.DependentlyTyped.Term.Substitution
