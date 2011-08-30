@@ -10,13 +10,13 @@ open import Universe
 -- functions is extensional.
 
 module README.DependentlyTyped.Term-without-type
-  {Uni₀ : Universe Level.zero Level.zero}
+  (Uni₀ : Universe Level.zero Level.zero)
   where
 
 open import Data.Product
 open import Function renaming (const to k)
-open import README.DependentlyTyped.NBE
-open import README.DependentlyTyped.NormalForm
+import README.DependentlyTyped.NBE as NBE; open NBE Uni₀
+import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 open import Relation.Binary.PropositionalEquality as P using (_≡_; _≢_)
 open import Relation.Nullary

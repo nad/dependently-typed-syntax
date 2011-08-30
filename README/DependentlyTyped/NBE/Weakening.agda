@@ -10,17 +10,18 @@ open import Universe
 -- functions is extensional.
 
 module README.DependentlyTyped.NBE.Weakening
-  {Uni₀ : Universe Level.zero Level.zero}
+  (Uni₀ : Universe Level.zero Level.zero)
   (ext : P.Extensionality Level.zero Level.zero)
   where
 
 open import Data.Product renaming (curry to c)
 open import deBruijn.Substitution.Data
 open import Function
-open import README.DependentlyTyped.NBE.Value
-open import README.DependentlyTyped.NormalForm
-  renaming ([_] to [_]n)
-open import README.DependentlyTyped.NormalForm.Substitution
+import README.DependentlyTyped.NBE.Value as Value; open Value Uni₀
+import README.DependentlyTyped.NormalForm as NF
+open NF Uni₀ renaming ([_] to [_]n)
+import README.DependentlyTyped.NormalForm.Substitution as NFS
+open NFS Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 
 open P.≡-Reasoning

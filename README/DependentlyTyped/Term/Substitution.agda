@@ -6,13 +6,12 @@ import Level
 open import Universe
 
 module README.DependentlyTyped.Term.Substitution
-  {Uni₀ : Universe Level.zero Level.zero} where
-
-import README.DependentlyTyped.Term as Term; open Term Uni₀
+  (Uni₀ : Universe Level.zero Level.zero) where
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 open import deBruijn.Substitution.Data
 open import Function as F using (_$_; _ˢ_) renaming (const to k)
+import README.DependentlyTyped.Term as Term; open Term Uni₀
 import Relation.Binary.PropositionalEquality as P
 
 open P.≡-Reasoning

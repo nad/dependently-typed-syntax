@@ -10,7 +10,7 @@ open import Universe
 -- functions is extensional.
 
 module README.DependentlyTyped.NBE
-  {Uni₀ : Universe Level.zero Level.zero}
+  (Uni₀ : Universe Level.zero Level.zero)
   (ext : P.Extensionality Level.zero Level.zero)
   where
 
@@ -18,10 +18,10 @@ open import Data.Empty
 open import Data.Product renaming (curry to c)
 open import deBruijn.Substitution.Data
 open import Function renaming (const to k)
-open import README.DependentlyTyped.NormalForm
-  renaming ([_] to [_]n)
+import README.DependentlyTyped.NormalForm as NF
+open NF Uni₀ renaming ([_] to [_]n)
 import README.DependentlyTyped.Term as Term; open Term Uni₀
-open import README.DependentlyTyped.Term.Substitution
+import README.DependentlyTyped.Term.Substitution as S; open S Uni₀
 open import Relation.Nullary
 
 open P.≡-Reasoning
@@ -29,12 +29,12 @@ open P.≡-Reasoning
 -- The values that are used by the NBE algorithm.
 
 import README.DependentlyTyped.NBE.Value as Value
-open Value {Uni₀} public
+open Value Uni₀ public
 
 -- Weakening for the values.
 
 import README.DependentlyTyped.NBE.Weakening as Weakening
-open Weakening {Uni₀} ext public
+open Weakening Uni₀ ext public
 
 -- Application.
 

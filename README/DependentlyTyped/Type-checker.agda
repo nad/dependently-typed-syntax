@@ -10,7 +10,7 @@ open import Universe
 -- functions is extensional.
 
 module README.DependentlyTyped.Type-checker
-  {Uni₀ : Universe Level.zero Level.zero}
+  (Uni₀ : Universe Level.zero Level.zero)
   (ext : P.Extensionality Level.zero Level.zero)
   where
 
@@ -19,14 +19,13 @@ open import Data.Maybe as Maybe
 open import Data.Nat using (ℕ; zero; suc; pred)
 open import Data.Product as Prod
 open import Function as F hiding (type-signature) renaming (_∘_ to _⊚_)
-import README.DependentlyTyped.Equality-checker as EC
-open EC {Uni₀} ext
-import README.DependentlyTyped.NBE as NBE; open NBE {Uni₀} ext
+import README.DependentlyTyped.Equality-checker as EC; open EC Uni₀ ext
+import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext
 import README.DependentlyTyped.NormalForm as NF
-open NF {Uni₀} hiding (⌊_⌋)
-import README.DependentlyTyped.Raw-term as RT; open RT {Uni₀}
+open NF Uni₀ hiding (⌊_⌋)
+import README.DependentlyTyped.Raw-term as RT; open RT Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
-open import README.DependentlyTyped.Term.Substitution
+import README.DependentlyTyped.Term.Substitution as S; open S Uni₀
 open import Relation.Nullary
 import Relation.Nullary.Decidable as Dec
 open import Relation.Nullary.Product

@@ -10,7 +10,7 @@ open import Universe
 -- functions is extensional.
 
 module README.DependentlyTyped.Equality-checker
-  {Uni₀ : Universe Level.zero Level.zero}
+  (Uni₀ : Universe Level.zero Level.zero)
   (ext : P.Extensionality Level.zero Level.zero)
   where
 
@@ -18,8 +18,8 @@ open import Category.Monad
 open import Data.Maybe as Maybe
 open import Data.Product
 open import Function renaming (const to k)
-import README.DependentlyTyped.NBE as NBE; open NBE {Uni₀} ext
-import README.DependentlyTyped.NormalForm as NF; open NF {Uni₀}
+import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext
+import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 open import Relation.Nullary
 import Relation.Nullary.Decidable as Dec

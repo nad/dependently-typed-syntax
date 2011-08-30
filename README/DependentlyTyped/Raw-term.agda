@@ -6,7 +6,7 @@ import Level
 open import Universe
 
 module README.DependentlyTyped.Raw-term
-  {Uni₀ : Universe Level.zero Level.zero}
+  (Uni₀ : Universe Level.zero Level.zero)
   where
 
 open import Data.Nat

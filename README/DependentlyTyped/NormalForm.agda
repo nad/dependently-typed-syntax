@@ -6,7 +6,7 @@ open import Level using (zero)
 open import Universe
 
 module README.DependentlyTyped.NormalForm
-  {Uni₀ : Universe zero zero} where
+  (Uni₀ : Universe zero zero) where
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 open import Function renaming (const to k; _∘_ to _⊚_)

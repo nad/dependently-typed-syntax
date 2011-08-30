@@ -6,14 +6,15 @@ import Level
 open import Universe
 
 module README.DependentlyTyped.NBE.Value
-  {Uni₀ : Universe Level.zero Level.zero}
+  (Uni₀ : Universe Level.zero Level.zero)
   where
 
 open import Data.Product renaming (curry to c; uncurry to uc)
 open import deBruijn.Substitution.Data
 open import Function using (id; _ˢ_; _$_) renaming (const to k)
-open import README.DependentlyTyped.NormalForm
-open import README.DependentlyTyped.NormalForm.Substitution
+import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
+import README.DependentlyTyped.NormalForm.Substitution as NFS
+open NFS Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
