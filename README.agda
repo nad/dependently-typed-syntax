@@ -76,10 +76,6 @@ import README.DependentlyTyped.Term
 
 import README.DependentlyTyped.NormalForm
 
--- Raw terms.
-
-import README.DependentlyTyped.Raw-term
-
 -- Instantiation of deBruijn.Substitution.Data for terms.
 
 import README.DependentlyTyped.Term.Substitution
@@ -96,6 +92,10 @@ import README.DependentlyTyped.NBE
 -- Various equality checkers (some complete, all sound).
 
 import README.DependentlyTyped.Equality-checker
+
+-- Raw terms.
+
+import README.DependentlyTyped.Raw-term
 
 -- A type-checker (sound).
 
