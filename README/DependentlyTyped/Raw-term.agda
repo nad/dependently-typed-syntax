@@ -10,15 +10,8 @@ module README.DependentlyTyped.Raw-term
   where
 
 open import Data.Nat
-open import Data.Product as Prod
-import README.DependentlyTyped.Term
-
-open README.DependentlyTyped.Term Uni₀
-
--- Two kinds of raw terms: checkable and inferrable.
-
-data Kind : Set where
-  chk inf : Kind
+import README.DependentlyTyped.Term as Term; open Term Uni₀
+open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
 mutual
 
@@ -27,36 +20,24 @@ mutual
 
   -- Raw types.
 
-  data Ty : Set where
-    ⋆  : Ty
-    el : (t : Term inf) → Ty
-    π  : (t₁ t₂ : Ty) → Ty
+  data Raw-ty : Set where
+    ⋆  : Raw-ty
+    el : (t : Raw) → Raw-ty
+    π  : (t₁ t₂ : Raw-ty) → Raw-ty
 
   -- Raw terms.
+  --
+  -- One could distinguish between "checkable" and "inferrable" terms,
+  -- but without a corresponding split for the well-typed terms this
+  -- seems awkward.
 
-  data Term : Kind → Set where
-    var : (x : ℕ) → Term inf
-    ƛ   : (t : Term chk) → Term chk
-    _·_ : (t₁ : Term inf) (t₂ : Term chk) → Term inf
-
-    -- Inferrable terms can be checked.
-    inf : (t : Term inf) → Term chk
+  data Raw : Set where
+    var : (x : ℕ) → Raw
+    ƛ   : (t : Raw) → Raw
+    _·_ : (t₁ t₂ : Raw) → Raw
 
     -- Type annotation.
-    _∶_ : (t : Term chk) (σ : Ty) → Term inf
-
--- Turns arbitrary raw terms into checkable ones.
-
-checkable : ∃ Term → Term chk
-checkable (inf , t) = inf t
-checkable (chk , t) = t
-
--- Turns arbitrary raw terms into inferrable ones, given a potential
--- type annotation.
-
-inferrable : ∃ Term → Ty → Term inf
-inferrable (inf , t) _ = t
-inferrable (chk , t) σ = t ∶ σ
+    _∶_ : (t : Raw) (σ : Raw-ty) → Raw
 
 -- The context position corresponding to a variable.
 
@@ -64,18 +45,48 @@ position : ∀ {Γ σ} → Γ ∋ σ → ℕ
 position zero    = zero
 position (suc x) = suc (position x)
 
+-- Well-typed terms can be turned into raw ones.
+
+⌊_⌋ : ∀ {Γ σ} → Γ ⊢ σ → Raw
+⌊ var x   ⌋ = var (position x)
+⌊ ƛ t     ⌋ = ƛ ⌊ t ⌋
+⌊ t₁ · t₂ ⌋ = ⌊ t₁ ⌋ · ⌊ t₂ ⌋
+
+-- The same applies to syntactic types.
+
+⌊_⌋ty : ∀ {Γ σ} → Γ ⊢ σ type → Raw-ty
+⌊ ⋆       ⌋ty = ⋆
+⌊ el t    ⌋ty = el ⌊ t ⌋
+⌊ π σ′ τ′ ⌋ty = π ⌊ σ′ ⌋ty ⌊ τ′ ⌋ty
+
 mutual
 
-  -- Well-typed terms can be turned into raw ones.
-  --
-  -- (As long as they do not involve applications of checkable terms…)
+  -- The following functions remove type-annotations.
 
-  ⌊_⌋ty : ∀ {Γ σ} → Γ ⊢ σ type → Ty
-  ⌊ ⋆       ⌋ty = ⋆
-  ⌊ el t    ⌋ty = el (inferrable ⌊ t ⌋ ⋆)
-  ⌊ π σ′ τ′ ⌋ty = π ⌊ σ′ ⌋ty ⌊ τ′ ⌋ty
+  ⌊_⌋raw-ty : Raw-ty → Raw-ty
+  ⌊ ⋆       ⌋raw-ty = ⋆
+  ⌊ el t    ⌋raw-ty = el ⌊ t ⌋raw
+  ⌊ π t₁ t₂ ⌋raw-ty = π ⌊ t₁ ⌋raw-ty ⌊ t₂ ⌋raw-ty
 
-  ⌊_⌋ : ∀ {Γ σ} → Γ ⊢ σ → ∃ Term
-  ⌊ var x   ⌋ = inf , var (position x)
-  ⌊ ƛ t     ⌋ = , ƛ (checkable ⌊ t ⌋)
-  ⌊ t₁ · t₂ ⌋ = , inferrable ⌊ t₁ ⌋ {!!} · checkable ⌊ t₂ ⌋
+  ⌊_⌋raw : Raw → Raw
+  ⌊ var x   ⌋raw = var x
+  ⌊ ƛ t     ⌋raw = ƛ ⌊ t ⌋raw
+  ⌊ t₁ · t₂ ⌋raw = ⌊ t₁ ⌋raw · ⌊ t₂ ⌋raw
+  ⌊ t ∶ σ   ⌋raw = ⌊ t ⌋raw
+
+-- Some congruence lemmas.
+
+position-cong : ∀ {Γ₁ σ₁} {x₁ : Γ₁ ∋ σ₁}
+                  {Γ₂ σ₂} {x₂ : Γ₂ ∋ σ₂} →
+                x₁ ≅-∋ x₂ → position x₁ ≡ position x₂
+position-cong P.refl = P.refl
+
+⌊⌋-cong : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ σ₁}
+            {Γ₂ σ₂} {t₂ : Γ₂ ⊢ σ₂} →
+          t₁ ≅-⊢ t₂ → ⌊ t₁ ⌋ ≡ ⌊ t₂ ⌋
+⌊⌋-cong P.refl = P.refl
+
+⌊⌋ty-cong : ∀ {Γ₁ σ₁} {σ′₁ : Γ₁ ⊢ σ₁ type}
+              {Γ₂ σ₂} {σ′₂ : Γ₂ ⊢ σ₂ type} →
+            σ′₁ ≅-type σ′₂ → ⌊ σ′₁ ⌋ty ≡ ⌊ σ′₂ ⌋ty
+⌊⌋ty-cong P.refl = P.refl
