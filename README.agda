@@ -106,4 +106,8 @@ import README.DependentlyTyped.Type-checker
 
 import README.DependentlyTyped.Term-without-type
 
+-- Inductively defined beta-eta-equality.
+
+import README.DependentlyTyped.Beta-Eta
+
 -- TODO: Add an untyped example.
