@@ -93,6 +93,14 @@ import README.DependentlyTyped.NormalForm.Substitution
 
 import README.DependentlyTyped.NBE
 
+-- Various equality checkers (some complete, all sound).
+
+import README.DependentlyTyped.Equality-checker
+
+-- A type-checker (sound).
+
+import README.DependentlyTyped.Type-checker
+
 -- An observation: There is a term without a corresponding syntactic
 -- type (given some assumptions).
 
