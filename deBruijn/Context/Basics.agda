@@ -21,6 +21,8 @@ open import Data.Unit
 open import Function
 open import Level using (_⊔_; Lift)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
+open import Relation.Nullary
+import Relation.Nullary.Decidable as Dec
 
 open P.≡-Reasoning
 
@@ -510,10 +512,27 @@ t̂ail-▻̂-ĥead ρ̂ = P.refl
 /̂Val-∘̂ ρ̂₁ ρ̂₂ v = P.refl
 
 ------------------------------------------------------------------------
--- Another property
+-- More properties
 
 -- _▻_ is injective.
 
 ▻-injective : ∀ {Γ₁ σ₁ Γ₂ σ₂} →
               Γ₁ ▻ σ₁ ≅-Ctxt Γ₂ ▻ σ₂ → Γ₁ ≅-Ctxt Γ₂ × σ₁ ≅-Type σ₂
 ▻-injective P.refl = P.refl , P.refl
+
+-- Equality of variables is decidable (if they refer to the same
+-- context).
+
+infix 4 _≟-∋_
+
+_≟-∋_ : ∀ {Γ σ₁} (x₁ : Γ ∋ σ₁) {σ₂} (x₂ : Γ ∋ σ₂) →
+        Dec (x₁ ≅-∋ x₂)
+zero   ≟-∋ zero   = yes P.refl
+zero   ≟-∋ suc _  = no λ ()
+suc _  ≟-∋ zero   = no λ ()
+suc x₁ ≟-∋ suc x₂ = Dec.map′ (suc-cong P.refl) helper (x₁ ≟-∋ x₂)
+  where
+  helper : ∀ {Γ₁ σ₁ τ₁} {x₁ : Γ₁ ∋ τ₁}
+             {Γ₂ σ₂ τ₂} {x₂ : Γ₂ ∋ τ₂} →
+           suc[ σ₁ ] x₁ ≅-∋ suc[ σ₂ ] x₂ → x₁ ≅-∋ x₂
+  helper P.refl = P.refl
