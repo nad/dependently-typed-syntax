@@ -6,9 +6,6 @@
 import Level
 open import Universe
 
--- The code makes use of the assumption that propositional equality of
--- functions is extensional.
-
 module README.DependentlyTyped.Term-without-type
   (Uni₀ : Universe Level.zero Level.zero)
   where
