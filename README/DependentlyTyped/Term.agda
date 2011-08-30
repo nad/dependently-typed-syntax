@@ -150,7 +150,9 @@ Tm = record { _⊢_ = _⊢_; ⟦_⟧ = ⟦_⟧ }
 open Term-like Tm public hiding (_⊢_; ⟦_⟧)
 
 ------------------------------------------------------------------------
--- Syntactic types
+-- Syntactic contexts and types
+
+-- Syntactic types.
 
 infix 4 _⊢_type
 
@@ -160,6 +162,15 @@ data _⊢_type (Γ : Ctxt) : Type Γ → Set where
   π  : ∀ {sp₁ sp₂ σ τ}
        (σ′ : Γ ⊢ sp₁ , σ type) (τ′ : Γ ▻ (, σ) ⊢ sp₂ , τ type) →
        Γ ⊢ , k U-π ˢ σ ˢ c τ type
+
+-- Syntactic contexts.
+
+infixl 5 _▻_
+infix  4 _ctxt
+
+data _ctxt : Ctxt → Set where
+  ε   : ε ctxt
+  _▻_ : ∀ {Γ σ} (Γ′ : Γ ctxt) (σ′ : Γ ⊢ σ type) → Γ ▻ σ ctxt
 
 -- Semantics of types.
 
