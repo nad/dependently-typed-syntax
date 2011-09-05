@@ -50,6 +50,9 @@ data Spine : Set where
 -- and then I proved π-fst-snd (below) using the assumption of
 -- extensionality of functions, and I used a cast in the definition of
 -- README.DependentlyTyped.NBE.Value.řeflect.
+--
+-- TODO: Find out if the use of spines is compatible with large
+-- elimination.
 
 mutual
 
