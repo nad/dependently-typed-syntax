@@ -106,6 +106,13 @@ import README.DependentlyTyped.Type-checker
 
 import README.DependentlyTyped.Term-without-type
 
+-- Another observation: If the "Outrageous but Meaningful
+-- Coincidences" approach is used to formalise a language, then you
+-- can end up with an extensional type theory (with equality
+-- reflection).
+
+import README.DependentlyTyped.Extensional-type-theory
+
 -- Inductively defined beta-eta-equality.
 
 import README.DependentlyTyped.Beta-Eta
