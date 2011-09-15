@@ -26,7 +26,7 @@ open P.≡-Reasoning
 infix 4 _⊢_⟨ne⟩
 
 record _⊢_⟨ne⟩ (Γ : Ctxt) (σ : Type Γ) : Set where
-  constructor [_]
+  constructor [_]el
   field t : Γ ⊢ σ ⟨ ne ⟩
 
 mutual
@@ -80,9 +80,9 @@ mutual
   -- Reification.
 
   řeify : ∀ {Γ} sp {σ} → V̌alue Γ (sp , σ) → Γ ⊢ sp , σ ⟨ no ⟩
-  řeify ⋆           t     = ne ⋆  t
-  řeify el          [ t ] = ne el t
-  řeify (π sp₁ sp₂) f     = řeify-π sp₁ sp₂ _ (proj₁ f)
+  řeify ⋆           t       = ne ⋆  t
+  řeify el          [ t ]el = ne el t
+  řeify (π sp₁ sp₂) f       = řeify-π sp₁ sp₂ _ (proj₁ f)
 
   řeify-π : ∀ {Γ} sp₁ sp₂ σ →
             V̌alue-π Γ sp₁ sp₂ σ → Γ ⊢ π sp₁ sp₂ , σ ⟨ no ⟩
@@ -101,7 +101,7 @@ mutual
 
   řeflect : ∀ {Γ} sp {σ} → Γ ⊢ sp , σ ⟨ ne ⟩ → V̌alue Γ (sp , σ)
   řeflect ⋆           t = t
-  řeflect el          t = [ t ]
+  řeflect el          t = [ t ]el
   řeflect (π sp₁ sp₂) t =
     (λ Γ₊ v → řeflect sp₂ ((t /⊢n Renaming.wk₊ Γ₊) · řeify sp₁ v)) ,
     řeflect-π-well-behaved sp₁ sp₂ t
@@ -232,12 +232,12 @@ abstract
 
 ≅-⊢n-⇒-≅-Value-el : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ el , σ₁ ⟨ ne ⟩}
                       {Γ₂ σ₂} {t₂ : Γ₂ ⊢ el , σ₂ ⟨ ne ⟩} →
-                    t₁ ≅-⊢n t₂ → _⊢_⟨ne⟩.[_] t₁ ≅-V̌alue _⊢_⟨ne⟩.[_] t₂
+                    t₁ ≅-⊢n t₂ → [ t₁ ]el ≅-V̌alue [ t₂ ]el
 ≅-⊢n-⇒-≅-Value-el P.refl = P.refl
 
 ≅-Value-el-⇒-≅-⊢n : ∀ {Γ₁ σ₁} {t₁ : Γ₁ ⊢ el , σ₁ ⟨ ne ⟩}
                       {Γ₂ σ₂} {t₂ : Γ₂ ⊢ el , σ₂ ⟨ ne ⟩} →
-                    _⊢_⟨ne⟩.[_] t₁ ≅-V̌alue _⊢_⟨ne⟩.[_] t₂ → t₁ ≅-⊢n t₂
+                    [ t₁ ]el ≅-V̌alue [ t₂ ]el → t₁ ≅-⊢n t₂
 ≅-Value-el-⇒-≅-⊢n P.refl = P.refl
 
 abstract

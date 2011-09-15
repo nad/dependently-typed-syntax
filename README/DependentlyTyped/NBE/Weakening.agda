@@ -17,7 +17,8 @@ module README.DependentlyTyped.NBE.Weakening
 open import Data.Product renaming (curry to c)
 open import deBruijn.Substitution.Data
 open import Function
-import README.DependentlyTyped.NBE.Value as Value; open Value Uni₀
+import README.DependentlyTyped.NBE.Value as Value
+open Value Uni₀ renaming ([_] to [̌_])
 import README.DependentlyTyped.NormalForm as NF
 open NF Uni₀ renaming ([_] to [_]n)
 import README.DependentlyTyped.NormalForm.Substitution as NFS
@@ -31,9 +32,9 @@ mutual
   -- Weakening.
 
   w̌k[_] : ∀ {Γ} σ τ → V̌alue Γ τ → V̌alue (Γ ▻ σ) (τ /̂ ŵk)
-  w̌k[ _ ] (⋆     , τ) t     =   t /⊢n Renaming.wk
-  w̌k[ _ ] (el    , τ) [ t ] = [ t /⊢n Renaming.wk ]
-  w̌k[ σ ] (π _ _ , τ) f     =
+  w̌k[ _ ] (⋆     , τ) t       =   t /⊢n Renaming.wk
+  w̌k[ _ ] (el    , τ) [ t ]el = [ t /⊢n Renaming.wk ]el
+  w̌k[ σ ] (π _ _ , τ) f       =
     (λ Γ₊ → proj₁ f (σ ◅ Γ₊)) , w̌k-π-well-behaved τ f
 
   w̌k : ∀ {Γ σ} τ → V̌alue Γ τ → V̌alue (Γ ▻ σ) (τ /̂ ŵk)
@@ -89,9 +90,9 @@ w̌eaken = record
 
     corr : ∀ {Γ σ} τ (v : V̌alue Γ τ) →
            ⟦̌ v ⟧ /̂Val ŵk[ σ ] ≅-Value ⟦̌ w̌k[ σ ] τ v ⟧
-    corr (⋆         , τ) t     = t /⊢n-lemma Renaming.wk
-    corr (el        , τ) [ t ] = t /⊢n-lemma Renaming.wk
-    corr (π sp₁ sp₂ , τ) f     = w̌eaken-corresponds-π τ f
+    corr (⋆         , τ) t       = t /⊢n-lemma Renaming.wk
+    corr (el        , τ) [ t ]el = t /⊢n-lemma Renaming.wk
+    corr (π sp₁ sp₂ , τ) f       = w̌eaken-corresponds-π τ f
 
 -- Variables can be turned into values.
 
@@ -126,15 +127,15 @@ V̌al↦Tm = record
     w̌eaken-v̌ar : ∀ {Γ σ} τ (x : Γ ∋ τ) →
                  w̌k[ σ ] τ (v̌ar ⊙ x) ≅-V̌alue v̌ar ⊙ suc[ σ ] x
     w̌eaken-v̌ar (⋆ , τ) x = begin
-      [ var (x /∋ wk) ]  ≡⟨ ≅-⊢n-⇒-≅-Value-⋆ $ var-n-cong $ ≅-⊢-⇒-≅-∋ $ /∋-wk x ⟩
-      [ var (suc x)   ]  ∎
+      [̌ var (x /∋ wk) ]  ≡⟨ ≅-⊢n-⇒-≅-Value-⋆ $ var-n-cong $ ≅-⊢-⇒-≅-∋ $ /∋-wk x ⟩
+      [̌ var (suc x)   ]  ∎
     w̌eaken-v̌ar (el , τ) x =  begin
-      [ [ var (x /∋ wk) ] ]  ≡⟨ ≅-⊢n-⇒-≅-Value-el $ var-n-cong $ ≅-⊢-⇒-≅-∋ $ /∋-wk x ⟩
-      [ [ var (suc x)   ] ]  ∎
+      [̌ [ var (x /∋ wk) ]el ]  ≡⟨ ≅-⊢n-⇒-≅-Value-el $ var-n-cong $ ≅-⊢-⇒-≅-∋ $ /∋-wk x ⟩
+      [̌ [ var (suc x)   ]el ]  ∎
     w̌eaken-v̌ar {σ = σ} (π _ _ , τ) x = ,-cong ext λ Γ₊ v → begin
-      [ řeflect _ ((var x /⊢n wk₊ (σ ◅ Γ₊)) · řeify _ v) ]  ≡⟨ řeflect-cong $
+      [̌ řeflect _ ((var x /⊢n wk₊ (σ ◅ Γ₊)) · řeify _ v) ]  ≡⟨ řeflect-cong $
                                                                  ·n-cong (var-n-cong $ ≅-⊢-⇒-≅-∋ $ /∋-wk₊-◅ x Γ₊)
                                                                          (P.refl {x = [ řeify _ v ]n}) ⟩
-      [ řeflect _ ((var (suc x) /⊢n wk₊ Γ₊) · řeify _ v) ]  ∎
+      [̌ řeflect _ ((var (suc x) /⊢n wk₊ Γ₊) · řeify _ v) ]  ∎
 
 module V̌al-subst = _↦_ V̌al↦Tm
