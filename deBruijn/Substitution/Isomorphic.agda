@@ -3,8 +3,6 @@
 -- extensionality)
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Substitution.Isomorphic

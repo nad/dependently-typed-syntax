@@ -3,8 +3,6 @@
 -- position
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Context.Extension.Right

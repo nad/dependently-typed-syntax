@@ -7,8 +7,6 @@
 
 -- (This module reexports various other modules.)
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Substitution.Data.Application

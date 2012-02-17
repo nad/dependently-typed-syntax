@@ -2,8 +2,6 @@
 -- Contexts, variables, context morphisms, etc.
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 -- Based on Conor McBride's "Outrageous but Meaningful Coincidences:
 -- Dependent type-safe syntax and evaluation".
 

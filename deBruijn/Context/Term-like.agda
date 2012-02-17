@@ -2,8 +2,6 @@
 -- An abstraction: term-like things
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Context.Term-like

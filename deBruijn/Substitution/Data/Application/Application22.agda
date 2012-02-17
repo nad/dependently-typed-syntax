@@ -2,8 +2,6 @@
 -- Lemmas related to application of substitutions
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Substitution.Data.Application.Application22

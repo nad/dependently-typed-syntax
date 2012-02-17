@@ -2,8 +2,6 @@
 -- Parallel substitutions (defined using an inductive family)
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Substitution.Data

@@ -6,8 +6,6 @@
 -- variables to terms various substitutions are defined and various
 -- lemmas proved.
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Substitution.Data.Simple

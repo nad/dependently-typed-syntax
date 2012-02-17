@@ -2,8 +2,6 @@
 -- A well-typed representation of a dependently typed language
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 -- The code is parametrised by an arbitrary (small, unindexed)
 -- universe.
 

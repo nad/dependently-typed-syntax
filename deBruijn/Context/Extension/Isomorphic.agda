@@ -2,8 +2,6 @@
 -- The two definitions of context extensions are isomorphic
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Context.Extension.Isomorphic

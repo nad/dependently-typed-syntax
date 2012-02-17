@@ -2,8 +2,6 @@
 -- Contexts, variables, context morphisms, context extensions, etc.
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 -- The contexts, variables, etc. are parametrised by a universe.
 
 open import Universe

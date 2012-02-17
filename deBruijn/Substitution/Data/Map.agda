@@ -2,8 +2,6 @@
 -- A map function for the substitutions
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Substitution.Data.Map

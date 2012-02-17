@@ -2,8 +2,6 @@
 -- Parallel substitutions (defined as functions)
 ------------------------------------------------------------------------
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Substitution.Function.Basics

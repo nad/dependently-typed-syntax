@@ -7,8 +7,6 @@
 -- to another kind of term. TODO: This results in some extra
 -- complication—is it worth it?
 
-{-# OPTIONS --universe-polymorphism #-}
-
 open import Universe
 
 module deBruijn.Substitution.Data.Application.Application21
