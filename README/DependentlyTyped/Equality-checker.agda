@@ -90,16 +90,20 @@ mutual
   _≟-⊢no_[_] : ∀ {Γ₁ σ₁} (t₁ : Γ₁ ⊢ σ₁ ⟨ no ⟩)
                  {Γ₂ σ₂} (t₂ : Γ₂ ⊢ σ₂ ⟨ no ⟩) →
               σ₁ ≅-Type σ₂ → Dec (t₁ ≅-⊢n t₂)
-  ne σ′₁ t₁ ≟-⊢no ne σ′₂ t₂ [ P.refl ] with t₁ ≟-⊢ne t₂
-  ne ⋆   t  ≟-⊢no ne ⋆   .t [ P.refl ] | yes P.refl = yes P.refl
-  ne el  t  ≟-⊢no ne el  .t [ P.refl ] | yes P.refl = yes P.refl
-  ne σ′₁ t₁ ≟-⊢no ne σ′₂ t₂ [ P.refl ] | no  neq    = no (neq ∘ helper)
+  ne σ′₁ t₁ ≟-⊢no ne σ′₂ t₂ [ P.refl ] = ne≟ne σ′₁ σ′₂ (t₁ ≟-⊢ne t₂)
     where
-    helper :
-      ∀ {Γ₁ σ₁ σ′₁} {t₁ : Γ₁ ⊢ σ₁ ⟨ ne ⟩}
-        {Γ₂ σ₂ σ′₂} {t₂ : Γ₂ ⊢ σ₂ ⟨ ne ⟩} →
-      ne σ′₁ t₁ ≅-⊢n ne σ′₂ t₂ → t₁ ≅-⊢n t₂
-    helper P.refl = P.refl
+    ne≟ne : ∀ {Γ σ} {t₁ t₂ : Γ ⊢ σ ⟨ ne ⟩}
+            (σ′₁ : Γ ⊢ σ atomic-type) (σ′₂ : Γ ⊢ σ atomic-type) →
+            Dec (t₁ ≅-⊢n t₂) → Dec (ne σ′₁ t₁ ≅-⊢n ne σ′₂ t₂)
+    ne≟ne ⋆  ⋆  (yes P.refl) = yes P.refl
+    ne≟ne el el (yes P.refl) = yes P.refl
+    ne≟ne _  _  (no neq)     = no (neq ∘ helper)
+      where
+      helper :
+        ∀ {Γ₁ σ₁ σ′₁} {t₁ : Γ₁ ⊢ σ₁ ⟨ ne ⟩}
+          {Γ₂ σ₂ σ′₂} {t₂ : Γ₂ ⊢ σ₂ ⟨ ne ⟩} →
+        ne σ′₁ t₁ ≅-⊢n ne σ′₂ t₂ → t₁ ≅-⊢n t₂
+      helper P.refl = P.refl
 
   ƛ t₁ ≟-⊢no ƛ t₂ [ eq ] =
     Dec.map′ ƛn-cong helper
