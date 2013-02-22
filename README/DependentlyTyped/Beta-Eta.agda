@@ -10,7 +10,7 @@ module README.DependentlyTyped.Beta-Eta
   where
 
 open import Data.Product renaming (curry to c)
-open import Function
+open import Function hiding (_∋_)
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 import README.DependentlyTyped.Term.Substitution as S; open S Uni₀
 import Relation.Binary.PropositionalEquality as P

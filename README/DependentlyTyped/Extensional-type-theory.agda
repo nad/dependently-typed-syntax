@@ -10,7 +10,7 @@ open import Data.Empty
 open import Data.Product renaming (curry to c)
 open import Data.Unit
 import deBruijn.Context
-open import Function renaming (const to k)
+open import Function hiding (_∋_) renaming (const to k)
 import Level
 import Relation.Binary.PropositionalEquality as P
 open import Universe

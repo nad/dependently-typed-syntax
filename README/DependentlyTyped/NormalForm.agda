@@ -9,7 +9,7 @@ module README.DependentlyTyped.NormalForm
   (Uni₀ : Universe zero zero) where
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
-open import Function renaming (const to k; _∘_ to _⊚_)
+open import Function hiding (_∋_) renaming (const to k; _∘_ to _⊚_)
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 import Relation.Binary.PropositionalEquality as P
 

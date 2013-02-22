@@ -16,7 +16,7 @@ module README.DependentlyTyped.NBE.Weakening
 
 open import Data.Product renaming (curry to c)
 open import deBruijn.Substitution.Data
-open import Function
+open import Function hiding (_∋_)
 import README.DependentlyTyped.NBE.Value as Value
 open Value Uni₀ renaming ([_] to [̌_])
 import README.DependentlyTyped.NormalForm as NF

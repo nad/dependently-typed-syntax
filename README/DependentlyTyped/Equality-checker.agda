@@ -17,7 +17,7 @@ module README.DependentlyTyped.Equality-checker
 open import Category.Monad
 open import Data.Maybe as Maybe
 open import Data.Product
-open import Function renaming (const to k)
+open import Function hiding (_∋_) renaming (const to k)
 import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext
 import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀

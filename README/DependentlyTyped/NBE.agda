@@ -17,7 +17,7 @@ module README.DependentlyTyped.NBE
 open import Data.Empty
 open import Data.Product renaming (curry to c)
 open import deBruijn.Substitution.Data
-open import Function renaming (const to k)
+open import Function hiding (_∋_) renaming (const to k)
 import README.DependentlyTyped.NormalForm as NF
 open NF Uni₀ renaming ([_] to [_]n)
 import README.DependentlyTyped.Term as Term; open Term Uni₀

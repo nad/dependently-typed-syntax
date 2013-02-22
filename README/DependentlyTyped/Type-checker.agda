@@ -18,7 +18,7 @@ open import Category.Monad
 open import Data.Maybe as Maybe
 open import Data.Nat using (ℕ; zero; suc; pred)
 open import Data.Product as Prod
-open import Function as F hiding (type-signature) renaming (_∘_ to _⊚_)
+open import Function as F hiding (_∋_) renaming (_∘_ to _⊚_)
 import README.DependentlyTyped.Equality-checker as EC; open EC Uni₀ ext
 import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext
 import README.DependentlyTyped.NormalForm as NF

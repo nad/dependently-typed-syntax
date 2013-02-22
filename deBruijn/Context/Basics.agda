@@ -16,7 +16,7 @@ open Indexed-universe Uni
 
 open import Data.Product as Prod
 open import Data.Unit
-open import Function
+open import Function hiding (_∋_)
 open import Level using (_⊔_; Lift)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Relation.Nullary
