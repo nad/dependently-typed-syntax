@@ -22,14 +22,14 @@ abstract
 
   -- There are no closed neutral terms.
 
-  no-closed-neutral : ∀ {σ} → ¬ ε ⊢ σ ⟨ ne ⟩
+  no-closed-neutral : ∀ {σ} → ¬ (ε ⊢ σ ⟨ ne ⟩)
   no-closed-neutral (var ())
   no-closed-neutral (t₁ · t₂) = no-closed-neutral t₁
 
   -- There are no closed normal forms of "atomic" type.
 
   no-closed-atomic-normal :
-    ∀ {σ} → ε ⊢ σ atomic-type → ¬ ε ⊢ σ ⟨ no ⟩
+    ∀ {σ} → ε ⊢ σ atomic-type → ¬ (ε ⊢ σ ⟨ no ⟩)
   no-closed-atomic-normal ⋆  (ne ⋆  t) = no-closed-neutral t
   no-closed-atomic-normal el (ne el t) = no-closed-neutral t
 
@@ -38,7 +38,7 @@ abstract
 
   no-closed-atomic :
     P.Extensionality Level.zero Level.zero →
-    ∀ {σ} → ε ⊢ σ atomic-type → ¬ ε ⊢ σ
+    ∀ {σ} → ε ⊢ σ atomic-type → ¬ (ε ⊢ σ)
   no-closed-atomic ext atomic t =
     no-closed-atomic-normal atomic (normalise ext t)
 
@@ -54,11 +54,11 @@ abstract
 
   term-without-type :
     P.Extensionality Level.zero Level.zero → U₀ →
-    ∃₂ λ Γ σ → ∃ λ (t : Γ ⊢ σ) → ¬ Γ ⊢ σ type
+    ∃₂ λ Γ σ → ∃ λ (t : Γ ⊢ σ) → ¬ (Γ ⊢ σ type)
   term-without-type ext u = (ε , (, σ) , ƛ (var zero) , proof)
     where
     σ : IType ε (π el el)
     σ = k (U-π (U-el u) (k (U-el u)))
 
-    proof : ∀ {σ} → ¬ ε ⊢ π el el , σ type
+    proof : ∀ {σ} → ¬ (ε ⊢ π el el , σ type)
     proof (π (el t) (el t′)) = no-closed-atomic ext ⋆ t

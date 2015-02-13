@@ -31,7 +31,7 @@ mutual
   -- represents neutral terms.
 
   infixl 9 _·_
-  infix  4 _⊢_⟨_⟩
+  infix  3 _⊢_⟨_⟩
 
   data _⊢_⟨_⟩ (Γ : Ctxt) : Type Γ → Kind → Set where
     ne  : ∀ {σ} (σ′ : Γ ⊢ σ atomic-type) (t : Γ ⊢ σ ⟨ ne ⟩) →

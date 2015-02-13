@@ -125,7 +125,7 @@ snd σ = , isnd σ
 mutual
 
   infixl 9 _·_
-  infix  4 _⊢_
+  infix  3 _⊢_
 
   -- Terms.
 
@@ -155,7 +155,7 @@ open Term-like Tm public hiding (_⊢_; ⟦_⟧)
 
 -- Syntactic types.
 
-infix 4 _⊢_type
+infix 3 _⊢_type
 
 data _⊢_type (Γ : Ctxt) : Type Γ → Set where
   ⋆  : Γ ⊢ , k U-⋆ type
@@ -167,7 +167,7 @@ data _⊢_type (Γ : Ctxt) : Type Γ → Set where
 -- Syntactic contexts.
 
 infixl 5 _▻_
-infix  4 _ctxt
+infix  3 _ctxt
 
 data _ctxt : Ctxt → Set where
   ε   : ε ctxt

@@ -23,7 +23,7 @@ open P.≡-Reasoning
 -- A wrapper which is used to make V̌alue "constructor-headed", which
 -- in turn makes Agda infer more types for us.
 
-infix 4 _⊢_⟨ne⟩
+infix 3 _⊢_⟨ne⟩
 
 record _⊢_⟨ne⟩ (Γ : Ctxt) (σ : Type Γ) : Set where
   constructor [_]el

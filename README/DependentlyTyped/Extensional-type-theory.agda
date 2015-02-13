@@ -57,7 +57,7 @@ open deBruijn.Context Uni public
 mutual
 
   infixl 9 _·_
-  infix  4 _⊢_
+  infix  3 _⊢_
 
   -- Terms.
 

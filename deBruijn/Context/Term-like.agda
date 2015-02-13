@@ -23,7 +23,7 @@ open P.≡-Reasoning
 -- Term-like things
 
 record Term-like ℓ : Set (i ⊔ u ⊔ e ⊔ Level.suc ℓ) where
-  infix 4 _⊢_
+  infix 3 _⊢_
   field
     _⊢_ : (Γ : Ctxt) → Type Γ → Set ℓ
     ⟦_⟧ : ∀ {Γ σ} → Γ ⊢ σ → Value Γ σ
@@ -191,7 +191,7 @@ module ≅-⟶-Reasoning
   {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂}
   where
 
-  infix  2 _∎-⟶
+  infix  3 _∎-⟶
   infixr 2 _≅-⟶⟨_⟩_
 
   _≅-⟶⟨_⟩_ : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁}
