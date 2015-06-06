@@ -57,8 +57,8 @@ isomorphic {T = T} ext = record
     to-cong : ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {ρ₁ : F.Sub T ρ̂₁}
                 {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {ρ₂ : F.Sub T ρ̂₂} →
               F._≅-⇨_ ρ₁ ρ₂ → D._≅-⇨_ (to Γ₁ ρ₁) (to Γ₂ ρ₂)
-    to-cong {Γ₁ = ε}                                 [ P.refl ] = P.refl
-    to-cong {Γ₁ = Γ ▻ σ} {ρ₁ = ρ₁} {ρ₂ = ._ , corr₂} [ P.refl ] =
+    to-cong {Γ₁ = ε}     {ρ₁ = _ , _} {ρ₂ = ._ , _}     [ P.refl ] = P.refl
+    to-cong {Γ₁ = Γ ▻ σ} {ρ₁ = ρ₁}    {ρ₂ = ._ , corr₂} [ P.refl ] =
       let ρ₂ = [_⟶_].function ρ₁ , corr₂ in begin
        [ to (Γ ▻ σ) ρ₁                ]  ≡⟨ to-▻ ρ₁ ⟩
        [ to Γ (F.tail ρ₁) ▻ F.head ρ₁ ]  ≡⟨ D.▻⇨-cong P.refl (to-cong [ P.refl ]) P.refl ⟩
