@@ -1,0 +1,3 @@
+name: dependently-typed-syntax
+depend: agda-stdlib
+include: .
