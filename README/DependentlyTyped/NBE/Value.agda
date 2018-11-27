@@ -59,7 +59,7 @@ mutual
 
   -- The semantics of a value.
 
-  ⟦̌_⟧ : ∀ {Γ sp σ} → V̌alue Γ (sp , σ) → Value Γ (sp , σ)
+  ⟦̌_⟧ : ∀ {Γ sp σ} → V̌alue′ Γ sp σ → Value Γ (sp , σ)
   ⟦̌ v ⟧ = ⟦ řeify _ v ⟧n
 
   ⟦̌_∣_⟧-π : ∀ {Γ sp₁ sp₂} σ →
@@ -80,7 +80,7 @@ mutual
 
   -- Reification.
 
-  řeify : ∀ {Γ} sp {σ} → V̌alue Γ (sp , σ) → Γ ⊢ sp , σ ⟨ no ⟩
+  řeify : ∀ {Γ} sp {σ} → V̌alue′ Γ sp σ → Γ ⊢ sp , σ ⟨ no ⟩
   řeify ⋆           t       = ne ⋆  t
   řeify el          [ t ]el = ne el t
   řeify (π sp₁ sp₂) f       = řeify-π sp₁ sp₂ _ (proj₁ f)

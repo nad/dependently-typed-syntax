@@ -51,10 +51,21 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
 
     _/⊢n_ : ∀ {Γ Δ σ k} {ρ̂ : Γ ⇨̂ Δ} →
             Γ ⊢ σ ⟨ k ⟩ → (ρ : Sub T ρ̂) → Δ ⊢ σ / ρ ⟨ k ⟩
-    ne σ′ t           /⊢n ρ = ne (σ′ /⊢a ρ) (t /⊢n ρ)
-    var x             /⊢n ρ = trans ⊙ (x /∋ ρ)
-    ƛ t               /⊢n ρ = ƛ (t /⊢n ρ ↑)
-    _·_ {σ = σ} t₁ t₂ /⊢n ρ =
+    ne σ′ t /⊢n ρ = ne (σ′ /⊢a ρ) (t /⊢n ρ)
+    var x   /⊢n ρ = trans ⊙ (x /∋ ρ)
+    ƛ t     /⊢n ρ = ƛ (t /⊢n ρ ↑)
+    t₁ · t₂ /⊢n ρ = [ t₁ · t₂ ]/⊢n ρ
+
+    -- The body of the last case above. (At the time of writing the
+    -- termination checker complains if [ t₁ · t₂ ]/⊢n ρ is replaced
+    -- by t₁ · t₂ /⊢n ρ in the type signature of ·-/⊢n below.)
+
+    [_·_]/⊢n :
+      ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
+      (t₁ : Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩) (t₂ : Γ ⊢ fst σ ⟨ no ⟩)
+      (ρ : Sub T ρ̂) →
+      Δ ⊢ snd σ /̂ ŝub ⟦ t₂ ⟧n /̂ ρ̂ ⟨ ne ⟩
+    [_·_]/⊢n {σ = σ} t₁ t₂ ρ =
       P.subst (λ v → _ ⊢ snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v ⟨ ne ⟩)
               (≅-Value-⇒-≡ $ P.sym (t₂ /⊢n-lemma ρ))
               ((t₁ /⊢n ρ) · (t₂ /⊢n ρ))
@@ -67,7 +78,7 @@ module Apply-n {T : Term-like Level.zero} (T↦Ne : T ↦ Tm-n ne) where
         ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
         (t₁ : Γ ⊢ π sp₁ sp₂ , σ ⟨ ne ⟩) (t₂ : Γ ⊢ fst σ ⟨ no ⟩)
         (ρ : Sub T ρ̂) →
-        t₁ · t₂ /⊢n ρ ≅-⊢n (t₁ /⊢n ρ) · (t₂ /⊢n ρ)
+        [ t₁ · t₂ ]/⊢n ρ ≅-⊢n (t₁ /⊢n ρ) · (t₂ /⊢n ρ)
       ·-/⊢n {σ = σ} t₁ t₂ ρ =
         drop-subst-⊢n (λ v → snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
                       (≅-Value-⇒-≡ $ P.sym $ t₂ /⊢n-lemma ρ)

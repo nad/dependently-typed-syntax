@@ -33,9 +33,19 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
     -- the codomain to be any suitable applicative structure?
 
     _/⊢_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Γ ⊢ σ → Sub T ρ̂ → Δ ⊢ σ /̂ ρ̂
-    var x             /⊢ ρ = trans ⊙ (x /∋ ρ)
-    ƛ t               /⊢ ρ = ƛ (t /⊢ ρ ↑)
-    _·_ {σ = σ} t₁ t₂ /⊢ ρ =
+    var x   /⊢ ρ = trans ⊙ (x /∋ ρ)
+    ƛ t     /⊢ ρ = ƛ (t /⊢ ρ ↑)
+    t₁ · t₂ /⊢ ρ = [ t₁ · t₂ ]/⊢ ρ
+
+    -- The body of the last case above. (At the time of writing the
+    -- termination checker complains if [ t₁ · t₂ ]/⊢ ρ is replaced by
+    -- t₁ · t₂ /⊢ ρ in the type signature of ·-/⊢ below.)
+
+    [_·_]/⊢ :
+      ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
+      (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) (ρ : Sub T ρ̂) →
+      Δ ⊢ snd σ /̂ ŝub ⟦ t₂ ⟧ /̂ ρ̂
+    [_·_]/⊢ {σ = σ} t₁ t₂ ρ =
       P.subst (λ v → _ ⊢ snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
               (≅-Value-⇒-≡ $ P.sym $ t₂ /⊢-lemma ρ)
               ((t₁ /⊢ ρ) · (t₂ /⊢ ρ))
@@ -46,7 +56,7 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
 
       ·-/⊢ : ∀ {Γ Δ sp₁ sp₂ σ} {ρ̂ : Γ ⇨̂ Δ}
              (t₁ : Γ ⊢ π sp₁ sp₂ , σ) (t₂ : Γ ⊢ fst σ) (ρ : Sub T ρ̂) →
-             t₁ · t₂ /⊢ ρ ≅-⊢ (t₁ /⊢ ρ) · (t₂ /⊢ ρ)
+             [ t₁ · t₂ ]/⊢ ρ ≅-⊢ (t₁ /⊢ ρ) · (t₂ /⊢ ρ)
       ·-/⊢ {σ = σ} t₁ t₂ ρ =
         drop-subst-⊢ (λ v → snd σ /̂ ⟦ ρ ⟧⇨ ↑̂ /̂ ŝub v)
                      (≅-Value-⇒-≡ $ P.sym $ t₂ /⊢-lemma ρ)
