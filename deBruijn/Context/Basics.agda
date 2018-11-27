@@ -60,7 +60,7 @@ mutual
   -- Interpretation of contexts: environments.
 
   Env : Ctxt → Set e
-  Env ε       = Lift ⊤
+  Env ε       = Lift _ ⊤
   Env (Γ ▻ σ) = Σ (Env Γ) λ γ → El (indexed-type σ γ)
 
 -- Semantic values: maps from environments to universe values.

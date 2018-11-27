@@ -15,7 +15,8 @@ module README.DependentlyTyped.Type-checker
   where
 
 open import Category.Monad
-open import Data.Maybe as Maybe
+open import Data.Maybe
+import Data.Maybe.Categorical as Maybe
 open import Data.Nat using (ℕ; zero; suc; pred)
 open import Data.Product as Prod
 open import Function as F hiding (_∋_) renaming (_∘_ to _⊚_)

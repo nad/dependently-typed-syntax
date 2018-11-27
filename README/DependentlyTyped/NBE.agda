@@ -153,7 +153,7 @@ normalise-lemma t = eval-lemma t V̌al-subst.id
     {f₁ : V̌alue Γ₁ (π sp₁₁ sp₂₁ , σ₁)} {v₁ : V̌alue Γ₁ (fst σ₁)}
     {Γ₂ sp₁₂ sp₂₂ σ₂}
     {f₂ : V̌alue Γ₂ (π sp₁₂ sp₂₂ , σ₂)} {v₂ : V̌alue Γ₂ (fst σ₂)} →
-  σ₁ ≅-IType σ₂ → _≅-V̌alue_ {σ₁ = , σ₁} f₁ {σ₂ = , σ₂} f₂ →
+  σ₁ ≅-IType σ₂ → _≅-V̌alue_ {σ₁ = -, σ₁} f₁ {σ₂ = -, σ₂} f₂ →
   v₁ ≅-V̌alue v₂ →
   [ σ₁ ] f₁ ·̌ v₁ ≅-V̌alue [ σ₂ ] f₂ ·̌ v₂
 ·̌-cong P.refl P.refl P.refl = P.refl

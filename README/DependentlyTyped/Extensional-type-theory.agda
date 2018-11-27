@@ -42,14 +42,14 @@ open deBruijn.Context Uni public
 -- Some abbreviations.
 
 ⟨empty⟩ : ∀ {Γ} → Type Γ
-⟨empty⟩ = , λ _ → empty
+⟨empty⟩ = -, λ _ → empty
 
 ⟨π⟩ : ∀ {Γ} (σ : Type Γ) → Type (Γ ▻ σ) → Type Γ
-⟨π⟩ σ τ = , k π ˢ indexed-type σ ˢ c (indexed-type τ)
+⟨π⟩ σ τ = -, k π ˢ indexed-type σ ˢ c (indexed-type τ)
 
 ⟨π̂⟩ : ∀ {Γ} (σ : Type Γ) →
       ((γ : Env Γ) → El (indexed-type σ γ) → U) → Type Γ
-⟨π̂⟩ σ τ = , k π ˢ indexed-type σ ˢ τ
+⟨π̂⟩ σ τ = -, k π ˢ indexed-type σ ˢ τ
 
 ------------------------------------------------------------------------
 -- Well-typed terms
@@ -64,7 +64,7 @@ mutual
   data _⊢_ (Γ : Ctxt) : Type Γ → Set where
     var : ∀ {σ} (x : Γ ∋ σ) → Γ ⊢ σ
     ƛ   : ∀ {σ τ} (t : Γ ▻ σ ⊢ τ) → Γ ⊢ ⟨π⟩ σ τ
-    _·_ : ∀ {σ τ} (t₁ : Γ ⊢ ⟨π̂⟩ σ τ) (t₂ : Γ ⊢ σ) → Γ ⊢ (, τ ˢ ⟦ t₂ ⟧)
+    _·_ : ∀ {σ τ} (t₁ : Γ ⊢ ⟨π̂⟩ σ τ) (t₂ : Γ ⊢ σ) → Γ ⊢ (-, τ ˢ ⟦ t₂ ⟧)
 
   -- Semantics of terms.
 

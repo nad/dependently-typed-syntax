@@ -93,7 +93,7 @@ IType-π : ∀ {Γ} (σ : Type Γ) (τ : Type (Γ ▻ σ)) →
 IType-π σ τ = k U-π ˢ indexed-type σ ˢ c (indexed-type τ)
 
 Type-π : ∀ {Γ} (σ : Type Γ) → Type (Γ ▻ σ) → Type Γ
-Type-π σ τ = , IType-π σ τ
+Type-π σ τ = -, IType-π σ τ
 
 ------------------------------------------------------------------------
 -- Projections
@@ -104,14 +104,14 @@ ifst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → IType Γ sp₁
 ifst σ γ = proj₁ (σ γ)
 
 fst : ∀ {Γ sp₁ sp₂} → IType Γ (π sp₁ sp₂) → Type Γ
-fst σ = , ifst σ
+fst σ = -, ifst σ
 
 isnd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) →
        IType (Γ ▻ fst σ) sp₂
 isnd σ (γ , v) = proj₂ (σ γ) v
 
 snd : ∀ {Γ sp₁ sp₂} (σ : IType Γ (π sp₁ sp₂)) → Type (Γ ▻ fst σ)
-snd σ = , isnd σ
+snd σ = -, isnd σ
 
 -- The split is correct.
 
@@ -158,11 +158,11 @@ open Term-like Tm public hiding (_⊢_; ⟦_⟧)
 infix 3 _⊢_type
 
 data _⊢_type (Γ : Ctxt) : Type Γ → Set where
-  ⋆  : Γ ⊢ , k U-⋆ type
-  el : (t : Γ ⊢ , k U-⋆) → Γ ⊢ , k U-el ˢ ⟦ t ⟧ type
+  ⋆  : Γ ⊢ -, k U-⋆ type
+  el : (t : Γ ⊢ -, k U-⋆) → Γ ⊢ -, k U-el ˢ ⟦ t ⟧ type
   π  : ∀ {sp₁ sp₂ σ τ}
-       (σ′ : Γ ⊢ sp₁ , σ type) (τ′ : Γ ▻ (, σ) ⊢ sp₂ , τ type) →
-       Γ ⊢ , k U-π ˢ σ ˢ c τ type
+       (σ′ : Γ ⊢ sp₁ , σ type) (τ′ : Γ ▻ (-, σ) ⊢ sp₂ , τ type) →
+       Γ ⊢ -, k U-π ˢ σ ˢ c τ type
 
 -- Syntactic contexts.
 
@@ -182,11 +182,11 @@ data _ctxt : Ctxt → Set where
 -- Π-type.
 
 fst′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
-       Γ ⊢ , σ type → Γ ⊢ fst σ type
+       Γ ⊢ -, σ type → Γ ⊢ fst σ type
 fst′ (π σ′ τ′) = σ′
 
 snd′ : ∀ {Γ sp₁ sp₂} {σ : IType Γ (π sp₁ sp₂)} →
-       Γ ⊢ , σ type → Γ ▻ fst σ ⊢ snd σ type
+       Γ ⊢ -, σ type → Γ ▻ fst σ ⊢ snd σ type
 snd′ (π σ′ τ′) = τ′
 
 ------------------------------------------------------------------------
@@ -202,9 +202,9 @@ identity = ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (var z
 -- compact way.
 
 identity′ : ∀ {Γ} →
-            Γ ⊢ , k U-π ˢ k U-⋆ ˢ
-                          c (k U-π ˢ (k U-el ˢ ⟦ var zero ⟧) ˢ
-                                     c (k U-el ˢ ⟦ var (suc zero) ⟧))
+            Γ ⊢ -, k U-π ˢ k U-⋆ ˢ
+                           c (k U-π ˢ (k U-el ˢ ⟦ var zero ⟧) ˢ
+                                      c (k U-el ˢ ⟦ var (suc zero) ⟧))
 identity′ = ƛ {σ = ⟦ ⋆ ⟧type} (ƛ {σ = ⟦ el (var zero) ⟧type} (var zero))
 
 -- The polymorphic identity function applied to some variables from
@@ -310,8 +310,8 @@ uncurry-cong P.refl = P.refl
          Γ₁ ≅-Ctxt Γ₂ → ⋆ {Γ = Γ₁} ≅-type ⋆ {Γ = Γ₂}
 ⋆-cong P.refl = P.refl
 
-el-cong : ∀ {Γ₁} {t₁ : Γ₁ ⊢ , k U-⋆}
-            {Γ₂} {t₂ : Γ₂ ⊢ , k U-⋆} →
+el-cong : ∀ {Γ₁} {t₁ : Γ₁ ⊢ -, k U-⋆}
+            {Γ₂} {t₂ : Γ₂ ⊢ -, k U-⋆} →
           t₁ ≅-⊢ t₂ → el t₁ ≅-type el t₂
 el-cong P.refl = P.refl
 

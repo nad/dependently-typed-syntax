@@ -15,7 +15,8 @@ module README.DependentlyTyped.Equality-checker
   where
 
 open import Category.Monad
-open import Data.Maybe as Maybe
+open import Data.Maybe
+import Data.Maybe.Categorical as Maybe
 open import Data.Product
 open import Function hiding (_∋_) renaming (const to k)
 import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext

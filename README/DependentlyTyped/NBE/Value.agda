@@ -17,6 +17,7 @@ import README.DependentlyTyped.NormalForm.Substitution as NFS
 open NFS Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
+import Relation.Binary.PropositionalEquality.WithK as P
 
 open P.≡-Reasoning
 
@@ -75,7 +76,7 @@ mutual
   -- A normal term corresponding to variable zero.
 
   žero : ∀ {Γ} sp σ → Γ ▻ (sp , σ) ⊢ sp , σ /̂I ŵk ⟨ no ⟩
-  žero sp σ = ňeutral-to-normal sp (var zero[ , σ ])
+  žero sp σ = ňeutral-to-normal sp (var zero[ -, σ ])
 
   -- Reification.
 
@@ -92,7 +93,7 @@ mutual
   čast : ∀ {Γ} sp₁ {sp₂} (σ : IType Γ (π sp₁ sp₂)) →
          let ρ̂ = ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n in
          Γ ⊢ Type-π (fst σ) (snd σ /̂ ρ̂) ⟨ no ⟩ →
-         Γ ⊢ , σ ⟨ no ⟩
+         Γ ⊢ -, σ ⟨ no ⟩
   čast {Γ} sp₁ σ =
     P.subst (λ σ → Γ ⊢ σ ⟨ no ⟩)
             (≅-Type-⇒-≡ $ π-fst-snd-ŵk-ŝub-žero sp₁ σ)
@@ -147,12 +148,12 @@ mutual
     π-fst-snd-ŵk-ŝub-žero :
       ∀ {Γ} sp₁ {sp₂} (σ : IType Γ (π sp₁ sp₂)) →
       Type-π (fst σ) (snd σ /̂ ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n) ≅-Type
-      (, σ)
+      (-, σ)
     π-fst-snd-ŵk-ŝub-žero sp₁ σ = begin
       [ Type-π (fst σ) (snd σ /̂ ŵk ↑̂ ∘̂ ŝub ⟦ žero sp₁ (ifst σ) ⟧n) ]  ≡⟨ Type-π-cong $ /̂-cong (P.refl {x = [ snd σ ]})
                                                                                               (ŵk-ŝub-žero sp₁ σ) ⟩
       [ Type-π (fst σ) (snd σ)                                     ]  ≡⟨ P.refl ⟩
-      [ , σ                                                        ]  ∎
+      [ -, σ                                                       ]  ∎
 
     -- In the semantics řeify is a left inverse of řeflect.
 
@@ -249,7 +250,7 @@ abstract
                      {σ₂ = (π sp₁ sp₂ , σ)} f₂
   ,-cong ext hyp = P.cong (Term-like.[_] {_} {V̌al}) $
     ,-cong′ (ext λ Γ₊ → ext λ v → Term-like.≅-⊢-⇒-≡ V̌al $ hyp Γ₊ v)
-            (ext λ _  → ext λ _ → P.proof-irrelevance _ _)
+            (ext λ _  → ext λ _ → P.≡-irrelevance _ _)
     where
     ,-cong′ : {A : Set} {B : A → Set}
               {x₁ x₂ : A} {y₁ : B x₁} {y₂ : B x₂} →

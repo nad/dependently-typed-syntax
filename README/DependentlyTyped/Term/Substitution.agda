@@ -79,7 +79,7 @@ module Apply {T : Term-like Level.zero} (T↦Tm : T ↦ Tm) where
 
   _/⊢t_ : ∀ {Γ Δ σ} {ρ̂ : Γ ⇨̂ Δ} → Γ ⊢ σ type → Sub T ρ̂ → Δ ⊢ σ /̂ ρ̂ type
   ⋆       /⊢t ρ = ⋆
-  el t    /⊢t ρ = P.subst (λ v → _ ⊢ , k U-el ˢ v type)
+  el t    /⊢t ρ = P.subst (λ v → _ ⊢ -, k U-el ˢ v type)
                           (≅-Value-⇒-≡ $ P.sym $ t /⊢-lemma ρ) $
                     el (t /⊢ ρ)
   π σ′ τ′ /⊢t ρ = π (σ′ /⊢t ρ) (τ′ /⊢t ρ ↑)
@@ -153,13 +153,13 @@ module Unfolding-lemmas
       [ ⋆ /⊢t ρ         ]  ≡⟨ P.refl ⟩
       [ ⋆               ]  ∎
 
-    el-/⊢t : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ , k U-⋆) (ρ : Sub T ρ̂) →
+    el-/⊢t : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ -, k U-⋆) (ρ : Sub T ρ̂) →
              el t /⊢t ρ ≅-type el (t /⊢ ρ)
     el-/⊢t t ρ =
-      drop-subst-⊢-type (λ v → , k U-el ˢ v)
+      drop-subst-⊢-type (λ v → -, k U-el ˢ v)
                         (≅-Value-⇒-≡ $ P.sym $ t /⊢-lemma ρ)
 
-    el-/⊢t⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ , k U-⋆) (ρs : Subs T ρ̂) →
+    el-/⊢t⋆ : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (t : Γ ⊢ -, k U-⋆) (ρs : Subs T ρ̂) →
               el t /⊢t⋆ ρs ≅-type el (t /⊢⋆ ρs)
     el-/⊢t⋆ t ε        = P.refl
     el-/⊢t⋆ t (ρs ▻ ρ) = begin

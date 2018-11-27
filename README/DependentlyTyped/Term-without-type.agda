@@ -55,7 +55,7 @@ abstract
   term-without-type :
     P.Extensionality Level.zero Level.zero → U₀ →
     ∃₂ λ Γ σ → ∃ λ (t : Γ ⊢ σ) → ¬ (Γ ⊢ σ type)
-  term-without-type ext u = (ε , (, σ) , ƛ (var zero) , proof)
+  term-without-type ext u = (ε , (-, σ) , ƛ (var zero) , proof)
     where
     σ : IType ε (π el el)
     σ = k (U-π (U-el u) (k (U-el u)))
