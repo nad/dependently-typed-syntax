@@ -7,6 +7,7 @@ open import Universe
 module deBruijn.Substitution.Function.Basics
   {i u e} {Uni : Indexed-universe i u e} where
 
+import Axiom.Extensionality.Propositional as E
 import deBruijn.Context; open deBruijn.Context Uni
 open import Function using (id; _∘_; _$_)
 open import Level using (_⊔_)
@@ -205,13 +206,13 @@ private
 
     -- Eta in empty contexts.
 
-    ηε : P.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
+    ηε : E.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
          ∀ {Δ} {ρ̂ : ε ⇨̂ Δ} (ρ : Sub T ρ̂) → ρ ≅-⇨ ε⇨[ Δ ]
     ηε ext ρ = extensional-equality₁ ext P.refl (λ ())
 
     -- Eta in non-empty contexts.
 
-    η▻ : P.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
+    η▻ : E.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
          ∀ {Γ Δ σ} {ρ̂ : Γ ▻ σ ⇨̂ Δ} (ρ : Sub T ρ̂) →
          ρ ≅-⇨ tail ρ ▻⇨[ σ ] head ρ
     η▻ ext {Γ} {σ = σ} {ρ̂} ρ = extensional-equality₂ ext lemma₁ lemma₂
@@ -238,7 +239,7 @@ private
     -- their projections are pairwise equal (assuming extensionality).
 
     extensionality :
-      P.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
+      E.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
       ∀ {Γ Δ₁} {ρ̂₁ : Γ ⇨̂ Δ₁} {ρ₁ : Sub T ρ̂₁}
           {Δ₂} {ρ̂₂ : Γ ⇨̂ Δ₂} {ρ₂ : Sub T ρ̂₂} →
       Δ₁ ≅-Ctxt Δ₂ → (∀ {σ} (x : Γ ∋ σ) → x /∋ ρ₁ ≅-⊢ x /∋ ρ₂) →

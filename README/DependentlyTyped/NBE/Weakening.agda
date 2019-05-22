@@ -2,8 +2,8 @@
 -- Weakening for the NBE values
 ------------------------------------------------------------------------
 
+import Axiom.Extensionality.Propositional as E
 import Level
-import Relation.Binary.PropositionalEquality as P
 open import Universe
 
 -- The code makes use of the assumption that propositional equality of
@@ -11,7 +11,7 @@ open import Universe
 
 module README.DependentlyTyped.NBE.Weakening
   (Uni₀ : Universe Level.zero Level.zero)
-  (ext : P.Extensionality Level.zero Level.zero)
+  (ext : E.Extensionality Level.zero Level.zero)
   where
 
 open import Data.Product renaming (curry to c)
@@ -24,6 +24,7 @@ open NF Uni₀ renaming ([_] to [_]n)
 import README.DependentlyTyped.NormalForm.Substitution as NFS
 open NFS Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
+import Relation.Binary.PropositionalEquality as P
 
 open P.≡-Reasoning
 

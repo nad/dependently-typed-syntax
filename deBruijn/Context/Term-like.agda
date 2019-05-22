@@ -7,6 +7,7 @@ open import Universe
 module deBruijn.Context.Term-like
   {i u e} (Uni : Indexed-universe i u e) where
 
+import Axiom.Extensionality.Propositional as E
 open import Data.Product
 import deBruijn.Context.Basics          as Basics
 import deBruijn.Context.Extension.Right as Right
@@ -247,7 +248,7 @@ abstract
     let open Term-like T₁ renaming (_⊢_ to _⊢₁_)
         open Term-like T₂ renaming (_≅-⊢_ to _≅-⊢₂_)
     in
-    P.Extensionality (i ⊔ u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
+    E.Extensionality (i ⊔ u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
     ∀ {Γ Δ₁} {ρ̂₁ : Γ ⇨̂ Δ₁} {f₁ : [ T₁ ⟶ T₂ ] ρ̂₁}
         {Δ₂} {ρ̂₂ : Γ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} →
     ρ̂₁ ≅-⇨̂ ρ̂₂ → (∀ {σ} (t : Γ ⊢₁ σ) → f₁ · t ≅-⊢₂ f₂ · t) →
@@ -257,18 +258,18 @@ abstract
     where
     open Term-like T₂ using () renaming (≅-⊢-⇒-≡ to ≅-⊢₂-⇒-≡)
 
-    ext₁ : P.Extensionality (i ⊔ u ⊔ e) (t₁ ⊔ t₂)
-    ext₁ = P.extensionality-for-lower-levels t₁ Level.zero ext
+    ext₁ : E.Extensionality (i ⊔ u ⊔ e) (t₁ ⊔ t₂)
+    ext₁ = E.lower-extensionality t₁ Level.zero ext
 
-    ext₂ : P.Extensionality t₁ t₂
-    ext₂ = P.extensionality-for-lower-levels (i ⊔ u ⊔ e) t₁ ext
+    ext₂ : E.Extensionality t₁ t₂
+    ext₂ = E.lower-extensionality (i ⊔ u ⊔ e) t₁ ext
 
   extensional-equality₂ :
     ∀ {t₁ t₂} {T₁ : Term-like t₁} {T₂ : Term-like t₂} →
     let open Term-like T₁ renaming (_≅-⊢_ to _≅-⊢₁_; _⊢_ to _⊢₁_)
         open Term-like T₂ renaming (_≅-⊢_ to _≅-⊢₂_)
     in
-    P.Extensionality (i ⊔ u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
+    E.Extensionality (i ⊔ u ⊔ e ⊔ t₁) (t₁ ⊔ t₂) →
     ∀ {Γ₁ Δ₁} {ρ̂₁ : Γ₁ ⇨̂ Δ₁} {f₁ : [ T₁ ⟶ T₂ ] ρ̂₁}
       {Γ₂ Δ₂} {ρ̂₂ : Γ₂ ⇨̂ Δ₂} {f₂ : [ T₁ ⟶ T₂ ] ρ̂₂} →
     ρ̂₁ ≅-⇨̂ ρ̂₂ →

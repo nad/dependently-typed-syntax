@@ -7,6 +7,7 @@ open import Universe
 module deBruijn.Substitution.Function.Map
   {i u e} {Uni : Indexed-universe i u e} where
 
+import Axiom.Extensionality.Propositional as E
 import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Function.Basics
 open import Function using (_$_)
@@ -34,7 +35,7 @@ private
     -- An unfolding lemma.
 
     map-▻ :
-      P.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t₂) →
+      E.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t₂) →
       ∀ {Γ Δ Ε} {ρ̂₁ : Γ ⇨̂ Δ} {ρ̂₂ : Δ ⇨̂ Ε} {σ}
       (f : [ T₁ ⟶ T₂ ] ρ̂₂) (ρ : Sub T₁ ρ̂₁) t →
       map f (ρ ▻⇨[ σ ] t) ≅-⇨ map f ρ ▻⇨[ σ ] f · t
@@ -60,7 +61,7 @@ private
     -- Variants which only require that the functions are
     -- extensionally equal.
 
-    map-cong-ext₁ : P.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t₂) →
+    map-cong-ext₁ : E.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t₂) →
                     ∀ {Γ₁ Δ Ε₁} {ρ̂₁₁ : Γ₁ ⇨̂ Δ} {ρ̂₂₁ : Δ ⇨̂ Ε₁}
                       {f₁ : [ T₁ ⟶ T₂ ] ρ̂₂₁} {ρ₁ : Sub T₁ ρ̂₁₁}
                       {Γ₂   Ε₂} {ρ̂₁₂ : Γ₂ ⇨̂ Δ} {ρ̂₂₂ : Δ ⇨̂ Ε₂}
@@ -71,7 +72,7 @@ private
     map-cong-ext₁ ext {ρ₁ = ρ} {ρ₂ = ._ , _} Ε₁≅Ε₂ f₁≅f₂ [ P.refl ] =
       extensionality ext Ε₁≅Ε₂ (λ x → f₁≅f₂ (x /∋ ρ))
 
-    map-cong-ext₂ : P.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t₂) →
+    map-cong-ext₂ : E.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t₂) →
                     ∀ {Γ₁ Δ₁ Ε₁} {ρ̂₁₁ : Γ₁ ⇨̂ Δ₁} {ρ̂₂₁ : Δ₁ ⇨̂ Ε₁}
                       {f₁ : [ T₁ ⟶ T₂ ] ρ̂₂₁} {ρ₁ : Sub T₁ ρ̂₁₁}
                       {Γ₂ Δ₂ Ε₂} {ρ̂₁₂ : Γ₂ ⇨̂ Δ₂} {ρ̂₂₂ : Δ₂ ⇨̂ Ε₂}

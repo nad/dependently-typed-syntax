@@ -6,6 +6,7 @@
 
 module README.DependentlyTyped.Extensional-type-theory where
 
+import Axiom.Extensionality.Propositional as E
 open import Data.Empty
 open import Data.Product renaming (curry to c)
 open import Data.Unit
@@ -76,7 +77,7 @@ mutual
 ------------------------------------------------------------------------
 -- We can define looping terms (assuming extensionality)
 
-module Looping (ext : P.Extensionality Level.zero Level.zero) where
+module Looping (ext : E.Extensionality Level.zero Level.zero) where
 
   -- The casts are examples of the use of equality reflection: the
   -- casts are meta-language constructions, not object-language

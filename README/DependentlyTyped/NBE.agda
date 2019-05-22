@@ -2,8 +2,8 @@
 -- Normalisation by evaluation
 ------------------------------------------------------------------------
 
+import Axiom.Extensionality.Propositional as E
 import Level
-import Relation.Binary.PropositionalEquality as P
 open import Universe
 
 -- The code makes use of the assumption that propositional equality of
@@ -11,7 +11,7 @@ open import Universe
 
 module README.DependentlyTyped.NBE
   (Uni₀ : Universe Level.zero Level.zero)
-  (ext : P.Extensionality Level.zero Level.zero)
+  (ext : E.Extensionality Level.zero Level.zero)
   where
 
 open import Data.Empty
@@ -22,6 +22,7 @@ import README.DependentlyTyped.NormalForm as NF
 open NF Uni₀ renaming ([_] to [_]n)
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 import README.DependentlyTyped.Term.Substitution as S; open S Uni₀
+import Relation.Binary.PropositionalEquality as P
 open import Relation.Nullary
 
 open P.≡-Reasoning
@@ -178,7 +179,7 @@ abstract
   -- type:
 
   normal-forms-not-unique :
-    P.Extensionality Level.zero Level.zero →
+    E.Extensionality Level.zero Level.zero →
     (∃ λ (bot : U₀) → ¬ El₀ bot) →
     ¬ (∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
        ⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧ → normalise t₁ ≅-⊢n normalise t₂)

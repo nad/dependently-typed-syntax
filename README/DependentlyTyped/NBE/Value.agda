@@ -9,6 +9,7 @@ module README.DependentlyTyped.NBE.Value
   (Uni₀ : Universe Level.zero Level.zero)
   where
 
+import Axiom.Extensionality.Propositional as E
 open import Data.Product renaming (curry to c; uncurry to uc)
 open import deBruijn.Substitution.Data
 open import Function using (id; _ˢ_; _$_) renaming (const to k)
@@ -243,14 +244,14 @@ abstract
 
 abstract
 
-  ,-cong : P.Extensionality Level.zero Level.zero →
+  ,-cong : E.Extensionality Level.zero Level.zero →
            ∀ {Γ sp₁ sp₂ σ} {f₁ f₂ : V̌alue Γ (π sp₁ sp₂ , σ)} →
            (∀ Γ₊ v → proj₁ f₁ Γ₊ v ≅-V̌alue proj₁ f₂ Γ₊ v) →
            _≅-V̌alue_ {σ₁ = (π sp₁ sp₂ , σ)} f₁
                      {σ₂ = (π sp₁ sp₂ , σ)} f₂
   ,-cong ext hyp = P.cong (Term-like.[_] {_} {V̌al}) $
     ,-cong′ (ext λ Γ₊ → ext λ v → Term-like.≅-⊢-⇒-≡ V̌al $ hyp Γ₊ v)
-            (ext λ _  → ext λ _ → P.≡-irrelevance _ _)
+            (ext λ _  → ext λ _ → P.≡-irrelevant _ _)
     where
     ,-cong′ : {A : Set} {B : A → Set}
               {x₁ x₂ : A} {y₁ : B x₁} {y₂ : B x₂} →

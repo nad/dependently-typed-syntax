@@ -2,8 +2,8 @@
 -- Various equality checkers (some complete, all sound)
 ------------------------------------------------------------------------
 
+import Axiom.Extensionality.Propositional as E
 import Level
-open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Universe
 
 -- The code makes use of the assumption that propositional equality of
@@ -11,7 +11,7 @@ open import Universe
 
 module README.DependentlyTyped.Equality-checker
   (Uni₀ : Universe Level.zero Level.zero)
-  (ext : P.Extensionality Level.zero Level.zero)
+  (ext : E.Extensionality Level.zero Level.zero)
   where
 
 open import Category.Monad
@@ -22,6 +22,7 @@ open import Function hiding (_∋_) renaming (const to k)
 import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext
 import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
+open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Relation.Nullary
 import Relation.Nullary.Decidable as Dec
 open import Relation.Nullary.Product

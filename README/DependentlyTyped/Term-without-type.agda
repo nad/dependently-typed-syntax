@@ -10,12 +10,13 @@ module README.DependentlyTyped.Term-without-type
   (Uni₀ : Universe Level.zero Level.zero)
   where
 
+import Axiom.Extensionality.Propositional as E
 open import Data.Product
 open import Function renaming (const to k)
 import README.DependentlyTyped.NBE as NBE; open NBE Uni₀
 import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
-open import Relation.Binary.PropositionalEquality as P using (_≡_; _≢_)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Relation.Nullary
 
 abstract
@@ -37,7 +38,7 @@ abstract
   -- extensionality).
 
   no-closed-atomic :
-    P.Extensionality Level.zero Level.zero →
+    E.Extensionality Level.zero Level.zero →
     ∀ {σ} → ε ⊢ σ atomic-type → ¬ (ε ⊢ σ)
   no-closed-atomic ext atomic t =
     no-closed-atomic-normal atomic (normalise ext t)
@@ -53,7 +54,7 @@ abstract
   -- syntactic types to V̌alue, řeify, řeflect, etc.
 
   term-without-type :
-    P.Extensionality Level.zero Level.zero → U₀ →
+    E.Extensionality Level.zero Level.zero → U₀ →
     ∃₂ λ Γ σ → ∃ λ (t : Γ ⊢ σ) → ¬ (Γ ⊢ σ type)
   term-without-type ext u = (ε , (-, σ) , ƛ (var zero) , proof)
     where

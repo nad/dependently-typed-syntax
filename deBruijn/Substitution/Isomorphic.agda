@@ -8,6 +8,7 @@ open import Universe
 module deBruijn.Substitution.Isomorphic
   {i u e} {Uni : Indexed-universe i u e} where
 
+import Axiom.Extensionality.Propositional as E
 import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Basics as D using (ε; _▻_; [_])
 open import deBruijn.Substitution.Function.Basics as F
@@ -21,7 +22,7 @@ open P.≡-Reasoning
 
 isomorphic :
   ∀ {t} {T : Term-like t} →
-  P.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
+  E.Extensionality (i ⊔ u ⊔ e) (i ⊔ u ⊔ e ⊔ t) →
   ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} →
   Inverse ([ Var ⟶ T ]-setoid ρ̂) (P.setoid $ D.Sub T ρ̂)
 isomorphic {T = T} ext = record
