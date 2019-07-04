@@ -101,8 +101,8 @@ import README.DependentlyTyped.Raw-term
 
 import README.DependentlyTyped.Type-checker
 
--- A definability result: A "closed value" is definable if and only if
--- it satisfies all "Kripke predicates".
+-- A definability result: A "closed value" is the semantics of a
+-- closed term if and only if it satisfies all "Kripke predicates".
 
 import README.DependentlyTyped.Definability
 
