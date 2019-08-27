@@ -23,7 +23,7 @@ module README.DependentlyTyped.Definability
   where
 
 open import Data.Product as Prod renaming (curry to c)
-open import Function hiding (_∋_) renaming (const to k)
+open import Function.Core hiding (_∋_) renaming (const to k)
 open import Function.Equality using (_⟨$⟩_)
 open import Function.Equivalence
   using (_⇔_; module Equivalence; equivalence)
