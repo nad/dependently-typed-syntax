@@ -234,7 +234,7 @@ infix 4 _≅-type_
 
 _≅-type_ : ∀ {Γ₁ σ₁} (σ′₁ : Γ₁ ⊢ σ₁ type)
              {Γ₂ σ₂} (σ′₂ : Γ₂ ⊢ σ₂ type) → Set
-σ′₁ ≅-type σ′₂ = [type].[_] σ′₁ ≡ [ σ′₂ ]
+σ′₁ ≅-type σ′₂ = _≡_ {A = [type]} [ σ′₁ ] [ σ′₂ ]
 
 -- If the indices are equal, then _≅-type_ coincides with _≡_.
 

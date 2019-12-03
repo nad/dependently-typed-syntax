@@ -275,7 +275,7 @@ record [IType] : Set (i ⊔ u ⊔ e) where
 
 _≅-IType_ : ∀ {Γ₁ i₁} (σ₁ : IType Γ₁ i₁)
               {Γ₂ i₂} (σ₂ : IType Γ₂ i₂) → Set _
-σ₁ ≅-IType σ₂ = [IType].[_] σ₁ ≡ [ σ₂ ]
+σ₁ ≅-IType σ₂ = _≡_ {A = [IType]} [ σ₁ ] [ σ₂ ]
 
 -- If the indices are equal, then _≅-IType_ coincides with _≡_.
 
@@ -294,7 +294,7 @@ record [Value] : Set (i ⊔ u ⊔ e) where
 
 _≅-Value_ : ∀ {Γ₁ σ₁} (v₁ : Value Γ₁ σ₁)
               {Γ₂ σ₂} (v₂ : Value Γ₂ σ₂) → Set _
-v₁ ≅-Value v₂ = [Value].[_] v₁ ≡ [ v₂ ]
+v₁ ≅-Value v₂ = _≡_ {A = [Value]} [ v₁ ] [ v₂ ]
 
 ≅-Value-⇒-≡ : ∀ {Γ σ} {v₁ v₂ : Value Γ σ} →
               v₁ ≅-Value v₂ → v₁ ≡ v₂
@@ -310,7 +310,7 @@ record [⇨̂] : Set (i ⊔ u ⊔ e) where
 
 _≅-⇨̂_ : ∀ {Γ₁ Δ₁} (ρ̂₁ : Γ₁ ⇨̂ Δ₁)
           {Γ₂ Δ₂} (ρ̂₂ : Γ₂ ⇨̂ Δ₂) → Set _
-ρ̂₁ ≅-⇨̂ ρ̂₂ = [⇨̂].[_] ρ̂₁ ≡ [ ρ̂₂ ]
+ρ̂₁ ≅-⇨̂ ρ̂₂ = _≡_ {A = [⇨̂]} [ ρ̂₁ ] [ ρ̂₂ ]
 
 ≅-⇨̂-⇒-≡ : ∀ {Γ Δ} {ρ̂₁ ρ̂₂ : Γ ⇨̂ Δ} →
           ρ̂₁ ≅-⇨̂ ρ̂₂ → ρ̂₁ ≡ ρ̂₂
@@ -327,7 +327,7 @@ record [∋] : Set (i ⊔ u ⊔ e) where
 
 _≅-∋_ : ∀ {Γ₁ σ₁} (x₁ : Γ₁ ∋ σ₁)
           {Γ₂ σ₂} (x₂ : Γ₂ ∋ σ₂) → Set _
-x₁ ≅-∋ x₂ = [∋].[_] x₁ ≡ [ x₂ ]
+x₁ ≅-∋ x₂ = _≡_ {A = [∋]} [ x₁ ] [ x₂ ]
 
 ≅-∋-⇒-≡ : ∀ {Γ σ} {x₁ x₂ : Γ ∋ σ} →
           x₁ ≅-∋ x₂ → x₁ ≡ x₂
