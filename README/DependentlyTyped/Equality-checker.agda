@@ -23,7 +23,7 @@ import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext
 import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
-open import Relation.Nullary
+open import Relation.Nullary as Dec using (Dec; yes)
 import Relation.Nullary.Decidable as Dec
 open import Relation.Nullary.Product
 
@@ -70,8 +70,8 @@ mutual
     helper P.refl = P.refl
 
   t₁₁ · t₂₁ ≟-⊢ne t₁₂ · t₂₂ with t₁₁ ≟-⊢ne t₁₂
-  ... | no neq = no (neq ∘ proj₁ ∘ helper-lemma _ t₂₁ _ t₂₂)
-  ... | yes eq = Dec.map′
+  ... | Dec.no neq = Dec.no (neq ∘ proj₁ ∘ helper-lemma _ t₂₁ _ t₂₂)
+  ... | yes eq     = Dec.map′
     (·n-cong eq)
     (proj₂ ∘ helper-lemma t₁₁ _ t₁₂ _)
     (t₂₁ ≟-⊢no t₂₂ [ fst-cong $ indexed-type-cong $ helper eq ])
@@ -81,8 +81,8 @@ mutual
              t₁ ≅-⊢n t₂ → σ₁ ≅-Type σ₂
     helper P.refl = P.refl
 
-  var _ ≟-⊢ne _ · _ = no λ ()
-  _ · _ ≟-⊢ne var _ = no λ ()
+  var _ ≟-⊢ne _ · _ = Dec.no λ ()
+  _ · _ ≟-⊢ne var _ = Dec.no λ ()
 
   -- Decides if two normal forms are identical. Note that the terms
   -- must have the same type.
@@ -99,7 +99,7 @@ mutual
             Dec (t₁ ≅-⊢n t₂) → Dec (ne σ′₁ t₁ ≅-⊢n ne σ′₂ t₂)
     ne≟ne ⋆  ⋆  (yes P.refl) = yes P.refl
     ne≟ne el el (yes P.refl) = yes P.refl
-    ne≟ne _  _  (no neq)     = no (neq ∘ helper)
+    ne≟ne _  _  (Dec.no neq) = Dec.no (neq ∘ helper)
       where
       helper :
         ∀ {Γ₁ σ₁ σ′₁} {t₁ : Γ₁ ⊢ σ₁ ⟨ ne ⟩}
@@ -117,8 +117,8 @@ mutual
       ƛ t₁ ≅-⊢n ƛ t₂ → t₁ ≅-⊢n t₂
     helper P.refl = P.refl
 
-  ne _ _ ≟-⊢no ƛ _    [ _ ] = no λ ()
-  ƛ _    ≟-⊢no ne _ _ [ _ ] = no λ ()
+  ne _ _ ≟-⊢no ƛ _    [ _ ] = Dec.no λ ()
+  ƛ _    ≟-⊢no ne _ _ [ _ ] = Dec.no λ ()
 
 -- Tries to prove that two terms have the same semantics. The terms
 -- must have the same type.
@@ -126,8 +126,8 @@ mutual
 ⟦_⟧≟⟦_⟧ : ∀ {Γ σ} (t₁ t₂ : Γ ⊢ σ) →
           Maybe (⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧)
 ⟦ t₁ ⟧≟⟦ t₂ ⟧ with normalise t₁ ≟-⊢no normalise t₂ [ P.refl ]
-... | no  _  = ∅
-... | yes eq = return (begin
+... | Dec.no _ = ∅
+... | yes eq   = return (begin
   [ ⟦ t₁ ⟧            ]  ≡⟨ normalise-lemma t₁ ⟩
   [ ⟦ normalise t₁ ⟧n ]  ≡⟨ ⟦⟧n-cong eq ⟩
   [ ⟦ normalise t₂ ⟧n ]  ≡⟨ P.sym $ normalise-lemma t₂ ⟩

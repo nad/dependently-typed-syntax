@@ -23,7 +23,7 @@ open NF Uni₀ renaming ([_] to [_]n)
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 import README.DependentlyTyped.Term.Substitution as S; open S Uni₀
 import Relation.Binary.PropositionalEquality as P
-open import Relation.Nullary
+open import Relation.Nullary using (¬_)
 
 open P.≡-Reasoning
 

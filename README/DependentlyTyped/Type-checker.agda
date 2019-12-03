@@ -23,7 +23,7 @@ open import Function as F hiding (_∋_) renaming (_∘_ to _⊚_)
 import README.DependentlyTyped.Equality-checker as EC; open EC Uni₀ ext
 import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext
 import README.DependentlyTyped.NormalForm as NF
-open NF Uni₀ hiding (⌊_⌋)
+open NF Uni₀ hiding (⌊_⌋; no)
 import README.DependentlyTyped.Raw-term as RT; open RT Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 import README.DependentlyTyped.Term.Substitution as S; open S Uni₀

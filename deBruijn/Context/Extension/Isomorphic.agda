@@ -10,7 +10,7 @@ module deBruijn.Context.Extension.Isomorphic
 import deBruijn.Context.Basics          as Basics
 import deBruijn.Context.Extension.Left  as Left
 import deBruijn.Context.Extension.Right as Right
-open import Function.Core
+open import Function.Base
 open import Function.Inverse using (_↔_)
 import Relation.Binary.PropositionalEquality as P
 

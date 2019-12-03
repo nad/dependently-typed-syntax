@@ -17,7 +17,7 @@ import README.DependentlyTyped.NBE as NBE; open NBE Uni₀
 import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
-open import Relation.Nullary
+open import Relation.Nullary using (¬_)
 
 abstract
 
