@@ -7,10 +7,10 @@
 -- to another kind of term. TODO: This results in some extra
 -- complication—is it worth it?
 
-open import Universe
+open import Data.Universe.Indexed
 
 module deBruijn.Substitution.Data.Application.Application21
-  {i u e} {Uni : Indexed-universe i u e} where
+  {i u e} {Uni : IndexedUniverse i u e} where
 
 import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Application.Application

@@ -2,10 +2,10 @@
 -- A map function for the substitutions
 ------------------------------------------------------------------------
 
-open import Universe
+open import Data.Universe.Indexed
 
 module deBruijn.Substitution.Data.Map
-  {i u e} {Uni : Indexed-universe i u e} where
+  {i u e} {Uni : IndexedUniverse i u e} where
 
 import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Basics

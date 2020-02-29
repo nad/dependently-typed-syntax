@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------
 
 open import Level using (zero)
-open import Universe
+open import Data.Universe
 
 module README.DependentlyTyped.NormalForm.Substitution
   (Uni₀ : Universe zero zero) where

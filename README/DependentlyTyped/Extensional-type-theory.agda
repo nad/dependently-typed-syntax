@@ -10,11 +10,11 @@ import Axiom.Extensionality.Propositional as E
 open import Data.Empty
 open import Data.Product renaming (curry to c)
 open import Data.Unit
+open import Data.Universe.Indexed
 import deBruijn.Context
 open import Function hiding (_∋_) renaming (const to k)
 import Level
 import Relation.Binary.PropositionalEquality as P
-open import Universe
 
 ------------------------------------------------------------------------
 -- A non-indexed universe
@@ -29,7 +29,7 @@ mutual
   El empty   = ⊥
   El (π a b) = (x : El a) → El (b x)
 
-Uni : Indexed-universe _ _ _
+Uni : IndexedUniverse _ _ _
 Uni = record { I = ⊤; U = λ _ → U; El = El }
 
 ------------------------------------------------------------------------

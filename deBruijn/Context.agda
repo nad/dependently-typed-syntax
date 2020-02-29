@@ -4,10 +4,10 @@
 
 -- The contexts, variables, etc. are parametrised by a universe.
 
-open import Universe
+open import Data.Universe.Indexed
 
 module deBruijn.Context
-  {i u e} (Uni : Indexed-universe i u e) where
+  {i u e} (Uni : IndexedUniverse i u e) where
 
 -- Contexts, variables, context morphisms, etc.
 

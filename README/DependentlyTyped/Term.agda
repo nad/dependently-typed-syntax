@@ -6,7 +6,7 @@
 -- universe.
 
 import Level
-open import Universe
+open import Data.Universe
 
 module README.DependentlyTyped.Term
   (Uni₀ : Universe Level.zero Level.zero)
@@ -14,6 +14,7 @@ module README.DependentlyTyped.Term
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 open import Data.Unit
+open import Data.Universe.Indexed
 import deBruijn.Context
 open import Function hiding (_∋_) renaming (const to k)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
@@ -64,7 +65,7 @@ mutual
   El {el}        a       = El₀ a
   El {π sp₁ sp₂} (a , b) = (x : El a) → El (b x)
 
-Uni : Indexed-universe _ _ _
+Uni : IndexedUniverse _ _ _
 Uni = record { I = Spine; U = U; El = El }
 
 -- Some synonyms/specialisations.

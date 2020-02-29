@@ -12,7 +12,7 @@
 
 import Axiom.Extensionality.Propositional as E
 open import Level using (Level)
-open import Universe
+open import Data.Universe
 
 -- The code makes use of the assumption that propositional equality is
 -- extensional for functions.

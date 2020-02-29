@@ -7,10 +7,10 @@
 
 -- (This module reexports various other modules.)
 
-open import Universe
+open import Data.Universe.Indexed
 
 module deBruijn.Substitution.Data.Application
-  {i u e} {Uni : Indexed-universe i u e} where
+  {i u e} {Uni : IndexedUniverse i u e} where
 
 import deBruijn.Substitution.Data.Application.Application
 open deBruijn.Substitution.Data.Application.Application

@@ -3,10 +3,10 @@
 -- position
 ------------------------------------------------------------------------
 
-open import Universe
+open import Data.Universe.Indexed
 
 module deBruijn.Context.Extension.Left
-  {i u e} (Uni : Indexed-universe i u e) where
+  {i u e} (Uni : IndexedUniverse i u e) where
 
 import deBruijn.Context.Basics          as Basics
 import deBruijn.Context.Extension.Right as Right

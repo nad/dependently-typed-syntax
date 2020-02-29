@@ -4,7 +4,7 @@
 
 import Axiom.Extensionality.Propositional as E
 import Level
-open import Universe
+open import Data.Universe
 
 -- The code makes use of the assumption that propositional equality of
 -- functions is extensional.

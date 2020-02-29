@@ -7,12 +7,12 @@
 
 -- The contexts and variables are parametrised by a universe.
 
-open import Universe
+open import Data.Universe.Indexed
 
 module deBruijn.Context.Basics
-  {i u e} (Uni : Indexed-universe i u e) where
+  {i u e} (Uni : IndexedUniverse i u e) where
 
-open Indexed-universe Uni
+open IndexedUniverse Uni
 
 open import Data.Product as Prod
 open import Data.Unit

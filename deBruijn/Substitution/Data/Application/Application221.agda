@@ -2,10 +2,10 @@
 -- Lemmas related to application of substitutions
 ------------------------------------------------------------------------
 
-open import Universe
+open import Data.Universe.Indexed
 
 module deBruijn.Substitution.Data.Application.Application221
-  {i u e} {Uni : Indexed-universe i u e}
+  {i u e} {Uni : IndexedUniverse i u e}
   where
 
 import deBruijn.Context; open deBruijn.Context Uni

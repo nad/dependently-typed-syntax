@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------
 
 import Level
-open import Universe
+open import Data.Universe
 
 module README.DependentlyTyped.Term.Substitution
   (Uni₀ : Universe Level.zero Level.zero) where

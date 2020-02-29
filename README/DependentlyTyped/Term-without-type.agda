@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------
 
 import Level
-open import Universe
+open import Data.Universe
 
 module README.DependentlyTyped.Term-without-type
   (Uni₀ : Universe Level.zero Level.zero)
