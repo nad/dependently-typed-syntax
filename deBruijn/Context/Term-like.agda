@@ -11,7 +11,7 @@ import Axiom.Extensionality.Propositional as E
 open import Data.Product
 import deBruijn.Context.Basics          as Basics
 import deBruijn.Context.Extension.Right as Right
-open import Function hiding (_∋_)
+open import Function.Base hiding (_∋_)
 open import Level using (_⊔_)
 open import Relation.Binary using (Setoid)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)

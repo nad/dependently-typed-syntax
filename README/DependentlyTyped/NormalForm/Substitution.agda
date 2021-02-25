@@ -10,7 +10,7 @@ module README.DependentlyTyped.NormalForm.Substitution
 
 open import Data.Product as Prod renaming (curry to c; uncurry to uc)
 open import deBruijn.Substitution.Data
-open import Function as F renaming (const to k)
+open import Function.Base as F renaming (const to k)
 import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
 import README.DependentlyTyped.Term.Substitution as S
 open S Uni₀ using (module Apply)
