@@ -1,3 +1,5 @@
 name: dependently-typed-syntax
 depend: standard-library
 include: .
+flags:
+  --safe
