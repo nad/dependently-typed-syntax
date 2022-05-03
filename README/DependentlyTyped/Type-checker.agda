@@ -14,11 +14,11 @@ module README.DependentlyTyped.Type-checker
   (ext : E.Extensionality Level.zero Level.zero)
   where
 
-open import Category.Monad
 open import Data.Maybe hiding (_>>=_)
-import Data.Maybe.Categorical as Maybe
+import Data.Maybe.Effectful as Maybe
 open import Data.Nat using (ℕ; zero; suc; pred)
 open import Data.Product as Prod
+open import Effect.Monad
 open import Function as F hiding (_∋_) renaming (_∘_ to _⊚_)
 import README.DependentlyTyped.Equality-checker as EC; open EC Uni₀ ext
 import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext

@@ -14,10 +14,10 @@ module README.DependentlyTyped.Equality-checker
   (ext : E.Extensionality Level.zero Level.zero)
   where
 
-open import Category.Monad
 open import Data.Maybe
-import Data.Maybe.Categorical as Maybe
+import Data.Maybe.Effectful as Maybe
 open import Data.Product
+open import Effect.Monad
 open import Function hiding (_∋_) renaming (const to k)
 import README.DependentlyTyped.NBE as NBE; open NBE Uni₀ ext
 import README.DependentlyTyped.NormalForm as NF; open NF Uni₀
