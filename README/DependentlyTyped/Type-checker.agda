@@ -30,7 +30,6 @@ import README.DependentlyTyped.Term.Substitution as S; open S Uni₀
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Relation.Nullary
 import Relation.Nullary.Decidable as Dec
-open import Relation.Nullary.Product
 
 open P.≡-Reasoning
 open RawMonadZero (Maybe.monadZero {f = Level.zero})
@@ -78,14 +77,14 @@ mutual
   infer-ty :
     ∀ {Γ} → Γ ctxt → (σ : Raw-ty) →
     Maybe (∃₂ λ σ′ (σ″ : Γ ⊢ σ′ type) → ⌊ σ″ ⌋ty ≡ ⌊ σ ⌋raw-ty)
-  infer-ty Γ′ ⋆      = return (_ , ⋆ , P.refl)
+  infer-ty Γ′ ⋆      = pure (_ , ⋆ , P.refl)
   infer-ty Γ′ (el t) =
-    check Γ′ ⋆ t                      >>= λ { (t′ , eq) →
-    return (_ , el t′ , P.cong el eq) }
+    check Γ′ ⋆ t                    >>= λ { (t′ , eq) →
+    pure (_ , el t′ , P.cong el eq) }
   infer-ty Γ′ (π σ′₁ σ′₂) =
-    infer-ty Γ′          σ′₁                     >>= λ { (_ , σ′₁′ , eq₁) →
-    infer-ty (Γ′ ▻ σ′₁′) σ′₂                     >>= λ { (_ , σ′₂′ , eq₂) →
-    return (_ , π σ′₁′ σ′₂′ , P.cong₂ π eq₁ eq₂) }}
+    infer-ty Γ′          σ′₁                   >>= λ { (_ , σ′₁′ , eq₁) →
+    infer-ty (Γ′ ▻ σ′₁′) σ′₂                   >>= λ { (_ , σ′₂′ , eq₂) →
+    pure (_ , π σ′₁′ σ′₂′ , P.cong₂ π eq₁ eq₂) }}
 
   -- Tries to infer a type for a term. In the case of success a
   -- well-typed term is returned.
@@ -94,21 +93,21 @@ mutual
     ∀ {Γ} → Γ ctxt → (t : Raw) →
     Maybe (∃ λ σ → Γ ⊢ σ type × ∃ λ (t′ : Γ ⊢ σ) → ⌊ t′ ⌋ ≡ ⌊ t ⌋raw)
   infer Γ′ (var x) with infer-var-syntactic Γ′ x
-  ... | yes (_ , σ′ , x′ , eq) = return (_ , σ′ , var x′ , P.cong var eq)
+  ... | yes (_ , σ′ , x′ , eq) = pure (_ , σ′ , var x′ , P.cong var eq)
   ... | no _                   = ∅
   infer Γ′ (ƛ t)     = ∅
   infer Γ′ (t₁ · t₂) =
     infer Γ′ t₁ >>=
     λ { (._ , π σ′₁ σ′₂ , t₁′ , eq₁) →
-            check Γ′ σ′₁ t₂                           >>= λ { (t₂′ , eq₂) →
-            return (_ , σ′₂ /⊢t sub t₂′ , t₁′ · t₂′ ,
-                    P.cong₂ _·_ eq₁ eq₂) }
+            check Γ′ σ′₁ t₂                         >>= λ { (t₂′ , eq₂) →
+            pure (_ , σ′₂ /⊢t sub t₂′ , t₁′ · t₂′ ,
+                  P.cong₂ _·_ eq₁ eq₂) }
       ; _ → ∅
       }
   infer Γ′ (t ∶ σ) =
-    infer-ty Γ′ σ             >>= λ { (_ , σ′ , eq) →
-    check Γ′ σ′ t             >>= λ { (t′ , eq) →
-    return (_ , σ′ , t′ , eq) }}
+    infer-ty Γ′ σ           >>= λ { (_ , σ′ , eq) →
+    check Γ′ σ′ t           >>= λ { (t′ , eq) →
+    pure (_ , σ′ , t′ , eq) }}
 
   -- Tries to type-check a term. In the case of success a well-typed
   -- term is returned.
@@ -116,15 +115,15 @@ mutual
   check : ∀ {Γ σ} → Γ ctxt → (σ′ : Γ ⊢ σ type) (t : Raw) →
           Maybe (∃ λ (t′ : Γ ⊢ σ) → ⌊ t′ ⌋ ≡ ⌊ t ⌋raw)
   check Γ′ (π σ′₁ σ′₂) (ƛ t) =
-    check (Γ′ ▻ σ′₁) σ′₂ t      >>= λ { (t′ , eq) →
-    return (ƛ t′ , P.cong ƛ eq) }
+    check (Γ′ ▻ σ′₁) σ′₂ t    >>= λ { (t′ , eq) →
+    pure (ƛ t′ , P.cong ƛ eq) }
   check Γ′ σ′ t =
-    infer Γ′ t                                           >>= λ { (_ , τ′ , t′ , eq₁) →
-    τ′ ≟-Type σ′                                         >>= λ eq₂ →
-    return (P.subst (_⊢_ _) (≅-Type-⇒-≡ eq₂) t′ , (begin
-              ⌊ P.subst (_⊢_ _) (≅-Type-⇒-≡ eq₂) t′ ⌋  ≡⟨ ⌊⌋-cong $ drop-subst-⊢ F.id (≅-Type-⇒-≡ eq₂) ⟩
-              ⌊ t′ ⌋                                   ≡⟨ eq₁ ⟩
-              ⌊ t ⌋raw                                 ∎)) }
+    infer Γ′ t                                         >>= λ { (_ , τ′ , t′ , eq₁) →
+    τ′ ≟-Type σ′                                       >>= λ eq₂ →
+    pure (P.subst (_⊢_ _) (≅-Type-⇒-≡ eq₂) t′ , (begin
+            ⌊ P.subst (_⊢_ _) (≅-Type-⇒-≡ eq₂) t′ ⌋  ≡⟨ ⌊⌋-cong $ drop-subst-⊢ F.id (≅-Type-⇒-≡ eq₂) ⟩
+            ⌊ t′ ⌋                                   ≡⟨ eq₁ ⟩
+            ⌊ t ⌋raw                                 ∎)) }
 
 -- Tries to establish that the given raw term has the given raw type
 -- (in the empty context).
@@ -135,9 +134,9 @@ _∋?_ : (σ : Raw-ty) (t : Raw) →
        Maybe (∃₂ λ (σ′ : Type ε) (σ″ : ε ⊢ σ′ type) →
               ∃  λ (t′ : ε ⊢ σ′) →
                    ⌊ σ″ ⌋ty ≡ ⌊ σ ⌋raw-ty × ⌊ t′ ⌋ ≡ ⌊ t ⌋raw)
-σ ∋? t = infer-ty ε σ                      >>= λ { (σ′ , σ″ , eq₁) →
-         check ε σ″ t                      >>= λ { (t′ , eq₂) →
-         return (σ′ , σ″ , t′ , eq₁ , eq₂) }}
+σ ∋? t = infer-ty ε σ                    >>= λ { (σ′ , σ″ , eq₁) →
+         check ε σ″ t                    >>= λ { (t′ , eq₂) →
+         pure (σ′ , σ″ , t′ , eq₁ , eq₂) }}
 
 ------------------------------------------------------------------------
 -- Examples

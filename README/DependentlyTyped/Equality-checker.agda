@@ -25,7 +25,6 @@ import README.DependentlyTyped.Term as Term; open Term Uni₀
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Relation.Nullary as Dec using (Dec; yes)
 import Relation.Nullary.Decidable as Dec
-open import Relation.Nullary.Product
 
 open P.≡-Reasoning
 open RawMonadZero (Maybe.monadZero {f = Level.zero})
@@ -127,7 +126,7 @@ mutual
           Maybe (⟦ t₁ ⟧ ≅-Value ⟦ t₂ ⟧)
 ⟦ t₁ ⟧≟⟦ t₂ ⟧ with normalise t₁ ≟-⊢no normalise t₂ [ P.refl ]
 ... | Dec.no _ = ∅
-... | yes eq   = return (begin
+... | yes eq   = pure (begin
   [ ⟦ t₁ ⟧            ]  ≡⟨ normalise-lemma t₁ ⟩
   [ ⟦ normalise t₁ ⟧n ]  ≡⟨ ⟦⟧n-cong eq ⟩
   [ ⟦ normalise t₂ ⟧n ]  ≡⟨ P.sym $ normalise-lemma t₂ ⟩
@@ -142,7 +141,7 @@ infix 4 _≟-Type_
 _≟-Type_ : ∀ {Γ σ₁} (σ₁′ : Γ ⊢ σ₁ type)
                {σ₂} (σ₂′ : Γ ⊢ σ₂ type) →
            Maybe (σ₁ ≅-Type σ₂)
-⋆ ≟-Type ⋆ = return P.refl
+⋆ ≟-Type ⋆ = pure P.refl
 
 el t₁ ≟-Type el t₂ = helper <$> ⟦ t₁ ⟧≟⟦ t₂ ⟧
   where
