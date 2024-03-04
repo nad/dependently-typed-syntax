@@ -28,7 +28,7 @@ import README.DependentlyTyped.Raw-term as RT; open RT Uni₀
 import README.DependentlyTyped.Term as Term; open Term Uni₀
 import README.DependentlyTyped.Term.Substitution as S; open S Uni₀
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
-open import Relation.Nullary
+open import Relation.Nullary using (Dec; yes; no; ¬_)
 import Relation.Nullary.Decidable as Dec
 
 open P.≡-Reasoning

@@ -9,12 +9,12 @@ module deBruijn.Substitution.Isomorphic
   {i u e} {Uni : IndexedUniverse i u e} where
 
 import Axiom.Extensionality.Propositional as E
+open import Data.Product
 import deBruijn.Context; open deBruijn.Context Uni
 open import deBruijn.Substitution.Data.Basics as D using (ε; _▻_; [_])
 open import deBruijn.Substitution.Function.Basics as F
   using (ε⇨; _▻⇨_) renaming (_▻⇨[_]_ to _▻⇨[_]F_)
-open import Function using (_$_)
-open import Function.Inverse using (Inverse)
+open import Function
 open import Level using (_⊔_)
 import Relation.Binary.PropositionalEquality as P
 
@@ -26,14 +26,13 @@ isomorphic :
   ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} →
   Inverse ([ Var ⟶ T ]-setoid ρ̂) (P.setoid $ D.Sub T ρ̂)
 isomorphic {T = T} ext = record
-  { to         = record { _⟨$⟩_ = to _
-                        ; cong  = λ ρ₁≅ρ₂ → D.≅-⇨-⇒-≡ $ to-cong ρ₁≅ρ₂
-                        }
-  ; from       = P.→-to-⟶ from
-  ; inverse-of = record
-    { left-inverse-of  = from∘to _
-    ; right-inverse-of = λ ρ → D.≅-⇨-⇒-≡ $ to∘from ρ
-    }
+  { to        = to _
+  ; from      = from
+  ; to-cong   = λ ρ₁≅ρ₂ → D.≅-⇨-⇒-≡ $ to-cong ρ₁≅ρ₂
+  ; from-cong = λ { P.refl → _ ∎-⟶ }
+  ; inverse   =
+        (λ { [ P.refl ] → D.≅-⇨-⇒-≡ $ to∘from _ })
+      , (λ { P.refl → from∘to _ _ })
   }
   where
   to : ∀ Γ {Δ} {ρ̂ : Γ ⇨̂ Δ} → F.Sub T ρ̂ → D.Sub T ρ̂
@@ -85,12 +84,13 @@ isomorphic {T = T} ext = record
       F.tail ρ ▻⇨ F.head ρ                ≅-⟶⟨ sym-⟶ $ F.η▻ ext ρ ⟩
       ρ                                   ∎-⟶
 
-    to∘from : ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : D.Sub T ρ̂) →
-              D._≅-⇨_ (to Γ (from ρ)) ρ
-    to∘from ε                 = P.refl
-    to∘from (_▻_ {σ = σ} ρ t) = begin
-      [ to (_ ▻ _) (from ρ ▻⇨ t)            ]  ≡⟨ to-▻ (from ρ ▻⇨ t) ⟩
-      [ to _ (F.tail (from ρ ▻⇨[ σ ]F t)) ▻
-        F.head (from ρ ▻⇨[ σ ]F t)          ]  ≡⟨ D.▻⇨-cong P.refl (to-cong [ P.refl ]) P.refl ⟩
-      [ to _ (from ρ) ▻ t                   ]  ≡⟨ D.▻⇨-cong P.refl (to∘from ρ) P.refl ⟩
-      [ ρ ▻ t                               ]  ∎
+    to∘from :
+      ∀ {Γ Δ} {ρ̂ : Γ ⇨̂ Δ} (ρ : D.Sub T ρ̂) {c} →
+      D._≅-⇨_ (to Γ ([_⟶_].function (from ρ) , c)) ρ
+    to∘from ε                         = P.refl
+    to∘from (_▻_ {σ = σ} ρ t) {c = c} = begin
+      [ to (_ ▻ _) ([_⟶_].function (from (_▻_ {σ = σ} ρ t)) , c) ]  ≡⟨⟩
+      [ to (_ ▻ _) ([_⟶_].function (from ρ ▻⇨ t) , c)            ]  ≡⟨ to-▻ _ ⟩
+      [ to _ ([_⟶_].function (from ρ) , _) ▻ t                   ]  ≡⟨ D.▻⇨-cong P.refl (to-cong [ P.refl ]) P.refl ⟩
+      [ to _ (from ρ) ▻ t                                        ]  ≡⟨ D.▻⇨-cong P.refl (to∘from ρ) P.refl ⟩
+      [ ρ ▻ t                                                    ]  ∎

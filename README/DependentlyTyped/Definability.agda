@@ -23,10 +23,8 @@ module README.DependentlyTyped.Definability
   where
 
 open import Data.Product as Prod renaming (curry to c)
-open import Function.Base hiding (_∋_) renaming (const to k)
-open import Function.Equality using (_⟨$⟩_)
-open import Function.Equivalence
-  using (_⇔_; module Equivalence; equivalence)
+open import Function hiding (_∋_) renaming (const to k)
+open import Function.Properties.Equivalence
 open import README.DependentlyTyped.NBE Uni₀ ext
 open import README.DependentlyTyped.NormalForm Uni₀
 open import README.DependentlyTyped.Term Uni₀
@@ -81,10 +79,10 @@ record Kripke (P : Predicate) : Set where
     P (⟦ t ⟧ /̂Val ρ̂)
   fundamental hyp (var x)   = hyp x
   fundamental hyp (t₁ · t₂) =
-    (Equivalence.to definition-for-π ⟨$⟩ fundamental hyp t₁)
+    (Equivalence.to definition-for-π $ fundamental hyp t₁)
       ε (fundamental hyp t₂)
   fundamental hyp (ƛ t) =
-    Equivalence.from definition-for-π ⟨$⟩ λ Δ₊ p →
+    Equivalence.from definition-for-π $ λ Δ₊ p →
       fundamental
         (λ { zero    → p
            ; (suc x) → weaken Δ₊ (hyp x)
@@ -111,11 +109,13 @@ weaken₁ ∃-V̌alue-Kripke =
   Prod.map ([_⟶_].function w̌eaken _)
            (λ { P.refl → [_⟶_].corresponds w̌eaken _ _ })
 definition-for-π ∃-V̌alue-Kripke {Γ = Γ} {σ = σ} {τ = τ} {f = f} =
-  equivalence
-    (λ { (f , P.refl) Γ₊ (v , P.refl) →
+  mkEquivalence
+    (mk⟶ $
+     λ { (f , P.refl) Γ₊ (v , P.refl) →
          proj₁ f Γ₊ v , proj₂ f Γ₊ v
        })
-    (λ hyp →
+    (mk⟶ $
+     λ hyp →
        let
          g : V̌alue-π Γ _ _ (IType-π σ τ)
          g = λ Γ₊ v → proj₁ (hyp Γ₊ (v , P.refl))
@@ -148,8 +148,10 @@ definability :
   (∃ λ (t : ε ⊢ σ) → v ≡ ⟦ t ⟧)
     ⇔
   ({P : Predicate} → Kripke P → P v)
-definability = equivalence
-  (λ { (t , P.refl) kripke → fundamental-closed kripke t })
-  (λ hyp → Prod.map ([_⟶_].function V̌al-subst.trans _)
+definability = mkEquivalence
+  (mk⟶ $
+   λ { (t , P.refl) kripke → fundamental-closed kripke t })
+  (mk⟶ $
+   λ hyp → Prod.map ([_⟶_].function V̌al-subst.trans _)
                     ≅-Value-⇒-≡
                     (hyp ∃-V̌alue-Kripke))

@@ -7,11 +7,11 @@ open import Data.Universe.Indexed
 module deBruijn.Context.Extension.Isomorphic
   {i u e} (Uni : IndexedUniverse i u e) where
 
+open import Data.Product
 import deBruijn.Context.Basics          as Basics
 import deBruijn.Context.Extension.Left  as Left
 import deBruijn.Context.Extension.Right as Right
-open import Function.Base
-open import Function.Inverse using (_↔_)
+open import Function
 import Relation.Binary.PropositionalEquality as P
 
 open Basics Uni
@@ -75,14 +75,11 @@ mutual
 -- Ctxt⁺ and Ctxt₊ are isomorphic.
 
 Ctxt⁺↔Ctxt₊ : ∀ Γ → Ctxt⁺ Γ ↔ Ctxt₊ Γ
-Ctxt⁺↔Ctxt₊ Γ = record
-  { to         = P.→-to-⟶ ⁺-to-₊
-  ; from       = P.→-to-⟶ ₊-to-⁺
-  ; inverse-of = record
-    { left-inverse-of  = λ Γ⁺ → ≅-Ctxt⁺-⇒-≡ $ ₊-to-⁺-⁺-to-₊ Γ⁺
-    ; right-inverse-of = λ Γ₊ → ≅-Ctxt₊-⇒-≡ $ ⁺-to-₊-₊-to-⁺ Γ₊
-    }
-  }
+Ctxt⁺↔Ctxt₊ Γ =
+  mk↔ {to = ⁺-to-₊} {from = ₊-to-⁺}
+     ( (λ { {x = Γ₊} P.refl → ≅-Ctxt₊-⇒-≡ $ ⁺-to-₊-₊-to-⁺ Γ₊ })
+     , (λ { {x = Γ⁺} P.refl → ≅-Ctxt⁺-⇒-≡ $ ₊-to-⁺-⁺-to-₊ Γ⁺ })
+     )
   where
   abstract
     ₊-to-⁺-⁺-to-₊ : (Γ⁺ : Ctxt⁺ Γ) → ₊-to-⁺ (⁺-to-₊ Γ⁺) ≅-Ctxt⁺ Γ⁺
